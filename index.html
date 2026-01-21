@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woordenschatspel met Pacman Beloning</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid #0f3460;
+        }
+        
+        h1 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            color: #4dccbd;
+            font-size: 1.2rem;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .quiz-section, .pacman-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #0f3460;
+        }
+        
+        .section-title {
+            color: #ffcc00;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0f3460;
+            font-size: 1.8rem;
+        }
+        
+        /* Quiz Styling */
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(15, 52, 96, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .score, .progress {
+            font-size: 1.2rem;
+            color: #4dccbd;
+        }
+        
+        .question-container {
+            margin-bottom: 25px;
+        }
+        
+        .question {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+            line-height: 1.4;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #0f3460;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        
+        .option:hover {
+            background: rgba(15, 52, 96, 0.5);
+            transform: translateY(-3px);
+        }
+        
+        .option.correct {
+            background: rgba(46, 204, 113, 0.3);
+            border-color: #2ecc71;
+        }
+        
+        .option.wrong {
+            background: rgba(231, 76, 60, 0.3);
+            border-color: #e74c3c;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .correct-feedback {
+            background: rgba(46, 204, 113, 0.2);
+            border: 2px solid #2ecc71;
+            color: #2ecc71;
+        }
+        
+        .wrong-feedback {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .next-btn {
+            background: #ffcc00;
+            color: #16213e;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .next-btn:hover {
+            background: #e6b800;
+            transform: scale(1.05);
+        }
+        
+        .next-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Pacman Styling */
+        .pacman-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(15, 52, 96, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .unlocked-levels, .pacman-lives {
+            font-size: 1.2rem;
+            color: #4dccbd;
+        }
+        
+        .pacman-game-container {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid #0f3460;
+        }
+        
+        #gameCanvas {
+            display: block;
+        }
+        
+        .pacman-instructions {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .pacman-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            background: #0f3460;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: #1a4b8c;
+        }
+        
+        .game-over-message {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #ffcc00;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .pacman-game-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Woordenschatspel met Pacman Beloning</h1>
+            <p class="subtitle">Beantwoord de vragen correct om Pacman te spelen!</p>
+        </header>
+        
+        <div class="game-container">
+            <!-- Woordenschat Quiz Sectie -->
+            <section class="quiz-section">
+                <h2 class="section-title">Woordenschat Quiz</h2>
+                
+                <div class="quiz-info">
+                    <div class="score">Score: <span id="score">0</span>/<span id="total-questions">0</span></div>
+                    <div class="progress">Vraag: <span id="current-question">1</span>/<span id="total-questions-display">10</span></div>
+                </div>
+                
+                <div class="question-container">
+                    <div class="question" id="question-text">Laden...</div>
+                    
+                    <div class="options" id="options-container">
+                        <!-- Opties worden hier ingevoegd via JavaScript -->
+                    </div>
+                    
+                    <div class="feedback" id="feedback"></div>
+                    
+                    <button class="next-btn" id="next-btn" disabled>Volgende Vraag</button>
+                </div>
+            </section>
+            
+            <!-- Pacman Spel Sectie -->
+            <section class="pacman-section">
+                <h2 class="section-title">Pacman Beloning</h2>
+                
+                <div class="pacman-info">
+                    <div class="unlocked-levels">Vrijgespeeld: <span id="unlocked-levels">0</span> van 5</div>
+                    <div class="pacman-lives">Levens: <span id="pacman-lives">3</span></div>
+                </div>
+                
+                <div class="pacman-game-container">
+                    <canvas id="gameCanvas" width="600" height="400"></canvas>
+                </div>
+                
+                <div class="pacman-controls">
+                    <button class="control-btn" id="start-btn">Start Pacman</button>
+                    <button class="control-btn" id="reset-btn">Reset Spel</button>
+                </div>
+                
+                <div class="game-over-message" id="game-over-message">Game Over! Beantwoord meer vragen om verder te spelen.</div>
+                
+                <div class="pacman-instructions">
+                    <p><strong>Besturing:</strong> Gebruik pijltjestoetsen om Pacman te bewegen. Eet alle punten om het level te voltooien. Vermijd de spoken!</p>
+                </div>
+            </section>
+        </div>
+        
+        <div class="instructions">
+            <h3>Hoe werkt dit spel?</h3>
+            <p>1. Beantwoord de multiple choice vragen over woordenschat. Voor elk correct antwoord krijg je een Pacman level vrijgespeeld.</p>
+            <p>2. Speel het vrijgegeven Pacman level door op "Start Pacman" te klikken en gebruik de pijltjestoetsen om Pacman te besturen.</p>
+            <p>3. Als je alle 5 de Pacman levels hebt voltooid, heb je het spel uitgespeeld!</p>
+            <p>4. Als je geen levens meer hebt in Pacman, moet je meer vragen correct beantwoorden om verder te kunnen spelen.</p>
+        </div>
+    </div>
+
+    <script>
+        // Woordenschat vragen
+        const vocabularyQuestions = [
+            {
+                question: "Wat is een synoniem voor 'groots'?",
+                options: ["Klein", "Enorm", "Breed", "Smal"],
+                correct: 1
+            },
+            {
+                question: "Wat betekent het woord 'ambigu'?",
+                options: ["Duidelijk", "Tweeslachtig", "Simpel", "Complex"],
+                correct: 1
+            },
+            {
+                question: "Wat is het tegenovergestelde van 'schaars'?",
+                options: ["Zeldzaam", "Overvloedig", "Kostbaar", "Goedkoop"],
+                correct: 1
+            },
+            {
+                question: "Welk woord past het beste in de zin: 'Hij toonde veel ______ voor het probleem.'?",
+                options: ["Onverschilligheid", "Begrip", "Weerstand", "Afkeer"],
+                correct: 1
+            },
+            {
+                question: "Wat is de juiste spelling?",
+                options: ["Accommodatie", "Akomodatie", "Acomodatie", "Accomodatie"],
+                correct: 0
+            },
+            {
+                question: "Wat betekent 'ephemeraal'?",
+                options: ["Eeuwigdurend", "Kortstondig", "Grootschalig", "Kleinzerig"],
+                correct: 1
+            },
+            {
+                question: "Welk woord is geen synoniem voor 'veranderen'?",
+                options: ["Wijzigen", "Behouden", "Aanpassen", "Transformeren"],
+                correct: 1
+            },
+            {
+                question: "Wat is het tegenovergestelde van 'nadeel'?",
+                options: ["Beperking", "Voordeel", "Obstakel", "Probleem"],
+                correct: 1
+            },
+            {
+                question: "Wat betekent het woord 'insinueren'?",
+                options: ["Zeggen", "Verzwijgen", "Zinspelen", "Schreeuwen"],
+                correct: 2
+            },
+            {
+                question: "Welk woord past het beste: 'De ______ van het kunstwerk was indrukwekkend.'?",
+                options: ["Kleur", "Complexiteit", "Eenvoud", "Grootte"],
+                correct: 1
+            }
+        ];
+
+        // Game state
+        let currentQuestion = 0;
+        let score = 0;
+        let unlockedLevels = 0;
+        let pacmanLives = 3;
+        let gameOver = false;
+        let pacmanGameActive = false;
+
+        // DOM elementen
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreElement = document.getElementById('score');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsDisplay = document.getElementById('total-questions-display');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const feedbackElement = document.getElementById('feedback');
+        const nextButton = document.getElementById('next-btn');
+        const unlockedLevelsElement = document.getElementById('unlocked-levels');
+        const pacmanLivesElement = document.getElementById('pacman-lives');
+        const startButton = document.getElementById('start-btn');
+        const resetButton = document.getElementById('reset-btn');
+        const gameOverMessage = document.getElementById('game-over-message');
+
+        // Initialisatie
+        function init() {
+            totalQuestionsDisplay.textContent = vocabularyQuestions.length;
+            totalQuestionsElement.textContent = vocabularyQuestions.length;
+            unlockedLevelsElement.textContent = unlockedLevels;
+            pacmanLivesElement.textContent = pacmanLives;
+            
+            loadQuestion();
+            
+            // Event listeners
+            nextButton.addEventListener('click', nextQuestion);
+            startButton.addEventListener('click', startPacman);
+            resetButton.addEventListener('click', resetPacman);
+            
+            // Keyboard controls voor Pacman
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+        }
+
+        // Vraag laden
+        function loadQuestion() {
+            const question = vocabularyQuestions[currentQuestion];
+            questionText.textContent = question.question;
+            
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', selectOption);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            currentQuestionElement.textContent = currentQuestion + 1;
+            feedbackElement.style.display = 'none';
+            nextButton.disabled = true;
+        }
+
+        // Optie selecteren
+        function selectOption(e) {
+            if (nextButton.disabled === false) return; // Voorkom meerdere selecties
+            
+            const selectedOption = parseInt(e.target.dataset.index);
+            const correctOption = vocabularyQuestions[currentQuestion].correct;
+            const options = document.querySelectorAll('.option');
+            
+            // Toon feedback
+            if (selectedOption === correctOption) {
+                score++;
+                scoreElement.textContent = score;
+                feedbackElement.textContent = "Goed gedaan! Je hebt een Pacman level vrijgespeeld!";
+                feedbackElement.className = "feedback correct-feedback";
+                
+                // Unlock een Pacman level
+                if (unlockedLevels < 5) {
+                    unlockedLevels++;
+                    unlockedLevelsElement.textContent = unlockedLevels;
+                }
+                
+                // Markeer correct antwoord
+                options[selectedOption].classList.add('correct');
+            } else {
+                feedbackElement.textContent = `Helaas! Het juiste antwoord was: ${vocabularyQuestions[currentQuestion].options[correctOption]}`;
+                feedbackElement.className = "feedback wrong-feedback";
+                
+                // Markeer fout en correct antwoord
+                options[selectedOption].classList.add('wrong');
+                options[correctOption].classList.add('correct');
+            }
+            
+            feedbackElement.style.display = 'block';
+            nextButton.disabled = false;
+        }
+
+        // Volgende vraag
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < vocabularyQuestions.length) {
+                loadQuestion();
+            } else {
+                // Einde van de quiz
+                questionText.textContent = "Gefeliciteerd! Je hebt alle vragen beantwoord!";
+                optionsContainer.innerHTML = '';
+                feedbackElement.style.display = 'none';
+                nextButton.style.display = 'none';
+                
+                // Toon eindscore
+                const finalScore = document.createElement('div');
+                finalScore.className = "feedback correct-feedback";
+                finalScore.textContent = `Eindscore: ${score}/${vocabularyQuestions.length}`;
+                finalScore.style.display = 'block';
+                optionsContainer.appendChild(finalScore);
+            }
+        }
+
+        // Pacman Game Code
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game variabelen
+        let pacman = {
+            x: 50,
+            y: 200,
+            radius: 15,
+            speed: 3,
+            direction: { x: 0, y: 0 },
+            mouthOpen: 0,
+            mouthSpeed: 0.1
+        };
+
+        let dots = [];
+        let ghosts = [];
+        let dotsCollected = 0;
+        let dotsTotal = 20;
+        let gameRunning = false;
+        let keys = {};
+
+        // Initialiseer spel
+        function initPacman() {
+            // Reset Pacman positie
+            pacman.x = 50;
+            pacman.y = 200;
+            pacman.direction = { x: 0, y: 0 };
+            
+            // Maak dots
+            dots = [];
+            for (let i = 0; i < dotsTotal; i++) {
+                dots.push({
+                    x: Math.random() * (canvas.width - 30) + 15,
+                    y: Math.random() * (canvas.height - 30) + 15,
+                    radius: 5,
+                    collected: false
+                });
+            }
+            
+            // Maak ghosts
+            ghosts = [];
+            for (let i = 0; i < 3; i++) {
+                ghosts.push({
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: Math.random() * (canvas.height - 40) + 20,
+                    radius: 12,
+                    speed: 1.5 + Math.random(),
+                    direction: { x: Math.random() > 0.5 ? 1 : -1, y: Math.random() > 0.5 ? 1 : -1 },
+                    color: i === 0 ? '#FF0000' : i === 1 ? '#00FFFF' : '#FF00FF'
+                });
+            }
+            
+            dotsCollected = 0;
+        }
+
+        // Teken Pacman
+        function drawPacman() {
+            ctx.save();
+            ctx.translate(pacman.x, pacman.y);
+            
+            // Draai Pacman in de juiste richting
+            let angle = 0;
+            if (pacman.direction.x === 1) angle = 0;
+            else if (pacman.direction.x === -1) angle = Math.PI;
+            else if (pacman.direction.y === 1) angle = Math.PI / 2;
+            else if (pacman.direction.y === -1) angle = 3 * Math.PI / 2;
+            
+            ctx.rotate(angle);
+            
+            // Teken Pacman lichaam
+            ctx.fillStyle = '#FFCC00';
+            ctx.beginPath();
+            ctx.arc(0, 0, pacman.radius, pacman.mouthOpen, 2 * Math.PI - pacman.mouthOpen);
+            ctx.lineTo(0, 0);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        // Teken dots
+        function drawDots() {
+            dots.forEach(dot => {
+                if (!dot.collected) {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, dot.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            });
+        }
+
+        // Teken ghosts
+        function drawGhosts() {
+            ghosts.forEach(ghost => {
+                // Teken ghost lichaam
+                ctx.fillStyle = ghost.color;
+                ctx.beginPath();
+                ctx.arc(ghost.x, ghost.y, ghost.radius, Math.PI, 2 * Math.PI);
+                ctx.ellipse(ghost.x, ghost.y - ghost.radius / 2, ghost.radius, ghost.radius / 1.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Teken ghost ogen
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(ghost.x - 4, ghost.y - 5, 3, 0, Math.PI * 2);
+                ctx.arc(ghost.x + 4, ghost.y - 5, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Tegen ghost pupil
+                ctx.fillStyle = '#0000FF';
+                ctx.beginPath();
+                ctx.arc(ghost.x - 4 + (ghost.direction.x * 2), ghost.y - 5 + (ghost.direction.y * 2), 1.5, 0, Math.PI * 2);
+                ctx.arc(ghost.x + 4 + (ghost.direction.x * 2), ghost.y - 5 + (ghost.direction.y * 2), 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // Update spel
+        function update() {
+            // Update Pacman positie
+            pacman.x += pacman.direction.x * pacman.speed;
+            pacman.y += pacman.direction.y * pacman.speed;
+            
+            // Houd Pacman binnen canvas
+            if (pacman.x < pacman.radius) pacman.x = pacman.radius;
+            if (pacman.x > canvas.width - pacman.radius) pacman.x = canvas.width - pacman.radius;
+            if (pacman.y < pacman.radius) pacman.y = pacman.radius;
+            if (pacman.y > canvas.height - pacman.radius) pacman.y = canvas.height - pacman.radius;
+            
+            // Update Pacman mond animatie
+            pacman.mouthOpen += pacman.mouthSpeed;
+            if (pacman.mouthOpen > 0.7 || pacman.mouthOpen < 0) {
+                pacman.mouthSpeed = -pacman.mouthSpeed;
+            }
+            
+            // Controleer dot collectie
+            dots.forEach(dot => {
+                if (!dot.collected) {
+                    const dx = pacman.x - dot.x;
+                    const dy = pacman.y - dot.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < pacman.radius + dot.radius) {
+                        dot.collected = true;
+                        dotsCollected++;
+                    }
+                }
+            });
+            
+            // Update ghosts
+            ghosts.forEach(ghost => {
+                ghost.x += ghost.direction.x * ghost.speed;
+                ghost.y += ghost.direction.y * ghost.speed;
+                
+                // Botsing met muren
+                if (ghost.x < ghost.radius || ghost.x > canvas.width - ghost.radius) {
+                    ghost.direction.x = -ghost.direction.x;
+                }
+                if (ghost.y < ghost.radius || ghost.y > canvas.height - ghost.radius) {
+                    ghost.direction.y = -ghost.direction.y;
+                }
+                
+                // Controleer botsing met Pacman
+                const dx = pacman.x - ghost.x;
+                const dy = pacman.y - ghost.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < pacman.radius + ghost.radius) {
+                    // Pacman is geraakt
+                    pacmanLives--;
+                    pacmanLivesElement.textContent = pacmanLives;
+                    
+                    if (pacmanLives <= 0) {
+                        gameOver = true;
+                        gameRunning = false;
+                        gameOverMessage.style.display = 'block';
+                        startButton.disabled = true;
+                    } else {
+                        // Reset Pacman positie
+                        pacman.x = 50;
+                        pacman.y = 200;
+                        pacman.direction = { x: 0, y: 0 };
+                    }
+                }
+            });
+            
+            // Controleer of level is voltooid
+            if (dotsCollected >= dotsTotal) {
+                gameRunning = false;
+                startButton.textContent = "Volgende Level";
+                startButton.disabled = false;
+                
+                // Toon succesbericht
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#FFCC00';
+                ctx.font = '30px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Level Voltooid!', canvas.width / 2, canvas.height / 2);
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '20px Arial';
+                ctx.fillText(`Je hebt ${unlockedLevels} van 5 levels vrijgespeeld`, canvas.width / 2, canvas.height / 2 + 40);
+            }
+        }
+
+        // Teken alles
+        function draw() {
+            // Wis canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Teken achtergrond
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Teken game elementen
+            drawDots();
+            drawGhosts();
+            drawPacman();
+            
+            // Teken score
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '16px Arial';
+            ctx.fillText(`Dots: ${dotsCollected}/${dotsTotal}`, 10, 20);
+            
+            // Teken instructies als het spel niet actief is
+            if (!gameRunning && dotsCollected < dotsTotal) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#FFCC00';
+                ctx.font = '24px Arial';
+                ctx.textAlign = 'center';
+                
+                if (unlockedLevels > 0) {
+                    ctx.fillText('Klik op "Start Pacman" om te spelen!', canvas.width / 2, canvas.height / 2);
+                } else {
+                    ctx.fillText('Beantwoord vragen om Pacman vrij te spelen!', canvas.width / 2, canvas.height / 2);
+                }
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '16px Arial';
+                ctx.fillText('Gebruik pijltjestoetsen om Pacman te besturen', canvas.width / 2, canvas.height / 2 + 40);
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (gameRunning) {
+                update();
+            }
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start Pacman spel
+        function startPacman() {
+            if (unlockedLevels <= 0) {
+                alert('Beantwoord eerst een vraag correct om Pacman te kunnen spelen!');
+                return;
+            }
+            
+            if (pacmanLives <= 0) {
+                alert('Je hebt geen levens meer! Beantwoord meer vragen correct om levens te verdienen.');
+                return;
+            }
+            
+            if (dotsCollected >= dotsTotal) {
+                // Nieuw level starten
+                initPacman();
+                startButton.textContent = "Pauzeer Pacman";
+            }
+            
+            gameRunning = !gameRunning;
+            startButton.textContent = gameRunning ? "Pauzeer Pacman" : "Hervat Pacman";
+            
+            if (gameRunning) {
+                gameOverMessage.style.display = 'none';
+            }
+        }
+
+        // Reset Pacman spel
+        function resetPacman() {
+            initPacman();
+            gameRunning = false;
+            startButton.textContent = "Start Pacman";
+            gameOverMessage.style.display = 'none';
+            startButton.disabled = false;
+        }
+
+        // Toetsenbord besturing
+        function handleKeyDown(e) {
+            keys[e.key] = true;
+            
+            if (!gameRunning) return;
+            
+            // Stel Pacman richting in op basis van toetsen
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+                pacman.direction = { x: 0, y: -1 };
+            } else if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+                pacman.direction = { x: 0, y: 1 };
+            } else if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                pacman.direction = { x: -1, y: 0 };
+            } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                pacman.direction = { x: 1, y: 0 };
+            }
+        }
+
+        function handleKeyUp(e) {
+            keys[e.key] = false;
+        }
+
+        // Start alles
+        window.onload = function() {
+            init();
+            initPacman();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>

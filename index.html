@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Justitie Woordenschatspel met Pacman Doolhof</title>
+    <title>Woordenschatspel met Pacman Beloning</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,14 +13,14 @@
         }
         
         body {
-            background: linear-gradient(to bottom, #0c1a2d, #1a2b4d);
+            background: linear-gradient(to bottom, #1a1a2e, #16213e);
             color: #fff;
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
@@ -29,36 +29,22 @@
         
         header {
             text-align: center;
-            padding: 25px;
-            background: rgba(12, 26, 45, 0.8);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
-            border: 3px solid #2a4a7a;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #0f3460;
         }
         
         h1 {
             color: #ffcc00;
             margin-bottom: 10px;
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .subtitle {
             color: #4dccbd;
-            font-size: 1.3rem;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-        
-        .theme-badge {
-            display: inline-block;
-            background: #2a4a7a;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            margin-top: 15px;
-            font-weight: bold;
+            font-size: 1.2rem;
         }
         
         .game-container {
@@ -69,28 +55,19 @@
         
         .quiz-section, .pacman-section {
             flex: 1;
-            min-width: 350px;
-            background: rgba(12, 26, 45, 0.8);
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 15px;
             padding: 25px;
-            border: 3px solid #2a4a7a;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #0f3460;
         }
         
         .section-title {
             color: #ffcc00;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #2a4a7a;
+            border-bottom: 2px solid #0f3460;
             font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .section-title::before {
-            content: "⚖️";
-            font-size: 1.5rem;
         }
         
         /* Quiz Styling */
@@ -98,12 +75,12 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
-            background: rgba(42, 74, 122, 0.3);
+            background: rgba(15, 52, 96, 0.3);
             padding: 15px;
             border-radius: 10px;
         }
         
-        .score, .progress, .lives {
+        .score, .progress {
             font-size: 1.2rem;
             color: #4dccbd;
         }
@@ -113,36 +90,30 @@
         }
         
         .question {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             margin-bottom: 20px;
             color: #fff;
             line-height: 1.4;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #ffcc00;
         }
         
         .options {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
         
         .option {
             background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #2a4a7a;
+            border: 2px solid #0f3460;
             border-radius: 10px;
             padding: 15px;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 1.1rem;
-            display: flex;
-            align-items: center;
         }
         
         .option:hover {
-            background: rgba(42, 74, 122, 0.5);
+            background: rgba(15, 52, 96, 0.5);
             transform: translateY(-3px);
         }
         
@@ -154,19 +125,6 @@
         .option.wrong {
             background: rgba(231, 76, 60, 0.3);
             border-color: #e74c3c;
-        }
-        
-        .option-letter {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            background: #2a4a7a;
-            color: white;
-            border-radius: 50%;
-            margin-right: 15px;
-            font-weight: bold;
         }
         
         .feedback {
@@ -191,8 +149,8 @@
         }
         
         .next-btn {
-            background: linear-gradient(to right, #ffcc00, #ffaa00);
-            color: #0c1a2d;
+            background: #ffcc00;
+            color: #16213e;
             border: none;
             padding: 15px 30px;
             font-size: 1.2rem;
@@ -205,7 +163,7 @@
         }
         
         .next-btn:hover {
-            background: linear-gradient(to right, #e6b800, #dd9900);
+            background: #e6b800;
             transform: scale(1.05);
         }
         
@@ -220,24 +178,24 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 20px;
-            background: rgba(42, 74, 122, 0.3);
+            background: rgba(15, 52, 96, 0.3);
             padding: 15px;
             border-radius: 10px;
         }
         
-        .unlocked-levels, .pacman-lives, .dots-collected {
+        .unlocked-levels, .pacman-lives {
             font-size: 1.2rem;
             color: #4dccbd;
         }
         
         .pacman-game-container {
             width: 100%;
-            height: 450px;
+            height: 400px;
             background: #000;
             border-radius: 10px;
             overflow: hidden;
             position: relative;
-            border: 3px solid #2a4a7a;
+            border: 3px solid #0f3460;
         }
         
         #gameCanvas {
@@ -261,19 +219,17 @@
         }
         
         .control-btn {
-            background: #2a4a7a;
+            background: #0f3460;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            font-weight: bold;
         }
         
         .control-btn:hover {
-            background: #3a5a9a;
-            transform: scale(1.05);
+            background: #1a4b8c;
         }
         
         .game-over-message {
@@ -286,7 +242,7 @@
         
         .instructions {
             background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
+            padding: 20px;
             border-radius: 15px;
             margin-top: 20px;
             line-height: 1.6;
@@ -294,34 +250,7 @@
         
         .instructions h3 {
             color: #ffcc00;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .instructions h3::before {
-            content: "📚";
-        }
-        
-        .instruction-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-        
-        .step {
-            background: rgba(42, 74, 122, 0.3);
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #ffcc00;
-        }
-        
-        .step-number {
-            color: #ffcc00;
-            font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
         
         @media (max-width: 768px) {
@@ -330,11 +259,7 @@
             }
             
             .pacman-game-container {
-                height: 350px;
-            }
-            
-            .instruction-steps {
-                grid-template-columns: 1fr;
+                height: 300px;
             }
         }
     </style>
@@ -342,20 +267,18 @@
 <body>
     <div class="container">
         <header>
-            <h1>Justitie Woordenschatspel</h1>
-            <p class="subtitle">Test je kennis van juridische termen en speel Pacman in een doolhof met gevangenishutten voor de spoken als beloning!</p>
-            <div class="theme-badge">⚖️ Thema: Recht en Justitie ⚖️</div>
+            <h1>Woordenschatspel met Pacman Beloning</h1>
+            <p class="subtitle">Beantwoord de vragen correct om Pacman te spelen!</p>
         </header>
         
         <div class="game-container">
             <!-- Woordenschat Quiz Sectie -->
             <section class="quiz-section">
-                <h2 class="section-title">Justitie Woordenschat</h2>
+                <h2 class="section-title">Woordenschat Quiz</h2>
                 
                 <div class="quiz-info">
-                    <div class="score">Score: <span id="score">0</span>/<span id="total-questions">25</span></div>
-                    <div class="progress">Vraag: <span id="current-question">1</span>/25</div>
-                    <div class="lives">Levens: <span id="quiz-lives">3</span></div>
+                    <div class="score">Score: <span id="score">0</span>/<span id="total-questions">0</span></div>
+                    <div class="progress">Vraag: <span id="current-question">1</span>/<span id="total-questions-display">10</span></div>
                 </div>
                 
                 <div class="question-container">
@@ -373,244 +296,123 @@
             
             <!-- Pacman Spel Sectie -->
             <section class="pacman-section">
-                <h2 class="section-title">Pacman Doolhof</h2>
+                <h2 class="section-title">Pacman Beloning</h2>
                 
                 <div class="pacman-info">
                     <div class="unlocked-levels">Vrijgespeeld: <span id="unlocked-levels">0</span> van 5</div>
                     <div class="pacman-lives">Levens: <span id="pacman-lives">3</span></div>
-                    <div class="dots-collected">Dots: <span id="dots-counter">0</span>/<span id="dots-total">0</span></div>
                 </div>
                 
                 <div class="pacman-game-container">
-                    <canvas id="gameCanvas" width="600" height="450"></canvas>
+                    <canvas id="gameCanvas" width="600" height="400"></canvas>
                 </div>
                 
                 <div class="pacman-controls">
                     <button class="control-btn" id="start-btn">Start Pacman</button>
                     <button class="control-btn" id="reset-btn">Reset Spel</button>
-                    <button class="control-btn" id="hint-btn">Hint (3 resterend)</button>
                 </div>
                 
                 <div class="game-over-message" id="game-over-message">Game Over! Beantwoord meer vragen om verder te spelen.</div>
                 
                 <div class="pacman-instructions">
-                    <p><strong>Besturing:</strong> Gebruik pijltjestoetsen om Pacman te bewegen. Eet alle punten om het level te voltooien. Vermijd de spoken! De spoken hebben hutten (blauwe vakken) waar ze in kunnen schuilen.</p>
+                    <p><strong>Besturing:</strong> Gebruik pijltjestoetsen om Pacman te bewegen. Eet alle punten om het level te voltooien. Vermijd de spoken!</p>
                 </div>
             </section>
         </div>
         
         <div class="instructions">
-            <h3>Hoe werkt dit justitie-spel?</h3>
-            <div class="instruction-steps">
-                <div class="step">
-                    <div class="step-number">Stap 1: Woordenschat</div>
-                    <p>Beantwoord 25 multiple choice vragen over juridische termen. Voor elk correct antwoord verdien je een Pacman level.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">Stap 2: Pacman Doolhof</div>
-                    <p>Speel het vrijgegeven Pacman level in een doolhof met gevangenishutten voor de spoken. Gebruik pijltjestoetsen om te bewegen.</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">Stap 3: Strategie</div>
-                    <p>De spoken hebben hutten (blauwe vakken) waar ze in kunnen verdwijnen. Gebruik dit strategisch om ze te ontwijken!</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">Stap 4: Voltooiing</div>
-                    <p>Voltooi alle 5 de Pacman levels om het spel te winnen. Je hebt 3 levens in zowel de quiz als Pacman.</p>
-                </div>
-            </div>
+            <h3>Hoe werkt dit spel?</h3>
+            <p>1. Beantwoord de multiple choice vragen over woordenschat. Voor elk correct antwoord krijg je een Pacman level vrijgespeeld.</p>
+            <p>2. Speel het vrijgegeven Pacman level door op "Start Pacman" te klikken en gebruik de pijltjestoetsen om Pacman te besturen.</p>
+            <p>3. Als je alle 5 de Pacman levels hebt voltooid, heb je het spel uitgespeeld!</p>
+            <p>4. Als je geen levens meer hebt in Pacman, moet je meer vragen correct beantwoorden om verder te kunnen spelen.</p>
         </div>
     </div>
 
     <script>
-        // Woordenschat vragen met thema Justitie
+        // Woordenschat vragen
         const vocabularyQuestions = [
             {
-                question: "Wat betekent 'jurisprudentie'?",
-                options: ["Rechtspraak en rechterlijke uitspraken", "Wetenschap van het recht", "Rechtsbijstand", "Gerechtelijke procedure"],
-                correct: 0,
-                explanation: "Jurisprudentie verwijst naar het geheel van rechterlijke uitspraken die richting geven aan de rechtspleging."
+                question: "Wat is een synoniem voor 'groots'?",
+                options: ["Klein", "Enorm", "Breed", "Smal"],
+                correct: 1
             },
             {
-                question: "Wat is een 'civiele rechtszaak'?",
-                options: ["Een strafzaak", "Een geschil tussen burgers onderling", "Een constitutionele zaak", "Een administratieve zaak"],
-                correct: 1,
-                explanation: "Een civiele rechtszaak betreft geschillen tussen burgers of bedrijven, niet tussen staat en burger."
+                question: "Wat betekent het woord 'ambigu'?",
+                options: ["Duidelijk", "Tweeslachtig", "Simpel", "Complex"],
+                correct: 1
             },
             {
-                question: "Wat betekent 'proces-verbaal'?",
-                options: ["Een gerechtelijk vonnis", "Een officieel verslag van een gebeurtenis", "Een getuigenverklaring", "Een pleidooi"],
-                correct: 1,
-                explanation: "Een proces-verbaal is een officieel schriftelijk verslag, vaak opgemaakt door politie of andere autoriteiten."
+                question: "Wat is het tegenovergestelde van 'schaars'?",
+                options: ["Zeldzaam", "Overvloedig", "Kostbaar", "Goedkoop"],
+                correct: 1
             },
             {
-                question: "Wat is een 'getuige-deskundige'?",
-                options: ["Een getuige van het misdrijf", "Een rechter", "Een expert die de rechter adviseert", "Een officier van justitie"],
-                correct: 2,
-                explanation: "Een getuige-deskundige is een expert die op basis van specifieke kennis de rechter adviseert over technische aspecten van een zaak."
+                question: "Welk woord past het beste in de zin: 'Hij toonde veel ______ voor het probleem.'?",
+                options: ["Onverschilligheid", "Begrip", "Weerstand", "Afkeer"],
+                correct: 1
             },
             {
-                question: "Wat betekent 'cassatie'?",
-                options: ["Eerste aanleg", "Hoger beroep", "Beroep bij de Hoge Raad", "Bemiddeling"],
-                correct: 2,
-                explanation: "Cassatie is beroep bij de Hoge Raad tegen een uitspraak van een lagere rechter, meestal vanwege procedurefouten."
+                question: "Wat is de juiste spelling?",
+                options: ["Accommodatie", "Akomodatie", "Acomodatie", "Accomodatie"],
+                correct: 0
             },
             {
-                question: "Wat is een 'dagvaarding'?",
-                options: ["Een uitnodiging voor een hoorzitting", "Een officiële oproeping voor de rechtbank", "Een vonnis", "Een verzoekschrift"],
-                correct: 1,
-                explanation: "Een dagvaarding is een officieel document waarmee iemand wordt opgeroepen om voor de rechter te verschijnen."
+                question: "Wat betekent 'ephemeraal'?",
+                options: ["Eeuwigdurend", "Kortstondig", "Grootschalig", "Kleinzerig"],
+                correct: 1
             },
             {
-                question: "Wat betekent 'voorlopige hechtenis'?",
-                options: ["Huisarrest", "Gevangenisstraf na vonnis", "Gevangenhouding voor de rechtszaak", "Voorwaardelijke straf"],
-                correct: 2,
-                explanation: "Voorlopige hechtenis is gevangenhouding van een verdachte tijdens het onderzoek, voorafgaand aan de rechtszaak."
+                question: "Welk woord is geen synoniem voor 'veranderen'?",
+                options: ["Wijzigen", "Behouden", "Aanpassen", "Transformeren"],
+                correct: 1
             },
             {
-                question: "Wat is een 'wrakingsprocedure'?",
-                options: ["Procedure om een rechter te laten vervangen", "Procedure om een zaak te laten vervallen", "Procedure om in hoger beroep te gaan", "Procedure om getuigen te horen"],
-                correct: 0,
-                explanation: "Een wrakingsprocedure is een verzoek om een rechter niet te laten zitting nemen vanwege vermeende partijdigheid."
+                question: "Wat is het tegenovergestelde van 'nadeel'?",
+                options: ["Beperking", "Voordeel", "Obstakel", "Probleem"],
+                correct: 1
             },
             {
-                question: "Wat betekent 'sepot'?",
-                options: ["Opschorting van de rechtszaak", "Niet-ontvankelijk verklaring", "Strafbaarstelling", "Beslissing om niet te vervolgen"],
-                correct: 3,
-                explanation: "Sepot is het besluit van het Openbaar Ministerie om een strafzaak niet te vervolgen."
+                question: "Wat betekent het woord 'insinueren'?",
+                options: ["Zeggen", "Verzwijgen", "Zinspelen", "Schreeuwen"],
+                correct: 2
             },
             {
-                question: "Wat is een 'curator'?",
-                options: ["Een rechter", "Een bewindvoerder bij faillissement", "Een advocaat", "Een notaris"],
-                correct: 1,
-                explanation: "Een curator is een door de rechter aangestelde bewindvoerder die een failliete boedel beheert."
-            },
-            {
-                question: "Wat betekent 'arbitrage'?",
-                options: ["Bemiddeling door een rechter", "Geschilbeslechting door een onafhankelijke arbiter", "Een vorm van hoger beroep", "Een strafrechtelijke procedure"],
-                correct: 1,
-                explanation: "Arbitrage is een vorm van geschilbeslechting waarbij partijen hun conflict voorleggen aan een onafhankelijke arbiter in plaats van aan een rechter."
-            },
-            {
-                question: "Wat is 'exhibitie' in juridische context?",
-                options: ["Tentoonstelling van bewijs", "Overlegging van stukken", "Getuigenverhoor", "Pleidooi"],
-                correct: 1,
-                explanation: "Exhibitie is het overleggen van stukken ter ondersteuning van een stelling in een rechtszaak."
-            },
-            {
-                question: "Wat betekent 'verstek'?",
-                options: ["Uitspraak zonder zitting", "Vonnis bij afwezigheid van partij", "Voorlopige voorziening", "Schikking"],
-                correct: 1,
-                explanation: "Verstek wordt uitgesproken wanneer een partij niet op de rechtszitting verschijnt, ondanks behoorlijke oproeping."
-            },
-            {
-                question: "Wat is 'ontbinding van overeenkomst'?",
-                options: ["Aanpassing van contract", "Beëindiging van contractuele relatie", "Schorsing van overeenkomst", "Heronderhandeling van contract"],
-                correct: 1,
-                explanation: "Ontbinding van overeenkomst betekent het beëindigen van een contract met terugwerkende kracht."
-            },
-            {
-                question: "Wat betekent 'prejudiciële vraag'?",
-                options: ["Vraag voor de aanvang van de zaak", "Vraag aan hogere rechter voor beslissing", "Vraag aan getuige", "Vraag in hoger beroep"],
-                correct: 1,
-                explanation: "Een prejudiciële vraag is een vraag die een nationale rechter voorlegt aan het Europese Hof van Justitie over de uitleg van EU-recht."
-            },
-            {
-                question: "Wat is 'bewijsindicatie'?",
-                options: ["Volledig bewijs", "Sterke aanwijzing voor waarheid", "Getuigenverklaring", "Documentair bewijs"],
-                correct: 1,
-                explanation: "Bewijsindicatie is een aanwijzing die sterk suggereert dat iets waar is, maar geen volledig bewijs vormt."
-            },
-            {
-                question: "Wat betekent 'restitutie'?",
-                options: ["Schadevergoeding", "Teruggave van onrechtmatig verkregen goed", "Boete", "Schikking"],
-                correct: 1,
-                explanation: "Restitutie is het herstel van de oorspronkelijke situatie door teruggave van onrechtmatig verkregen goederen."
-            },
-            {
-                question: "Wat is een 'conclusie van repliek'?",
-                options: ["Eindpleidooi", "Antwoord op conclusie van antwoord", "Verweerschrift", "Dagvaarding"],
-                correct: 1,
-                explanation: "De conclusie van repliek is het schriftelijk antwoord van de eiser op het verweerschrift van de gedaagde."
-            },
-            {
-                question: "Wat betekent 'detentie'?",
-                options: ["Huisarrest", "Gevangenschap", "Voorwaardelijke straf", "Taakstraf"],
-                correct: 1,
-                explanation: "Detentie betekent gevangenschap, meestal in het kader van een strafrechtelijke sanctie."
-            },
-            {
-                question: "Wat is 'executoriaal beslag'?",
-                options: ["Beslag om schuld te innen", "Voorlopig beslag", "Conservatoir beslag", "Beslag op onroerend goed"],
-                correct: 0,
-                explanation: "Executoriaal beslag is beslag dat wordt gelegd om een vordering te innen na een vonnis."
-            },
-            {
-                question: "Wat betekent 'incompetentie' van een rechter?",
-                options: ["Onbekwaamheid", "Gebrek aan bevoegdheid", "Partijdigheid", "Onwetendheid"],
-                correct: 1,
-                explanation: "Incompetentie betekent dat een rechter niet bevoegd is om over een bepaalde zaak te oordelen."
-            },
-            {
-                question: "Wat is 'kort geding'?",
-                options: ["Versnelde procedure", "Kleine claims procedure", "Bodemprocedure", "Hoger beroep"],
-                correct: 0,
-                explanation: "Een kort geding is een spoedprocedure voor dringende zaken, waarbij een voorzieningenrechter snel een beslissing neemt."
-            },
-            {
-                question: "Wat betekent 'non-disclosure agreement' (NDA)?",
-                options: ["Arbeidsovereenkomst", "Geheimhoudingsovereenkomst", "Aankoopovereenkomst", "Bemiddelingsovereenkomst"],
-                correct: 1,
-                explanation: "Een NDA is een overeenkomst waarbij partijen afspreken bepaalde informatie geheim te houden."
-            },
-            {
-                question: "Wat is 'precedentwerking'?",
-                options: ["Invloed van eerdere uitspraken", "Werking van nieuwe wet", "Effect van getuigenverklaring", "Impact van bewijs"],
-                correct: 0,
-                explanation: "Precedentwerking is de invloed die eerdere rechterlijke uitspraken hebben op latere soortgelijke zaken."
-            },
-            {
-                question: "Wat betekent 'verjaring'?",
-                options: ["Verval van strafbaarheid door tijdsverloop", "Vervanging van straf", "Vermindering van straf", "Opschorting van straf"],
-                correct: 0,
-                explanation: "Verjaring is het verval van de mogelijkheid tot vervolging of tenuitvoerlegging van een straf door verloop van tijd."
+                question: "Welk woord past het beste: 'De ______ van het kunstwerk was indrukwekkend.'?",
+                options: ["Kleur", "Complexiteit", "Eenvoud", "Grootte"],
+                correct: 1
             }
         ];
 
         // Game state
         let currentQuestion = 0;
         let score = 0;
-        let quizLives = 3;
         let unlockedLevels = 0;
         let pacmanLives = 3;
         let gameOver = false;
         let pacmanGameActive = false;
-        let hintsRemaining = 3;
 
         // DOM elementen
         const questionText = document.getElementById('question-text');
         const optionsContainer = document.getElementById('options-container');
         const scoreElement = document.getElementById('score');
         const currentQuestionElement = document.getElementById('current-question');
-        const quizLivesElement = document.getElementById('quiz-lives');
+        const totalQuestionsDisplay = document.getElementById('total-questions-display');
+        const totalQuestionsElement = document.getElementById('total-questions');
         const feedbackElement = document.getElementById('feedback');
         const nextButton = document.getElementById('next-btn');
         const unlockedLevelsElement = document.getElementById('unlocked-levels');
         const pacmanLivesElement = document.getElementById('pacman-lives');
-        const dotsCounter = document.getElementById('dots-counter');
-        const dotsTotalElement = document.getElementById('dots-total');
         const startButton = document.getElementById('start-btn');
         const resetButton = document.getElementById('reset-btn');
-        const hintButton = document.getElementById('hint-btn');
         const gameOverMessage = document.getElementById('game-over-message');
 
         // Initialisatie
         function init() {
-            scoreElement.textContent = score;
-            quizLivesElement.textContent = quizLives;
+            totalQuestionsDisplay.textContent = vocabularyQuestions.length;
+            totalQuestionsElement.textContent = vocabularyQuestions.length;
             unlockedLevelsElement.textContent = unlockedLevels;
             pacmanLivesElement.textContent = pacmanLives;
-            hintButton.textContent = `Hint (${hintsRemaining} resterend)`;
             
             loadQuestion();
             
@@ -618,7 +420,6 @@
             nextButton.addEventListener('click', nextQuestion);
             startButton.addEventListener('click', startPacman);
             resetButton.addEventListener('click', resetPacman);
-            hintButton.addEventListener('click', giveHint);
             
             // Keyboard controls voor Pacman
             document.addEventListener('keydown', handleKeyDown);
@@ -628,18 +429,13 @@
         // Vraag laden
         function loadQuestion() {
             const question = vocabularyQuestions[currentQuestion];
-            questionText.textContent = `${currentQuestion + 1}. ${question.question}`;
+            questionText.textContent = question.question;
             
             optionsContainer.innerHTML = '';
-            const letters = ['A', 'B', 'C', 'D'];
-            
             question.options.forEach((option, index) => {
                 const optionElement = document.createElement('div');
                 optionElement.classList.add('option');
-                optionElement.innerHTML = `
-                    <div class="option-letter">${letters[index]}</div>
-                    <div class="option-text">${option}</div>
-                `;
+                optionElement.textContent = option;
                 optionElement.dataset.index = index;
                 optionElement.addEventListener('click', selectOption);
                 optionsContainer.appendChild(optionElement);
@@ -654,7 +450,7 @@
         function selectOption(e) {
             if (nextButton.disabled === false) return; // Voorkom meerdere selecties
             
-            const selectedOption = parseInt(e.target.closest('.option').dataset.index);
+            const selectedOption = parseInt(e.target.dataset.index);
             const correctOption = vocabularyQuestions[currentQuestion].correct;
             const options = document.querySelectorAll('.option');
             
@@ -662,7 +458,7 @@
             if (selectedOption === correctOption) {
                 score++;
                 scoreElement.textContent = score;
-                feedbackElement.innerHTML = `<strong>Goed gedaan!</strong><br>${vocabularyQuestions[currentQuestion].explanation}<br><br>Je hebt een Pacman level vrijgespeeld!`;
+                feedbackElement.textContent = "Goed gedaan! Je hebt een Pacman level vrijgespeeld!";
                 feedbackElement.className = "feedback correct-feedback";
                 
                 // Unlock een Pacman level
@@ -674,46 +470,16 @@
                 // Markeer correct antwoord
                 options[selectedOption].classList.add('correct');
             } else {
-                quizLives--;
-                quizLivesElement.textContent = quizLives;
-                
-                feedbackElement.innerHTML = `<strong>Helaas!</strong><br>${vocabularyQuestions[currentQuestion].explanation}<br><br>Het juiste antwoord was: ${vocabularyQuestions[currentQuestion].options[correctOption]}`;
+                feedbackElement.textContent = `Helaas! Het juiste antwoord was: ${vocabularyQuestions[currentQuestion].options[correctOption]}`;
                 feedbackElement.className = "feedback wrong-feedback";
                 
                 // Markeer fout en correct antwoord
                 options[selectedOption].classList.add('wrong');
                 options[correctOption].classList.add('correct');
-                
-                if (quizLives <= 0) {
-                    feedbackElement.innerHTML += "<br><br><strong>Je hebt geen levens meer in de quiz! Beantwoord de volgende vragen zorgvuldig.</strong>";
-                }
             }
             
             feedbackElement.style.display = 'block';
             nextButton.disabled = false;
-        }
-
-        // Hint geven
-        function giveHint() {
-            if (hintsRemaining <= 0) {
-                alert("Je hebt geen hints meer over!");
-                return;
-            }
-            
-            hintsRemaining--;
-            hintButton.textContent = `Hint (${hintsRemaining} resterend)`;
-            
-            const correctOption = vocabularyQuestions[currentQuestion].correct;
-            const options = document.querySelectorAll('.option');
-            
-            // Laat het juiste antwoord kort oplichten
-            options[correctOption].style.backgroundColor = 'rgba(46, 204, 113, 0.5)';
-            options[correctOption].style.borderColor = '#2ecc71';
-            
-            setTimeout(() => {
-                options[correctOption].style.backgroundColor = '';
-                options[correctOption].style.borderColor = '';
-            }, 1500);
         }
 
         // Volgende vraag
@@ -724,7 +490,7 @@
                 loadQuestion();
             } else {
                 // Einde van de quiz
-                questionText.textContent = "Gefeliciteerd! Je hebt alle justitie vragen beantwoord!";
+                questionText.textContent = "Gefeliciteerd! Je hebt alle vragen beantwoord!";
                 optionsContainer.innerHTML = '';
                 feedbackElement.style.display = 'none';
                 nextButton.style.display = 'none';
@@ -732,234 +498,66 @@
                 // Toon eindscore
                 const finalScore = document.createElement('div');
                 finalScore.className = "feedback correct-feedback";
-                finalScore.innerHTML = `<strong>Eindscore: ${score}/${vocabularyQuestions.length}</strong><br><br>`;
-                
-                if (score >= 20) {
-                    finalScore.innerHTML += "Uitstekend! Je bent een juridisch expert!";
-                } else if (score >= 15) {
-                    finalScore.innerHTML += "Goed gedaan! Je hebt een solide kennis van justitiële termen.";
-                } else if (score >= 10) {
-                    finalScore.innerHTML += "Redelijk! Je basiskennis is goed, maar er is ruimte voor verbetering.";
-                } else {
-                    finalScore.innerHTML += "Oefening baart kunst! Blijf de juridische terminologie bestuderen.";
-                }
-                
+                finalScore.textContent = `Eindscore: ${score}/${vocabularyQuestions.length}`;
                 finalScore.style.display = 'block';
                 optionsContainer.appendChild(finalScore);
             }
         }
 
-        // Pacman Game Code met Doolhof
+        // Pacman Game Code
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Maze layout - een doolhof met muren en hutten voor spoken
-        const maze = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1],
-            [1,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,0,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
-            [1,0,0,0,1,2,0,0,0,0,0,0,0,0,0,2,1,0,0,1],
-            [1,0,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1],
-            [1,0,1,0,0,0,0,0,0,1,2,1,0,0,0,0,0,0,1,1],
-            [1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,1],
-            [1,0,0,0,0,0,1,2,0,0,0,0,0,2,1,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
         // Game variabelen
         let pacman = {
-            x: 30,
-            y: 30,
-            radius: 10,
-            speed: 2,
+            x: 50,
+            y: 200,
+            radius: 15,
+            speed: 3,
             direction: { x: 0, y: 0 },
-            nextDirection: { x: 0, y: 0 },
             mouthOpen: 0,
             mouthSpeed: 0.1
         };
 
         let dots = [];
         let ghosts = [];
-        let ghostHuts = [];
         let dotsCollected = 0;
-        let dotsTotal = 0;
+        let dotsTotal = 20;
         let gameRunning = false;
         let keys = {};
-        const cellSize = 30;
 
         // Initialiseer spel
         function initPacman() {
             // Reset Pacman positie
-            pacman.x = 30;
-            pacman.y = 30;
+            pacman.x = 50;
+            pacman.y = 200;
             pacman.direction = { x: 0, y: 0 };
-            pacman.nextDirection = { x: 0, y: 0 };
             
-            // Bereken doolhof afmetingen
-            const mazeWidth = maze[0].length;
-            const mazeHeight = maze.length;
-            
-            // Maak dots op basis van maze
+            // Maak dots
             dots = [];
-            ghostHuts = [];
-            dotsTotal = 0;
-            
-            for (let y = 0; y < mazeHeight; y++) {
-                for (let x = 0; x < mazeWidth; x++) {
-                    const cellX = x * cellSize + cellSize/2;
-                    const cellY = y * cellSize + cellSize/2;
-                    
-                    if (maze[y][x] === 0) {
-                        // Normale dot
-                        dots.push({
-                            x: cellX,
-                            y: cellY,
-                            radius: 3,
-                            collected: false,
-                            isPowerDot: false
-                        });
-                        dotsTotal++;
-                    } else if (maze[y][x] === 2) {
-                        // Ghost hut (speciale cel)
-                        ghostHuts.push({
-                            x: x * cellSize,
-                            y: y * cellSize,
-                            width: cellSize,
-                            height: cellSize
-                        });
-                    }
-                }
+            for (let i = 0; i < dotsTotal; i++) {
+                dots.push({
+                    x: Math.random() * (canvas.width - 30) + 15,
+                    y: Math.random() * (canvas.height - 30) + 15,
+                    radius: 5,
+                    collected: false
+                });
             }
-            
-            // Voeg power dots toe
-            dots.push({
-                x: 30,
-                y: 30,
-                radius: 6,
-                collected: false,
-                isPowerDot: true
-            });
-            
-            dots.push({
-                x: canvas.width - 30,
-                y: 30,
-                radius: 6,
-                collected: false,
-                isPowerDot: true
-            });
-            
-            dots.push({
-                x: 30,
-                y: canvas.height - 30,
-                radius: 6,
-                collected: false,
-                isPowerDot: true
-            });
-            
-            dots.push({
-                x: canvas.width - 30,
-                y: canvas.height - 30,
-                radius: 6,
-                collected: false,
-                isPowerDot: true
-            });
-            
-            dotsTotal += 4;
             
             // Maak ghosts
             ghosts = [];
-            const ghostColors = ['#FF0000', '#00FFFF', '#FF00FF', '#FFA500'];
-            const ghostNames = ['Blinky', 'Inky', 'Pinky', 'Clyde'];
-            
-            for (let i = 0; i < 4; i++) {
-                // Plaats ghost bij een hut indien beschikbaar
-                let startX, startY;
-                if (ghostHuts.length > 0) {
-                    const hut = ghostHuts[i % ghostHuts.length];
-                    startX = hut.x + hut.width/2;
-                    startY = hut.y + hut.height/2;
-                } else {
-                    startX = canvas.width/2 + (i-2)*40;
-                    startY = canvas.height/2;
-                }
-                
+            for (let i = 0; i < 3; i++) {
                 ghosts.push({
-                    x: startX,
-                    y: startY,
+                    x: Math.random() * (canvas.width - 40) + 20,
+                    y: Math.random() * (canvas.height - 40) + 20,
                     radius: 12,
-                    speed: 1.2 + Math.random() * 0.5,
-                    direction: { x: Math.random() > 0.5 ? 1 : -1, y: 0 },
-                    color: ghostColors[i],
-                    name: ghostNames[i],
-                    isScared: false,
-                    scaredTimer: 0,
-                    inHut: true,
-                    hutTimer: Math.random() * 200 + 100
+                    speed: 1.5 + Math.random(),
+                    direction: { x: Math.random() > 0.5 ? 1 : -1, y: Math.random() > 0.5 ? 1 : -1 },
+                    color: i === 0 ? '#FF0000' : i === 1 ? '#00FFFF' : '#FF00FF'
                 });
             }
             
             dotsCollected = 0;
-            dotsCounter.textContent = dotsCollected;
-            dotsTotalElement.textContent = dotsTotal;
-        }
-
-        // Teken doolhof
-        function drawMaze() {
-            const mazeWidth = maze[0].length;
-            const mazeHeight = maze.length;
-            
-            for (let y = 0; y < mazeHeight; y++) {
-                for (let x = 0; x < mazeWidth; x++) {
-                    const cellX = x * cellSize;
-                    const cellY = y * cellSize;
-                    
-                    if (maze[y][x] === 1) {
-                        // Muur
-                        ctx.fillStyle = '#1a3a8f';
-                        ctx.fillRect(cellX, cellY, cellSize, cellSize);
-                        
-                        ctx.strokeStyle = '#0c1a2d';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(cellX, cellY, cellSize, cellSize);
-                    } else if (maze[y][x] === 2) {
-                        // Ghost hut
-                        ctx.fillStyle = '#2a4a7a';
-                        ctx.fillRect(cellX, cellY, cellSize, cellSize);
-                        
-                        ctx.strokeStyle = '#4dccbd';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(cellX, cellY, cellSize, cellSize);
-                        
-                        // Teken tralies op de hut
-                        ctx.strokeStyle = '#ffcc00';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(cellX + 5, cellY + 5);
-                        ctx.lineTo(cellX + cellSize - 5, cellY + 5);
-                        ctx.moveTo(cellX + 5, cellY + cellSize - 5);
-                        ctx.lineTo(cellX + cellSize - 5, cellY + cellSize - 5);
-                        ctx.moveTo(cellX + 5, cellY + 5);
-                        ctx.lineTo(cellX + 5, cellY + cellSize - 5);
-                        ctx.moveTo(cellX + cellSize - 5, cellY + 5);
-                        ctx.lineTo(cellX + cellSize - 5, cellY + cellSize - 5);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-        // Controleer of positie een muur is
-        function isWall(x, y) {
-            const gridX = Math.floor(x / cellSize);
-            const gridY = Math.floor(y / cellSize);
-            
-            if (gridX < 0 || gridX >= maze[0].length || gridY < 0 || gridY >= maze.length) {
-                return true;
-            }
-            
-            return maze[gridY][gridX] === 1;
         }
 
         // Teken Pacman
@@ -983,12 +581,6 @@
             ctx.lineTo(0, 0);
             ctx.fill();
             
-            // Teken oog
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(4, -4, 2, 0, Math.PI * 2);
-            ctx.fill();
-            
             ctx.restore();
         }
 
@@ -996,15 +588,10 @@
         function drawDots() {
             dots.forEach(dot => {
                 if (!dot.collected) {
-                    ctx.fillStyle = dot.isPowerDot ? '#FF4444' : '#FFFFFF';
+                    ctx.fillStyle = '#FFFFFF';
                     ctx.beginPath();
                     ctx.arc(dot.x, dot.y, dot.radius, 0, 2 * Math.PI);
                     ctx.fill();
-                    
-                    // Animeer power dots
-                    if (dot.isPowerDot) {
-                        dot.radius = 5 + Math.sin(Date.now() / 200) * 2;
-                    }
                 }
             });
         }
@@ -1012,42 +599,25 @@
         // Teken ghosts
         function drawGhosts() {
             ghosts.forEach(ghost => {
-                if (ghost.inHut) return;
-                
                 // Teken ghost lichaam
-                const ghostColor = ghost.isScared ? '#0000FF' : ghost.color;
-                ctx.fillStyle = ghostColor;
-                
-                // Rond lichaam
+                ctx.fillStyle = ghost.color;
                 ctx.beginPath();
                 ctx.arc(ghost.x, ghost.y, ghost.radius, Math.PI, 2 * Math.PI);
-                ctx.fill();
-                
-                // Golvende onderkant
-                ctx.beginPath();
-                ctx.moveTo(ghost.x - ghost.radius, ghost.y);
-                for (let i = 0; i < 5; i++) {
-                    const x = ghost.x - ghost.radius + (i * ghost.radius * 2) / 4;
-                    const y = ghost.y + Math.sin(Date.now() / 200 + i) * 3;
-                    ctx.lineTo(x, y);
-                }
-                ctx.lineTo(ghost.x + ghost.radius, ghost.y);
+                ctx.ellipse(ghost.x, ghost.y - ghost.radius / 2, ghost.radius, ghost.radius / 1.5, 0, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Teken ghost ogen
                 ctx.fillStyle = '#FFFFFF';
                 ctx.beginPath();
-                ctx.arc(ghost.x - 4, ghost.y - 4, 4, 0, Math.PI * 2);
-                ctx.arc(ghost.x + 4, ghost.y - 4, 4, 0, Math.PI * 2);
+                ctx.arc(ghost.x - 4, ghost.y - 5, 3, 0, Math.PI * 2);
+                ctx.arc(ghost.x + 4, ghost.y - 5, 3, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Teken ghost pupillen
+                // Tegen ghost pupil
                 ctx.fillStyle = '#0000FF';
                 ctx.beginPath();
-                const pupilOffsetX = ghost.direction.x * 2;
-                const pupilOffsetY = ghost.direction.y * 2;
-                ctx.arc(ghost.x - 4 + pupilOffsetX, ghost.y - 4 + pupilOffsetY, 2, 0, Math.PI * 2);
-                ctx.arc(ghost.x + 4 + pupilOffsetX, ghost.y - 4 + pupilOffsetY, 2, 0, Math.PI * 2);
+                ctx.arc(ghost.x - 4 + (ghost.direction.x * 2), ghost.y - 5 + (ghost.direction.y * 2), 1.5, 0, Math.PI * 2);
+                ctx.arc(ghost.x + 4 + (ghost.direction.x * 2), ghost.y - 5 + (ghost.direction.y * 2), 1.5, 0, Math.PI * 2);
                 ctx.fill();
             });
         }
@@ -1055,26 +625,8 @@
         // Update spel
         function update() {
             // Update Pacman positie
-            if (pacman.nextDirection.x !== 0 || pacman.nextDirection.y !== 0) {
-                const nextX = pacman.x + pacman.nextDirection.x * pacman.speed;
-                const nextY = pacman.y + pacman.nextDirection.y * pacman.speed;
-                
-                if (!isWall(nextX, pacman.y)) {
-                    pacman.direction.x = pacman.nextDirection.x;
-                    pacman.direction.y = 0;
-                } else if (!isWall(pacman.x, nextY)) {
-                    pacman.direction.x = 0;
-                    pacman.direction.y = pacman.nextDirection.y;
-                }
-            }
-            
-            const nextX = pacman.x + pacman.direction.x * pacman.speed;
-            const nextY = pacman.y + pacman.direction.y * pacman.speed;
-            
-            if (!isWall(nextX, nextY)) {
-                pacman.x = nextX;
-                pacman.y = nextY;
-            }
+            pacman.x += pacman.direction.x * pacman.speed;
+            pacman.y += pacman.direction.y * pacman.speed;
             
             // Houd Pacman binnen canvas
             if (pacman.x < pacman.radius) pacman.x = pacman.radius;
@@ -1098,99 +650,22 @@
                     if (distance < pacman.radius + dot.radius) {
                         dot.collected = true;
                         dotsCollected++;
-                        dotsCounter.textContent = dotsCollected;
-                        
-                        // Als power dot, maak ghosts bang
-                        if (dot.isPowerDot) {
-                            ghosts.forEach(ghost => {
-                                if (!ghost.inHut) {
-                                    ghost.isScared = true;
-                                    ghost.scaredTimer = 500; // 500 frames bang
-                                }
-                            });
-                        }
                     }
                 }
             });
             
             // Update ghosts
             ghosts.forEach(ghost => {
-                // Update scared timer
-                if (ghost.isScared) {
-                    ghost.scaredTimer--;
-                    if (ghost.scaredTimer <= 0) {
-                        ghost.isScared = false;
-                    }
+                ghost.x += ghost.direction.x * ghost.speed;
+                ghost.y += ghost.direction.y * ghost.speed;
+                
+                // Botsing met muren
+                if (ghost.x < ghost.radius || ghost.x > canvas.width - ghost.radius) {
+                    ghost.direction.x = -ghost.direction.x;
                 }
-                
-                // Ghosts in hutten blijven daar tot hun timer afloopt
-                if (ghost.inHut) {
-                    ghost.hutTimer--;
-                    if (ghost.hutTimer <= 0) {
-                        ghost.inHut = false;
-                    }
-                    return;
+                if (ghost.y < ghost.radius || ghost.y > canvas.height - ghost.radius) {
+                    ghost.direction.y = -ghost.direction.y;
                 }
-                
-                // Ghost beweging met eenvoudige AI
-                if (Math.random() < 0.02 || isWall(ghost.x + ghost.direction.x * ghost.speed, ghost.y + ghost.direction.y * ghost.speed)) {
-                    const directions = [
-                        { x: 1, y: 0 },
-                        { x: -1, y: 0 },
-                        { x: 0, y: 1 },
-                        { x: 0, y: -1 }
-                    ];
-                    
-                    // Filter geldige richtingen
-                    const validDirections = directions.filter(dir => {
-                        return !isWall(ghost.x + dir.x * ghost.speed, ghost.y + dir.y * ghost.speed) &&
-                               !(dir.x === -ghost.direction.x && dir.y === -ghost.direction.y); // Voorkom 180 graden draai
-                    });
-                    
-                    if (validDirections.length > 0) {
-                        // Als ghost bang is, beweeg willekeurig
-                        if (ghost.isScared) {
-                            const randomDir = validDirections[Math.floor(Math.random() * validDirections.length)];
-                            ghost.direction = randomDir;
-                        } else {
-                            // Anders jaag Pacman na
-                            const dx = pacman.x - ghost.x;
-                            const dy = pacman.y - ghost.y;
-                            
-                            // Kies richting die Pacman het dichtst benadert
-                            let bestDirection = validDirections[0];
-                            let bestScore = -Infinity;
-                            
-                            validDirections.forEach(dir => {
-                                const score = dir.x * dx + dir.y * dy;
-                                if (score > bestScore) {
-                                    bestScore = score;
-                                    bestDirection = dir;
-                                }
-                            });
-                            
-                            ghost.direction = bestDirection;
-                        }
-                    }
-                }
-                
-                // Beweeg ghost
-                const nextGhostX = ghost.x + ghost.direction.x * ghost.speed;
-                const nextGhostY = ghost.y + ghost.direction.y * ghost.speed;
-                
-                if (!isWall(nextGhostX, nextGhostY)) {
-                    ghost.x = nextGhostX;
-                    ghost.y = nextGhostY;
-                }
-                
-                // Controleer of ghost in een hut gaat
-                ghostHuts.forEach(hut => {
-                    if (ghost.x > hut.x && ghost.x < hut.x + hut.width &&
-                        ghost.y > hut.y && ghost.y < hut.y + hut.height) {
-                        ghost.inHut = true;
-                        ghost.hutTimer = Math.random() * 200 + 100;
-                    }
-                });
                 
                 // Controleer botsing met Pacman
                 const dx = pacman.x - ghost.x;
@@ -1198,36 +673,20 @@
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < pacman.radius + ghost.radius) {
-                    if (ghost.isScared) {
-                        // Pacman eet de ghost
-                        ghost.inHut = true;
-                        ghost.hutTimer = 300;
-                        ghost.isScared = false;
-                        score += 10;
-                        scoreElement.textContent = score;
+                    // Pacman is geraakt
+                    pacmanLives--;
+                    pacmanLivesElement.textContent = pacmanLives;
+                    
+                    if (pacmanLives <= 0) {
+                        gameOver = true;
+                        gameRunning = false;
+                        gameOverMessage.style.display = 'block';
+                        startButton.disabled = true;
                     } else {
-                        // Pacman is geraakt
-                        pacmanLives--;
-                        pacmanLivesElement.textContent = pacmanLives;
-                        
-                        if (pacmanLives <= 0) {
-                            gameOver = true;
-                            gameRunning = false;
-                            gameOverMessage.style.display = 'block';
-                            startButton.disabled = true;
-                            startButton.textContent = "Geen levens meer";
-                        } else {
-                            // Reset posities
-                            pacman.x = 30;
-                            pacman.y = 30;
-                            pacman.direction = { x: 0, y: 0 };
-                            pacman.nextDirection = { x: 0, y: 0 };
-                            
-                            ghosts.forEach(g => {
-                                g.inHut = true;
-                                g.hutTimer = Math.random() * 200 + 100;
-                            });
-                        }
+                        // Reset Pacman positie
+                        pacman.x = 50;
+                        pacman.y = 200;
+                        pacman.direction = { x: 0, y: 0 };
                     }
                 }
             });
@@ -1235,27 +694,21 @@
             // Controleer of level is voltooid
             if (dotsCollected >= dotsTotal) {
                 gameRunning = false;
-                startButton.textContent = unlockedLevels < 5 ? "Volgende Level" : "Spel Gewonnen!";
+                startButton.textContent = "Volgende Level";
                 startButton.disabled = false;
                 
                 // Toon succesbericht
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 ctx.fillStyle = '#FFCC00';
                 ctx.font = '30px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('Level Voltooid!', canvas.width / 2, canvas.height / 2 - 30);
+                ctx.fillText('Level Voltooid!', canvas.width / 2, canvas.height / 2);
                 
-                ctx.fillStyle = '#4dccbd';
+                ctx.fillStyle = '#FFFFFF';
                 ctx.font = '20px Arial';
-                ctx.fillText(`Je hebt ${unlockedLevels} van 5 levels vrijgespeeld`, canvas.width / 2, canvas.height / 2 + 10);
-                
-                if (unlockedLevels >= 5) {
-                    ctx.fillStyle = '#2ecc71';
-                    ctx.font = '24px Arial';
-                    ctx.fillText('Gefeliciteerd! Je hebt het spel gewonnen!', canvas.width / 2, canvas.height / 2 + 50);
-                }
+                ctx.fillText(`Je hebt ${unlockedLevels} van 5 levels vrijgespeeld`, canvas.width / 2, canvas.height / 2 + 40);
             }
         }
 
@@ -1269,7 +722,6 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // Teken game elementen
-            drawMaze();
             drawDots();
             drawGhosts();
             drawPacman();
@@ -1277,8 +729,7 @@
             // Teken score
             ctx.fillStyle = '#FFFFFF';
             ctx.font = '16px Arial';
-            ctx.fillText(`Level: ${unlockedLevels}/5`, 10, 20);
-            ctx.fillText(`Dots: ${dotsCollected}/${dotsTotal}`, 10, 40);
+            ctx.fillText(`Dots: ${dotsCollected}/${dotsTotal}`, 10, 20);
             
             // Teken instructies als het spel niet actief is
             if (!gameRunning && dotsCollected < dotsTotal) {
@@ -1314,7 +765,7 @@
         // Start Pacman spel
         function startPacman() {
             if (unlockedLevels <= 0) {
-                alert('Beantwoord eerst een justitie-vraag correct om Pacman te kunnen spelen!');
+                alert('Beantwoord eerst een vraag correct om Pacman te kunnen spelen!');
                 return;
             }
             
@@ -1323,7 +774,7 @@
                 return;
             }
             
-            if (dotsCollected >= dotsTotal && unlockedLevels < 5) {
+            if (dotsCollected >= dotsTotal) {
                 // Nieuw level starten
                 initPacman();
                 startButton.textContent = "Pauzeer Pacman";
@@ -1354,13 +805,13 @@
             
             // Stel Pacman richting in op basis van toetsen
             if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-                pacman.nextDirection = { x: 0, y: -1 };
+                pacman.direction = { x: 0, y: -1 };
             } else if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-                pacman.nextDirection = { x: 0, y: 1 };
+                pacman.direction = { x: 0, y: 1 };
             } else if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-                pacman.nextDirection = { x: -1, y: 0 };
+                pacman.direction = { x: -1, y: 0 };
             } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-                pacman.nextDirection = { x: 1, y: 0 };
+                pacman.direction = { x: 1, y: 0 };
             }
         }
 

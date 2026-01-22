@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Woordenschat PRO - FIXED BUTTONS</title>
+    <title>Pacman Woordenschat XL - Final PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #020617; color: #fff; padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
+        body { background: #020617; color: #fff; padding: 20px; overflow-x: hidden; }
+        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
         header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; margin-bottom: 10px; }
         .section { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #334155; }
         .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 15px 0; min-height: 100px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.1rem; }
-        
         .option-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .option-btn:hover:not(:disabled) { background: #475569; border-color: #fbbf24; }
         .correct { background: #15803d !important; border-color: #22c55e !important; }
         .incorrect { background: #b91c1c !important; border-color: #ef4444 !important; }
-        
-        canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; }
+        canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
         .start-btn-active { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; cursor: pointer !important; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
@@ -27,60 +25,50 @@
 
 <div class="container">
     <header>
-        <h1 class="text-2xl font-black text-yellow-400 uppercase">Pacman Woordenschat XL</h1>
-        <p>Los de vragen op om Pacman te starten!</p>
+        <h1 class="text-3xl font-black text-yellow-400 uppercase">Pacman Woordenschat XL</h1>
+        <p>Los 5 vragen op om de grote maze te spelen!</p>
     </header>
 
     <div class="section">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-blue-400">De Quiz</h3>
-            <span class="bg-blue-900 px-3 py-1 rounded text-yellow-400 font-bold">Score: <span id="pts">0</span>/5</span>
+        <div class="flex justify-between items-center mb-4 text-blue-400 font-bold">
+            <span>De Quiz</span>
+            <span class="bg-blue-900 px-3 py-1 rounded text-yellow-400">Score: <span id="pts">0</span>/5</span>
         </div>
-
-        <div id="quiz-box-container">
-            <div id="q-text" class="question-box">Klik op de groene knop om te starten!</div>
-            <div id="ans-zone">
-                <button class="option-btn" style="background:#10b981; text-align:center; font-weight:bold;" onclick="startQuizNow()">START DE QUIZ</button>
-            </div>
-            <div id="feed" class="h-8 text-center font-bold mt-2"></div>
-            <button id="v-knop" class="option-btn mt-4 hidden" style="background:#fbbf24; color:black; text-align:center; font-weight:bold;" onclick="goNext()">VOLGENDE VRAAG ➔</button>
+        <div id="q-text" class="question-box">Klik op de groene knop!</div>
+        <div id="ans-zone">
+            <button class="option-btn" style="background:#10b981; text-align:center; font-weight:bold;" onclick="startQuizNow()">START DE QUIZ</button>
         </div>
+        <div id="feed" class="h-8 text-center font-bold mt-2"></div>
+        <button id="v-knop" class="option-btn mt-4 hidden" style="background:#fbbf24; color:black; text-align:center; font-weight:bold;" onclick="goNext()">VOLGENDE VRAAG ➔</button>
     </div>
 
     <div class="section">
-        <div class="flex justify-between p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 font-bold">
-            <span class="text-yellow-400">PUNTEN: <span id="game-score">0</span></span>
-            <span class="text-blue-400">LEVEL: <span id="game-lvl">1</span></span>
-            <span class="text-red-500">LEVENS: <span id="game-lives">3</span></span>
+        <div class="flex justify-between p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 font-bold text-sm lg:text-base">
+            <span class="text-yellow-400 text-xl">SCORE: <span id="game-score">0</span></span>
+            <span class="text-red-500 text-xl">LEVENS: <span id="game-lives">3</span></span>
         </div>
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <button id="game-start-btn" class="w-full p-4 mt-4 rounded-xl font-bold bg-slate-800 text-slate-600 cursor-not-allowed" disabled onclick="beginGame()">GAME VERGRENDELD (HAAL 5 PUNTEN)</button>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <button id="game-start-btn" class="w-full p-4 mt-4 rounded-xl font-bold bg-slate-800 text-slate-600" disabled onclick="beginGame()">VOOR PACMAN: WIN EERST DE QUIZ</button>
     </div>
 </div>
 
 <script>
 const woorden = [
     { w: "zeer goede", c: "uitmuntende", o: ["aangename", "flinke"] },
-    { w: "crèche", c: "kinderdagverblijf", o: ["gietemmer", "mensen met wie je verbonden bent"] },
+    { w: "crèche", c: "kinderdagverblijf", o: ["gietemmer", "mensen met wie je verbonden"] },
     { w: "voerbakken", c: "troggen", o: ["donateurs", "filialen"] },
     { w: "ophef", c: "beroering", o: ["argumentatie", "walging"] },
     { w: "Een ... plan", c: "indrukwekkend", o: ["idioot", "gevoelig"] },
     { w: "fauteuil", c: "armstoel", o: ["leidinggevende functie", "traditioneel"] },
     { w: "correspondentie", c: "briefwisseling", o: ["armstoel", "goedkeuring"] },
     { w: "barok", c: "stijl met overdadige vormen", o: ["godsdienstuiting", "meer dan nodig"] },
-    { w: "aangewakkerd", c: "feller doen branden", o: ["niet fris", "met betrekking tot"] },
-    { w: "onstuimig weer", c: "stormachtig", o: ["sober", "uitbundig"] },
-    { w: "eerbied", c: "respect", o: ["plotselinge gedachte", "godsdienst"] },
     { w: "flora", c: "plantenwereld", o: ["bodemkunde", "dierenwereld"] }
 ];
 
-let qIndex = 0;
-let quizPunten = 0;
-let huidigeVragen = [];
+let qIndex = 0, quizPunten = 0, huidigeVragen = [];
 
 function startQuizNow() {
-    qIndex = 0;
-    quizPunten = 0;
+    qIndex = 0; quizPunten = 0;
     document.getElementById('pts').innerText = "0";
     huidigeVragen = [...woorden].sort(() => Math.random() - 0.5);
     laadVraag();
@@ -93,111 +81,121 @@ function laadVraag() {
         document.getElementById('v-knop').classList.add('hidden');
         return;
     }
-
     const vraag = huidigeVragen[qIndex];
     const opties = [vraag.c, ...vraag.o].sort(() => Math.random() - 0.5);
-    
     document.getElementById('q-text').innerText = `Wat betekent: "${vraag.w}"?`;
     document.getElementById('feed').innerText = "";
     document.getElementById('v-knop').classList.add('hidden');
-    
     const zone = document.getElementById('ans-zone');
     zone.innerHTML = "";
-    
     opties.forEach(o => {
         const b = document.createElement('button');
         b.className = "option-btn";
         b.innerText = o;
-        b.onclick = function() { check(o, vraag.c, b); };
+        b.onclick = function() {
+            const all = document.querySelectorAll('#ans-zone .option-btn');
+            all.forEach(k => k.disabled = true);
+            if (o === vraag.c) {
+                b.classList.add('correct'); quizPunten++;
+                document.getElementById('pts').innerText = quizPunten;
+                if (quizPunten >= 5) unlockGame();
+            } else { b.classList.add('incorrect'); }
+            document.getElementById('v-knop').classList.remove('hidden');
+        };
         zone.appendChild(b);
     });
 }
 
-function check(gekozen, correct, knop) {
-    const alleKnoppen = document.querySelectorAll('#ans-zone .option-btn');
-    alleKnoppen.forEach(k => k.disabled = true);
-    
-    if (gekozen === correct) {
-        knop.classList.add('correct');
-        quizPunten++;
-        document.getElementById('pts').innerText = quizPunten;
-        document.getElementById('feed').innerText = "✅ GOED!";
-        document.getElementById('feed').style.color = "#22c55e";
-        if (quizPunten >= 5) unlockGame();
-    } else {
-        knop.classList.add('incorrect');
-        document.getElementById('feed').innerText = "❌ FOUT";
-        document.getElementById('feed').style.color = "#ef4444";
-    }
-    
-    document.getElementById('v-knop').classList.remove('hidden');
-}
-
-function goNext() {
-    qIndex++;
-    laadVraag();
-}
+function goNext() { qIndex++; laadVraag(); }
 
 function unlockGame() {
     const b = document.getElementById('game-start-btn');
-    b.disabled = false;
-    b.classList.add('start-btn-active');
-    b.innerText = "START PACMAN XL (NU BESCHIKBAAR)";
+    b.disabled = false; b.classList.add('start-btn-active');
+    b.innerText = "START PACMAN XL";
 }
 
 // ================= PACMAN XL ENGINE =================
 const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-const TILE = 20;
-let gameOn = false, gScore = 0, gLvl = 1, lives = 3;
-let pac = { x: 20, y: 20, dir: 0, next: 0, speed: 2 };
+const TILE = 25;
+let gameOn = false, gScore = 0, lives = 3;
+let pac = { x: 25, y: 25, dir: 0, next: 0, speed: 2.5 };
 let ghosts = [];
 
 const maze = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,2,1],
-    [1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,2,1],
-    [1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,2,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,2,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,2,1,1,1,2,1],
-    [1,3,2,2,2,2,1,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,3,1],
-    [1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,0,0,0,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1],
-    [1,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0,0,1],
-    [1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,3,1],
+    [1,2,1,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,2,1],
+    [1,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1],
+    [1,2,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1],
+    [1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,0,0,0,0,1,2,2,2,2,2,2,1,2,2,2,2,1],
+    [1,1,1,1,1,2,1,2,1,1,1,1,1,2,1,0,0,0,0,1,2,1,1,1,1,2,1,2,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,1,1,1,2,1,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2,1],
+    [1,2,2,2,1,2,2,2,2,2,1,2,2,2,1,1,1,1,1,1,2,2,2,1,2,2,2,2,2,1,2,1],
+    [1,1,1,2,1,2,1,1,1,2,1,2,1,2,1,2,2,2,2,1,2,1,2,1,2,1,1,1,2,1,1,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 let curM = [];
 
 function resetMap() {
     curM = maze.map(r => [...r]);
-    pac.x = 20; pac.y = 20; pac.dir = 0; pac.next = 0;
+    pac.x = TILE; pac.y = TILE; pac.dir = 0; pac.next = 0;
     ghosts = [
-        {x:360, y:160, c:'#ef4444', d:0, s:1.5+(gLvl*0.3)},
-        {x:400, y:160, c:'#ec4899', d:2, s:1.5+(gLvl*0.3)},
-        {x:380, y:140, c:'#06b6d4', d:3, s:1.5+(gLvl*0.3)}
+        {x:375, y:125, c:'#ef4444', d:0, s:2},
+        {x:400, y:125, c:'#ec4899', d:2, s:2.1},
+        {x:425, y:125, c:'#06b6d4', d:3, s:1.9}
     ];
 }
 
 function beginGame() {
-    gScore = 0; gLvl = 1; lives = 3; gameOn = true;
-    resetMap();
-    anim();
+    gScore = 0; lives = 3; gameOn = true;
+    resetMap(); anim();
 }
 
-function can(x,y,d) {
-    let nx=x, ny=y, m=2;
-    if(d===0)nx+=m; if(d===1)ny+=m; if(d===2)nx-=m; if(d===3)ny-=m;
-    let r = Math.floor((ny+10)/TILE), c = Math.floor((nx+10)/TILE);
+function can(x, y, d) {
+    let nx = x, ny = y;
+    const padding = 3; 
+    if(d === 0) nx += padding;
+    if(d === 1) ny += padding;
+    if(d === 2) nx -= padding;
+    if(d === 3) ny -= padding;
+    let r = Math.floor((ny + TILE/2) / TILE);
+    let c = Math.floor((nx + TILE/2) / TILE);
     return curM[r] && curM[r][c] !== 1;
+}
+
+function drawGhost(g) {
+    const x = g.x + TILE/2, y = g.y + TILE/2;
+    ctx.fillStyle = g.c;
+    ctx.beginPath();
+    ctx.arc(x, y - 2, 10, Math.PI, 0);
+    ctx.lineTo(x + 10, y + 10);
+    // Golvende onderkant
+    for (let i = 0; i < 3; i++) {
+        let wave = Math.sin(Date.now()/100 + i) * 2;
+        ctx.lineTo(x + 10 - (i*6.6), y + 10 + wave);
+    }
+    ctx.lineTo(x - 10, y + 10);
+    ctx.fill();
+    // Oogjes
+    ctx.fillStyle = "white";
+    ctx.beginPath(); ctx.arc(x - 4, y - 4, 3, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 4, y - 4, 3, 0, 7); ctx.fill();
+    ctx.fillStyle = "black";
+    ctx.beginPath(); ctx.arc(x - 4, y - 4, 1.5, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 4, y - 4, 1.5, 0, 7); ctx.fill();
 }
 
 function anim() {
     if(!gameOn) return;
     
-    // Smooth turn
-    if(pac.dir !== pac.next && Math.abs(pac.x%TILE)<5 && Math.abs(pac.y%TILE)<5) {
-        let gx = Math.round(pac.x/TILE)*TILE, gy = Math.round(pac.y/TILE)*TILE;
-        if(can(gx,gy,pac.next)) { pac.x=gx; pac.y=gy; pac.dir=pac.next; }
+    // Smooth turn logic
+    if(pac.dir !== pac.next) {
+        if(Math.abs(pac.x % TILE) < 6 && Math.abs(pac.y % TILE) < 6) {
+            let gx = Math.round(pac.x/TILE)*TILE, gy = Math.round(pac.y/TILE)*TILE;
+            if(can(gx, gy, pac.next)) { pac.x = gx; pac.y = gy; pac.dir = pac.next; }
+        }
     }
     
     let dx=0, dy=0;
@@ -205,11 +203,9 @@ function anim() {
     if(pac.dir===2) dx=-pac.speed; if(pac.dir===3) dy=-pac.speed;
     if(can(pac.x+dx, pac.y+dy, pac.dir)) { pac.x+=dx; pac.y+=dy; }
 
-    let r = Math.floor((pac.y+10)/TILE), c = Math.floor((pac.x+10)/TILE);
+    let r = Math.floor((pac.y+TILE/2)/TILE), c = Math.floor((pac.x+TILE/2)/TILE);
     if(curM[r] && curM[r][c] > 1) {
         gScore += (curM[r][c]===2?10:50); curM[r][c]=0;
-        let dots = 0; curM.forEach(row => row.forEach(t => {if(t>1) dots++;}));
-        if(dots===0) { gLvl++; resetMap(); alert("Level Up!"); }
     }
 
     ghosts.forEach(g => {
@@ -217,33 +213,41 @@ function anim() {
         let gx=0, gy=0;
         if(g.d===0) gx=g.s; if(g.d===1) gy=g.s; if(g.d===2) gx=-g.s; if(g.d===3) gy=-g.s;
         if(can(g.x+gx, g.y+gy, g.d)) { g.x+=gx; g.y+=gy; }
-        if(Math.hypot(pac.x-g.x, pac.y-g.y)<15) {
+        if(Math.hypot(pac.x-g.x, pac.y-g.y)<18) {
             lives--; if(lives<=0) { gameOn=false; alert("Game Over! Score: "+gScore); location.reload(); } else resetMap();
         }
     });
 
     ctx.fillStyle="black"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=0; i<curM.length; i++) {
-        for(let j=0; j<curM[i].length; j++) {
+    for(let i=0; i<curM.length; i++){
+        for(let j=0; j<curM[i].length; j++){
             let x=j*TILE, y=i*TILE;
-            if(curM[i][j]===1){ ctx.fillStyle="#1e40af"; ctx.fillRect(x+1,y+1,TILE-2,TILE-2); }
-            if(curM[i][j]===2){ ctx.fillStyle="#fbbf24"; ctx.beginPath(); ctx.arc(x+10,y+10,2,0,7); ctx.fill(); }
-            if(curM[i][j]===3){ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x+10,y+10,5,0,7); ctx.fill(); }
+            if(curM[i][j]===1){ 
+                ctx.fillStyle="#1e40af"; ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(x+2,y+2,TILE-4,TILE-4, 5) : ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
+                ctx.fill(); 
+            }
+            if(curM[i][j]===2){ ctx.fillStyle="#fbbf24"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,2,0,7); ctx.fill(); }
+            if(curM[i][j]===3){ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,6,0,7); ctx.fill(); }
         }
     }
-    ctx.fillStyle="yellow"; ctx.beginPath(); ctx.arc(pac.x+10, pac.y+10, 8, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pac.x+10,pac.y+10); ctx.fill();
-    ghosts.forEach(g => { ctx.fillStyle=g.c; ctx.beginPath(); ctx.arc(g.x+10, g.y+10, 8, 0, 7); ctx.fill(); });
+    // Draw Pacman
+    ctx.fillStyle="yellow"; ctx.beginPath(); 
+    let mouth = Math.sin(Date.now()/100)*0.2 + 0.2;
+    ctx.arc(pac.x+TILE/2, pac.y+TILE/2, 10, (mouth + pac.dir*0.5)*Math.PI, (2-mouth + pac.dir*0.5)*Math.PI);
+    ctx.lineTo(pac.x+TILE/2, pac.y+TILE/2); ctx.fill();
+
+    ghosts.forEach(drawGhost);
 
     document.getElementById('game-score').innerText = gScore;
-    document.getElementById('game-lvl').innerText = gLvl;
     document.getElementById('game-lives').innerText = lives;
     requestAnimationFrame(anim);
 }
 
-window.onkeydown = e => {
+window.addEventListener("keydown", e => {
     const k = {ArrowRight:0, ArrowDown:1, ArrowLeft:2, ArrowUp:3};
     if(k[e.key]!==undefined){ e.preventDefault(); pac.next=k[e.key]; }
-};
+});
 </script>
 </body>
 </html>

@@ -92,3 +92,163 @@ const goal = 5;
 function updateWordList() {
     const list = document.getElementById('word-list');
     list.innerHTML = vocabularyWords.map(w => `<div class="word-item"><b>${w.word}</b>: ${w.meaning}</div>`).join('');
+}
+
+function generateQuestions() {
+    questions = vocabularyWords.sort(() => Math.random() - 0.5).map(item => {
+        let options = [item.meaning];
+        while(options.length < 4) {
+            let rand = vocabularyWords[Math.floor(Math.random()*vocabularyWords.length)].meaning;
+            if(!options.includes(rand)) options.push(rand);
+        }
+        return { 
+            q: `Wat is de betekenis van '${item.word}'?`, 
+            correct: item.meaning, 
+            options: options.sort(() => Math.random() - 0.5) 
+        };
+    });
+    currentQIndex = 0;
+    loadQuestion();
+}
+
+function loadQuestion() {
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('next-btn').style.display = 'none';
+    const q = questions[currentQIndex];
+    document.getElementById('question-box').innerText = q.q;
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt, btn);
+        container.appendChild(btn);
+    });
+}
+
+function checkAnswer(selected, btn) {
+    const q = questions[currentQIndex];
+    const btns = document.querySelectorAll('.option-btn');
+    btns.forEach(b => b.style.pointerEvents = 'none');
+
+    if(selected === q.correct) {
+        btn.classList.add('correct');
+        correctScore++;
+        document.getElementById('correct-count').innerText = correctScore;
+        if(correctScore >= goal) unlockGame();
+    } else {
+        btn.classList.add('incorrect');
+    }
+    
+    document.getElementById('next-btn').style.display = 'block';
+    currentQIndex++;
+}
+
+function unlockGame() {
+    const btn = document.getElementById('start-game-btn');
+    btn.disabled = false;
+    btn.classList.add('unlocked');
+    document.getElementById('unlock-msg').innerText = "ONTGRENDELD!";
+    document.getElementById('unlock-msg').style.color = "#10b981";
+}
+
+// ================= PACMAN GAME ENGINE =================
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let gameInterval;
+let score = 0;
+
+let pacman = { x: 20, y: 20, dir: 'right', nextDir: 'right' };
+const tileSize = 20;
+const map = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+    [1,0,1,0,1,0,1,1,1,0,1,1,1,0,1,0,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1],
+    [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
+    [1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+
+function drawMap() {
+    for(let r=0; r<map.length; r++) {
+        for(let c=0; c<map[r].length; c++) {
+            if(map[r][c] === 1) {
+                ctx.fillStyle = "blue";
+                ctx.fillRect(c*tileSize, r*tileSize, tileSize, tileSize);
+            } else if(map[r][c] === 0) {
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(c*tileSize + 10, r*tileSize + 10, 2, 0, Math.PI*2);
+                ctx.fill();
+            }
+        }
+    }
+}
+
+function updatePacman() {
+    let nextX = pacman.x, nextY = pacman.y;
+    if(pacman.dir === 'left') nextX -= 2;
+    if(pacman.dir === 'right') nextX += 2;
+    if(pacman.dir === 'up') nextY -= 2;
+    if(pacman.dir === 'down') nextY += 2;
+
+    let col = Math.floor(nextX / tileSize);
+    let row = Math.floor(nextY / tileSize);
+    let col2 = Math.floor((nextX + 18) / tileSize);
+    let row2 = Math.floor((nextY + 18) / tileSize);
+
+    if(map[row][col] !== 1 && map[row2][col2] !== 1) {
+        pacman.x = nextX; pacman.y = nextY;
+    }
+
+    // Eet bolletjes
+    let gridX = Math.floor((pacman.x+10)/tileSize);
+    let gridY = Math.floor((pacman.y+10)/tileSize);
+    if(map[gridY][gridX] === 0) {
+        map[gridY][gridX] = 2; // Gemaakt
+        score += 10;
+        document.getElementById('game-score').innerText = score;
+    }
+}
+
+function drawPacman() {
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(pacman.x+10, pacman.y+10, 8, 0.2*Math.PI, 1.8*Math.PI);
+    ctx.lineTo(pacman.x+10, pacman.y+10);
+    ctx.fill();
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawMap();
+    updatePacman();
+    drawPacman();
+}
+
+function startGame() {
+    if(gameInterval) clearInterval(gameInterval);
+    canvas.focus();
+    gameInterval = setInterval(gameLoop, 20);
+}
+
+window.addEventListener("keydown", e => {
+    if(e.key === "ArrowLeft") pacman.dir = "left";
+    if(e.key === "ArrowRight") pacman.dir = "right";
+    if(e.key === "ArrowUp") pacman.dir = "up";
+    if(e.key === "ArrowDown") pacman.dir = "down";
+});
+
+updateWordList();
+drawMap();
+</script>
+
+</body>
+</html>

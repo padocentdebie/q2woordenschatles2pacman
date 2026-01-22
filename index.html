@@ -405,7 +405,7 @@
     <div class="container">
         <header>
             <h1>Pacman Woordenschat Avontuur</h1>
-            <p class="subtitle">Voer woorden in, genereer quizvragen met AI, en speel Pacman wanneer je genoeg vragen goed hebt!</p>
+            <p class="subtitle">Voer woorden in met hun betekenis, genereer quizvragen, en speel Pacman wanneer je 5 vragen goed hebt!</p>
         </header>
         
         <div class="main-content">
@@ -415,28 +415,18 @@
                 <div class="word-input-area">
                     <input type="text" class="word-input" id="word-input" 
                            placeholder="Voer een woord in (bijv. 'fascinerend')">
+                    <input type="text" class="word-input" id="meaning-input" 
+                           placeholder="Betekenis (bijv. 'interessant en boeiend')">
                     <button class="add-btn" id="add-word-btn">Toevoegen</button>
                 </div>
                 
                 <div class="word-list" id="word-list">
                     <!-- Woorden worden hier dynamisch toegevoegd -->
-                    <div class="word-item">
-                        <span>Woord: <strong>fascinerend</strong></span>
-                        <button class="remove-btn">×</button>
-                    </div>
-                    <div class="word-item">
-                        <span>Woord: <strong>kritisch</strong></span>
-                        <button class="remove-btn">×</button>
-                    </div>
-                    <div class="word-item">
-                        <span>Woord: <strong>initiatief</strong></span>
-                        <button class="remove-btn">×</button>
-                    </div>
                 </div>
                 
                 <div class="action-buttons">
                     <button class="action-btn generate-btn" id="generate-questions-btn">
-                        Vragen Genereren met AI
+                        Vragen Genereren
                     </button>
                     <button class="action-btn start-game-btn" id="start-game-btn" disabled>
                         Start Pacman (0/5)
@@ -444,7 +434,7 @@
                 </div>
                 
                 <div id="ai-status" style="margin-top: 15px; color: #60a5fa; display: none;">
-                    <p>AI genereert vragen...</p>
+                    <p>Vragen worden gegenereerd...</p>
                 </div>
             </div>
             
@@ -454,12 +444,12 @@
                 
                 <div class="quiz-info">
                     <div class="quiz-progress">Correct: <span id="correct-count">0</span>/5</div>
-                    <div class="quiz-progress">Vraag: <span id="current-question">1</span>/<span id="total-questions">15</span></div>
-                    <div class="quiz-progress">Woorden: <span id="word-count">3</span></div>
+                    <div class="quiz-progress">Vraag: <span id="current-question">1</span>/<span id="total-questions">0</span></div>
+                    <div class="quiz-progress">Woorden: <span id="word-count">0</span></div>
                 </div>
                 
                 <div class="question-box" id="question-box">
-                    Voeg woorden toe en klik op "Vragen Genereren met AI"
+                    Voeg woorden met betekenissen toe en klik op "Vragen Genereren"
                 </div>
                 
                 <div class="options-grid" id="options-container">
@@ -518,11 +508,11 @@
                 <div class="instruction-steps">
                     <div class="step">
                         <div class="step-number">Stap 1</div>
-                        <p>Voer woorden in die je wilt leren (minimaal 5)</p>
+                        <p>Voer woorden in met hun betekenis (minimaal 3)</p>
                     </div>
                     <div class="step">
                         <div class="step-number">Stap 2</div>
-                        <p>Klik op "Vragen Genereren met AI" om een quiz te maken</p>
+                        <p>Klik op "Vragen Genereren" om een quiz te maken</p>
                     </div>
                     <div class="step">
                         <div class="step-number">Stap 3</div>
@@ -540,9 +530,12 @@
     <script>
         // ==================== GLOBALE VARIABELEN ====================
         let vocabularyWords = [
+            // Start met enkele voorbeeldwoorden met correcte betekenissen
             { word: "fascinerend", meaning: "interessant en boeiend" },
             { word: "kritisch", meaning: "zich bewust van fouten en problemen" },
-            { word: "initiatief", meaning: "het nemen van het eerste stap" }
+            { word: "initiatief", meaning: "het nemen van de eerste stap" },
+            { word: "efficiënt", meaning: "met zo weinig mogelijk middelen het gewenste resultaat behalen" },
+            { word: "ambitieus", meaning: "grote doelen willen bereiken" }
         ];
         
         let vocabularyQuestions = [];
@@ -553,6 +546,7 @@
         
         // DOM elementen
         const wordInput = document.getElementById('word-input');
+        const meaningInput = document.getElementById('meaning-input');
         const addWordBtn = document.getElementById('add-word-btn');
         const wordListElement = document.getElementById('word-list');
         const wordCountElement = document.getElementById('word-count');
@@ -575,7 +569,10 @@
                 const wordItem = document.createElement('div');
                 wordItem.className = 'word-item';
                 wordItem.innerHTML = `
-                    <span>Woord: <strong>${item.word}</strong></span>
+                    <div>
+                        <strong>${item.word}</strong><br>
+                        <small>${item.meaning}</small>
+                    </div>
                     <button class="remove-btn" data-index="${index}">×</button>
                 `;
                 wordListElement.appendChild(wordItem);
@@ -596,61 +593,71 @@
         
         function addWord() {
             const word = wordInput.value.trim();
-            if (!word) return;
+            const meaning = meaningInput.value.trim();
             
-            // Voeg toe met lege betekenis (AI zal deze later invullen)
-            vocabularyWords.push({ word: word, meaning: '' });
+            if (!word || !meaning) {
+                alert('Voer zowel een woord als een betekenis in!');
+                return;
+            }
+            
+            // Controleer of woord al bestaat
+            if (vocabularyWords.some(item => item.word.toLowerCase() === word.toLowerCase())) {
+                alert('Dit woord staat al in de lijst!');
+                return;
+            }
+            
+            // Voeg toe aan lijst
+            vocabularyWords.push({ word: word, meaning: meaning });
             wordInput.value = '';
+            meaningInput.value = '';
             updateWordList();
+            
+            // Focus terug op eerste invoerveld
+            wordInput.focus();
         }
         
         function updateStartGameButton() {
-            const correctNeeded = neededForGame - correctAnswers;
             startGameBtn.textContent = `Start Pacman (${correctAnswers}/${neededForGame})`;
             startGameBtn.disabled = !gameUnlocked || vocabularyQuestions.length === 0;
         }
         
-        // ==================== AI VRAAG GENERATIE ====================
-        function generateQuestionsWithAI() {
+        // ==================== VRAAG GENERATIE ====================
+        function generateQuestions() {
             if (vocabularyWords.length < 3) {
-                alert('Voeg minimaal 3 woorden toe om vragen te genereren.');
+                alert('Voeg minimaal 3 woorden met betekenissen toe om vragen te genereren.');
                 return;
             }
             
             aiStatusElement.style.display = 'block';
-            aiStatusElement.innerHTML = '<p>AI genereert vragen met gevarieerde vraagstelling...</p>';
+            aiStatusElement.innerHTML = '<p>Vragen worden gegenereerd...</p>';
             
-            // Simuleer AI verwerking (in werkelijkheid zou je hier een API aanroepen)
+            // Genereer vragen na korte delay
             setTimeout(() => {
                 vocabularyQuestions = [];
                 
-                // Maak gevarieerde vragen voor elk woord
+                // Maak vragen voor elk woord
                 vocabularyWords.forEach((wordItem, index) => {
                     if (index >= 15) return; // Max 15 vragen
                     
                     const word = wordItem.word;
+                    const correctMeaning = wordItem.meaning;
                     
-                    // Genereer 4 verschillende vraagtypes
-                    const questionTypes = [
-                        `Wat is de betekenis van '${word}'?`,
-                        `Welke beschrijving past het beste bij '${word}'?`,
-                        `Hoe zou je '${word}' in een zin gebruiken?`,
-                        `Wat is een synoniem voor '${word}'?`,
-                        `Wat is het tegenovergestelde van '${word}'?`,
-                        `In welke context gebruik je '${word}'?`
-                    ];
+                    // Genereer alleen vragen over de betekenis
+                    const questionText = `Wat is de betekenis van '${word}'?`;
                     
-                    // Kies willekeurig vraagtype
-                    const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+                    // Genereer foute antwoorden
+                    const wrongAnswers = generateWrongAnswers(wordItem);
                     
-                    // Genereer antwoorden
-                    const answers = generateAnswers(word);
+                    // Combineer antwoorden en plaats correct antwoord op willekeurige positie
+                    const correctIndex = Math.floor(Math.random() * 4);
+                    const allOptions = [...wrongAnswers];
+                    allOptions.splice(correctIndex, 0, correctMeaning);
                     
                     vocabularyQuestions.push({
-                        question: questionType,
-                        options: answers.options,
-                        correct: answers.correctIndex,
-                        explanation: `Het correcte antwoord is '${answers.correctAnswer}'. Dit betekent dat iets ${word} is.`
+                        question: questionText,
+                        options: allOptions,
+                        correct: correctIndex,
+                        explanation: `Correct! '${word}' betekent: ${correctMeaning}`
                     });
                 });
                 
@@ -673,64 +680,65 @@
                     aiStatusElement.style.display = 'none';
                 }, 3000);
                 
-            }, 1500); // Simuleer AI verwerkingstijd
+            }, 800);
         }
         
-        function generateAnswers(word) {
-            // Dit zou normaal door AI worden gegenereerd
-            // Hier een eenvoudige simulatie
-            
-            const answerTypes = [
-                "Een positieve eigenschap",
-                "Iets dat aandacht vraagt",
-                "Een moeilijk begrip",
-                "Een eenvoudig concept",
-                "Een technische term",
-                "Een emotionele staat",
-                "Een fysieke eigenschap",
-                "Een mentale vaardigheid"
-            ];
-            
+        function generateWrongAnswers(correctWordItem) {
             const wrongAnswers = [];
-            while (wrongAnswers.length < 3) {
-                const randomType = answerTypes[Math.floor(Math.random() * answerTypes.length)];
-                if (!wrongAnswers.includes(randomType)) {
-                    wrongAnswers.push(randomType);
+            const usedMeanings = new Set();
+            usedMeanings.add(correctWordItem.meaning);
+            
+            // Verzamel alle andere betekenissen
+            const otherMeanings = vocabularyWords
+                .filter(item => item.word !== correctWordItem.word)
+                .map(item => item.meaning);
+            
+            // Voeg 3 foute antwoorden toe
+            while (wrongAnswers.length < 3 && (otherMeanings.length > 0 || wrongAnswers.length < 3)) {
+                let wrongAnswer;
+                
+                if (otherMeanings.length > 0) {
+                    // Gebruik een echte betekenis van een ander woord
+                    const randomIndex = Math.floor(Math.random() * otherMeanings.length);
+                    wrongAnswer = otherMeanings[randomIndex];
+                    otherMeanings.splice(randomIndex, 1);
+                } else {
+                    // Genereer een plausible fout antwoord
+                    wrongAnswer = generatePlausibleWrongMeaning(correctWordItem.word);
+                }
+                
+                // Zorg dat het antwoord uniek is
+                if (!usedMeanings.has(wrongAnswer)) {
+                    wrongAnswers.push(wrongAnswer);
+                    usedMeanings.add(wrongAnswer);
                 }
             }
             
-            // Genereer correct antwoord op basis van woord
-            let correctAnswer;
-            switch(word.toLowerCase()) {
-                case 'fascinerend':
-                    correctAnswer = "Interessant en boeiend";
-                    break;
-                case 'kritisch':
-                    correctAnswer = "Zich bewust van fouten en problemen";
-                    break;
-                case 'initiatief':
-                    correctAnswer = "Het nemen van de eerste stap";
-                    break;
-                default:
-                    correctAnswer = `Betekenis gerelateerd aan ${word}`;
-            }
+            return wrongAnswers;
+        }
+        
+        function generatePlausibleWrongMeaning(word) {
+            // Genereer plausible foute betekenissen gebaseerd op het woord
+            const wrongMeaningTemplates = [
+                "een soort voedsel",
+                "een muziekinstrument",
+                "een weersomstandigheid",
+                "een transportmiddel",
+                "een gebouwtype",
+                "een diersoort",
+                "een wetenschappelijke term",
+                "een emotionele staat",
+                "een kleur",
+                "een getal"
+            ];
             
-            // Voeg correct antwoord toe op willekeurige positie
-            const correctIndex = Math.floor(Math.random() * 4);
-            const allOptions = [...wrongAnswers];
-            allOptions.splice(correctIndex, 0, correctAnswer);
-            
-            return {
-                options: allOptions,
-                correctIndex: correctIndex,
-                correctAnswer: correctAnswer
-            };
+            return wrongMeaningTemplates[Math.floor(Math.random() * wrongMeaningTemplates.length)];
         }
         
         // ==================== QUIZ LOGICA ====================
         function loadQuestion() {
             if (vocabularyQuestions.length === 0) {
-                questionBox.textContent = "Voeg woorden toe en genereer vragen met AI";
+                questionBox.textContent = "Voeg woorden met betekenissen toe en klik op 'Vragen Genereren'";
                 optionsContainer.innerHTML = '';
                 return;
             }
@@ -768,7 +776,7 @@
                 correctAnswers++;
                 correctCountElement.textContent = correctAnswers;
                 
-                feedbackElement.textContent = `Goed gedaan! ${question.explanation}`;
+                feedbackElement.textContent = question.explanation;
                 feedbackElement.className = 'feedback correct';
                 
                 // Controleer of spel nu unlocked is
@@ -779,7 +787,12 @@
                 
                 optionButtons[selectedIndex].classList.add('correct');
             } else {
-                feedbackElement.textContent = `Helaas! ${question.explanation}`;
+                // Zoek het juiste woord voor deze vraag
+                const questionText = question.question;
+                const wordMatch = questionText.match(/'([^']+)'/);
+                const word = wordMatch ? wordMatch[1] : "dit woord";
+                
+                feedbackElement.textContent = `Helaas! Het juiste antwoord was: ${question.options[question.correct]}`;
                 feedbackElement.className = 'feedback incorrect';
                 
                 optionButtons[selectedIndex].classList.add('incorrect');
@@ -847,7 +860,8 @@
             lives: 3,
             gameOver: false,
             powerMode: 0,
-            dotsRemaining: 0
+            dotsRemaining: 0,
+            gameRunning: false
         };
         
         // Pacman
@@ -916,6 +930,7 @@
             gameState.gameOver = false;
             gameState.powerMode = 0;
             gameState.dotsRemaining = 0;
+            gameState.gameRunning = false;
             
             // Tel dots
             for (let y = 0; y < GRID_HEIGHT; y++) {
@@ -1172,6 +1187,7 @@
                         
                         if (gameState.lives <= 0) {
                             gameState.gameOver = true;
+                            gameState.gameRunning = false;
                             alert('Game Over! Beantwoord weer 5 vragen om opnieuw te spelen.');
                             resetGame();
                         } else {
@@ -1194,6 +1210,7 @@
             // Check win conditie
             if (gameState.dotsRemaining <= 0) {
                 gameState.gameOver = true;
+                gameState.gameRunning = false;
                 alert('Gewonnen! Alle bolletjes opgegeten! Score: ' + gameState.score);
                 resetGame();
             }
@@ -1323,7 +1340,7 @@
         }
         
         function gameLoop() {
-            if (!gameUnlocked) return;
+            if (!gameState.gameRunning || gameState.gameOver) return;
             
             movePacman();
             
@@ -1350,7 +1367,7 @@
             drawGame();
             updateGameUI();
             
-            if (!gameState.gameOver) {
+            if (!gameState.gameOver && gameState.gameRunning) {
                 requestAnimationFrame(gameLoop);
             }
         }
@@ -1361,8 +1378,6 @@
             correctAnswers = 0;
             correctCountElement.textContent = correctAnswers;
             updateStartGameButton();
-            
-            alert('Pacman spel gereset! Beantwoord 5 vragen opnieuw om te spelen.');
         }
         
         function startGame() {
@@ -1371,7 +1386,33 @@
                 return;
             }
             
+            // Reset het doolhof naar originele staat
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    // Reset alleen dots en power pellets
+                    if (maze[y][x] === 0) {
+                        // Zoek originele waarde uit mapTemplate (hier hardcoded)
+                        // Dit zou eigenlijk uit een originele map array moeten komen
+                        if ((y === 1 && x >= 1 && x <= 7) || (y === 1 && x >= 11 && x <= 17) ||
+                            (y === 2 && x === 1) || (y === 2 && x === 17) ||
+                            (y === 3 && x >= 1 && x <= 17) ||
+                            (y === 4 && (x === 1 || x === 4 || x === 7 || x === 11 || x === 14 || x === 17)) ||
+                            (y === 5 && x >= 1 && x <= 17) ||
+                            (y === 13 && x >= 1 && x <= 17) ||
+                            (y === 14 && (x === 1 || x === 4 || x === 7 || x === 11 || x === 14 || x === 17)) ||
+                            (y === 15 && x >= 1 && x <= 17) ||
+                            (y === 19 && x >= 1 && x <= 17)) {
+                            maze[y][x] = 2;
+                        } else if ((y === 2 && x === 2) || (y === 2 && x === 16) || 
+                                  (y === 15 && x === 2) || (y === 15 && x === 16)) {
+                            maze[y][x] = 3;
+                        }
+                    }
+                }
+            }
+            
             initGame();
+            gameState.gameRunning = true;
             canvas.focus();
             gameLoop();
         }
@@ -1379,17 +1420,28 @@
         // ==================== EVENT LISTENERS ====================
         addWordBtn.addEventListener('click', addWord);
         wordInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addWord();
+            if (e.key === 'Enter') {
+                meaningInput.focus();
+            }
         });
         
-        generateQuestionsBtn.addEventListener('click', generateQuestionsWithAI);
+        meaningInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addWord();
+            }
+        });
+        
+        generateQuestionsBtn.addEventListener('click', generateQuestions);
         startGameBtn.addEventListener('click', startGame);
         nextBtn.addEventListener('click', nextQuestion);
-        resetGameBtn.addEventListener('click', resetGame);
+        resetGameBtn.addEventListener('click', function() {
+            resetGame();
+            alert('Spel gereset! Beantwoord 5 vragen opnieuw om te spelen.');
+        });
         
         // Keyboard controls voor Pacman
         document.addEventListener('keydown', function(e) {
-            if (!gameUnlocked) return;
+            if (!gameState.gameRunning) return;
             
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
                 e.preventDefault();
@@ -1405,15 +1457,16 @@
         
         // Focus canvas voor keyboard controls
         canvas.addEventListener('click', function() {
-            this.focus();
+            if (gameState.gameRunning) {
+                this.focus();
+            }
         });
         
         // ==================== INITIALISATIE ====================
         updateWordList();
-        loadQuestion();
         initGame();
         
-        console.log('Game geïnitialiseerd!');
+        console.log('Game geïnitialiseerd! Voeg woorden met betekenissen toe om te beginnen.');
     </script>
 </body>
 </html>

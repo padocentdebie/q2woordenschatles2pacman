@@ -3,251 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Woordenschat XL - Final PRO</title>
+    <title>Pacman Woordenschat Master XL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #020617; color: #fff; padding: 20px; overflow-x: hidden; }
-        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
-        header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; margin-bottom: 10px; }
+        body { background: #020617; color: #fff; padding: 20px; font-family: sans-serif; overflow: hidden; }
+        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
+        header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; }
         .section { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #334155; }
-        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 15px 0; min-height: 100px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.1rem; }
-        .option-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; transition: 0.2s; }
-        .option-btn:hover:not(:disabled) { background: #475569; border-color: #fbbf24; }
-        .correct { background: #15803d !important; border-color: #22c55e !important; }
-        .incorrect { background: #b91c1c !important; border-color: #ef4444 !important; }
-        canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
-        .start-btn-active { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; cursor: pointer !important; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 10px 0; min-height: 100px; border-left: 5px solid #fbbf24; text-align: center; font-weight: bold; }
+        .timer-bar { width: 100%; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+        .timer-fill { width: 100%; height: 100%; background: #ef4444; transition: width 0.1s linear; }
+        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; }
+        .correct { background: #15803d !important; }
+        .incorrect { background: #b91c1c !important; }
+        canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; }
+        #highscore-list { list-style: none; padding: 0; }
+        #highscore-list li { background: #0f172a; padding: 8px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; border: 1px solid #1e40af; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1 class="text-3xl font-black text-yellow-400 uppercase">Pacman Woordenschat XL</h1>
-        <p>Los 5 vragen op om de grote maze te spelen!</p>
-    </header>
+    <header><h1 class="text-3xl font-black text-yellow-400">PACMAN MASTER XL</h1></header>
 
     <div class="section">
-        <div class="flex justify-between items-center mb-4 text-blue-400 font-bold">
-            <span>De Quiz</span>
-            <span class="bg-blue-900 px-3 py-1 rounded text-yellow-400">Score: <span id="pts">0</span>/5</span>
+        <div class="flex justify-between mb-2"><h3 class="font-bold text-blue-400">Quiz</h3><span class="text-yellow-400">Score: <span id="pts">0</span>/5</span></div>
+        <div class="timer-bar"><div id="t-fill" class="timer-fill"></div></div>
+        <div id="q-text" class="question-box">Klaar voor de start?</div>
+        <div id="ans-zone"><button class="option-btn bg-green-600 text-center font-bold" onclick="startQuiz()">START</button></div>
+        <button id="v-knop" class="option-btn mt-4 hidden bg-yellow-500 text-black font-bold text-center" onclick="goNext()">VOLGENDE ➔</button>
+        
+        <div class="mt-8 border-t border-slate-700 pt-4">
+            <h4 class="text-yellow-400 font-bold mb-2 uppercase text-sm">Top Scores</h4>
+            <ul id="highscore-list"></ul>
         </div>
-        <div id="q-text" class="question-box">Klik op de groene knop!</div>
-        <div id="ans-zone">
-            <button class="option-btn" style="background:#10b981; text-align:center; font-weight:bold;" onclick="startQuizNow()">START DE QUIZ</button>
-        </div>
-        <div id="feed" class="h-8 text-center font-bold mt-2"></div>
-        <button id="v-knop" class="option-btn mt-4 hidden" style="background:#fbbf24; color:black; text-align:center; font-weight:bold;" onclick="goNext()">VOLGENDE VRAAG ➔</button>
     </div>
 
     <div class="section">
-        <div class="flex justify-between p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 font-bold text-sm lg:text-base">
-            <span class="text-yellow-400 text-xl">SCORE: <span id="game-score">0</span></span>
-            <span class="text-red-500 text-xl">LEVENS: <span id="game-lives">3</span></span>
+        <div class="flex justify-between p-3 bg-slate-900 rounded mb-4 border border-slate-700 font-bold">
+            <span class="text-yellow-400 text-xl">SCORE: <span id="g-score">0</span></span>
+            <span class="text-red-500 text-xl">LEVENS: <span id="g-lives">3</span></span>
         </div>
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        <button id="game-start-btn" class="w-full p-4 mt-4 rounded-xl font-bold bg-slate-800 text-slate-600" disabled onclick="beginGame()">VOOR PACMAN: WIN EERST DE QUIZ</button>
+        <canvas id="gameCanvas" width="800" height="460"></canvas>
+        <button id="game-btn" class="w-full p-4 mt-4 rounded font-bold bg-slate-800 text-slate-600" disabled onclick="playGame()">WIN DE QUIZ OM TE SPELEN</button>
     </div>
 </div>
 
 <script>
-const woorden = [
-    { w: "zeer goede", c: "uitmuntende", o: ["aangename", "flinke"] },
-    { w: "crèche", c: "kinderdagverblijf", o: ["gietemmer", "mensen met wie je verbonden"] },
-    { w: "voerbakken", c: "troggen", o: ["donateurs", "filialen"] },
-    { w: "ophef", c: "beroering", o: ["argumentatie", "walging"] },
-    { w: "Een ... plan", c: "indrukwekkend", o: ["idioot", "gevoelig"] },
-    { w: "fauteuil", c: "armstoel", o: ["leidinggevende functie", "traditioneel"] },
-    { w: "correspondentie", c: "briefwisseling", o: ["armstoel", "goedkeuring"] },
-    { w: "barok", c: "stijl met overdadige vormen", o: ["godsdienstuiting", "meer dan nodig"] },
-    { w: "flora", c: "plantenwereld", o: ["bodemkunde", "dierenwereld"] }
+const woordenDB = [
+    { q: "De ober leverde een ____ prestatie in het drukke restaurant.", a: "uitmuntende", o: ["onstuimige", "flauwe"] },
+    { q: "Wat is een ander woord voor 'correspondentie'?", a: "briefwisseling", o: ["armstoel", "afspraak"] },
+    { q: "De paarden aten uit grote houten ____.", a: "troggen", o: ["flora", "fauteuils"] },
+    { q: "Wat betekent 'flora'?", a: "de plantenwereld", o: ["de dierenwereld", "oude gebouwen"] },
+    { q: "Hij toonde veel ____ voor de oude leraar.", a: "eerbied", o: ["ophef", "correspondentie"] }
 ];
 
-let qIndex = 0, quizPunten = 0, huidigeVragen = [];
+let qIdx = 0, pnts = 0, activeQ = [], timer, timeRemaining;
 
-function startQuizNow() {
-    qIndex = 0; quizPunten = 0;
-    document.getElementById('pts').innerText = "0";
-    huidigeVragen = [...woorden].sort(() => Math.random() - 0.5);
-    laadVraag();
+function updateHighscores() {
+    const scores = JSON.parse(localStorage.getItem('pacmanScores') || '[]');
+    const list = document.getElementById('highscore-list');
+    list.innerHTML = scores.sort((a,b) => b.score - a.score).slice(0, 5)
+        .map(s => `<li><span>${s.name}</span><span class="text-yellow-400">${s.score}</span></li>`).join('');
 }
 
-function laadVraag() {
-    if (qIndex >= huidigeVragen.length) {
-        document.getElementById('q-text').innerText = "Quiz klaar! Start opnieuw voor meer punten.";
-        document.getElementById('ans-zone').innerHTML = `<button class="option-btn" style="background:#10b981; text-align:center;" onclick="startQuizNow()">OPNIEUW STARTEN</button>`;
-        document.getElementById('v-knop').classList.add('hidden');
-        return;
-    }
-    const vraag = huidigeVragen[qIndex];
-    const opties = [vraag.c, ...vraag.o].sort(() => Math.random() - 0.5);
-    document.getElementById('q-text').innerText = `Wat betekent: "${vraag.w}"?`;
-    document.getElementById('feed').innerText = "";
+function startQuiz() {
+    pnts = 0; qIdx = 0; activeQ = [...woordenDB].sort(() => 0.5 - Math.random());
+    document.getElementById('pts').innerText = "0";
+    showQ();
+}
+
+function showQ() {
+    if (qIdx >= activeQ.length) { startQuiz(); return; }
+    clearInterval(timer);
+    timeRemaining = 100;
+    const v = activeQ[qIdx];
+    document.getElementById('q-text').innerText = v.q;
     document.getElementById('v-knop').classList.add('hidden');
     const zone = document.getElementById('ans-zone');
     zone.innerHTML = "";
-    opties.forEach(o => {
+    
+    timer = setInterval(() => {
+        timeRemaining -= 1;
+        document.getElementById('t-fill').style.width = timeRemaining + "%";
+        if(timeRemaining <= 0) {
+            clearInterval(timer);
+            checkAnswer(null, v.a);
+        }
+    }, 100);
+
+    [v.a, ...v.o].sort(() => 0.5 - Math.random()).forEach(opt => {
         const b = document.createElement('button');
         b.className = "option-btn";
-        b.innerText = o;
-        b.onclick = function() {
-            const all = document.querySelectorAll('#ans-zone .option-btn');
-            all.forEach(k => k.disabled = true);
-            if (o === vraag.c) {
-                b.classList.add('correct'); quizPunten++;
-                document.getElementById('pts').innerText = quizPunten;
-                if (quizPunten >= 5) unlockGame();
-            } else { b.classList.add('incorrect'); }
-            document.getElementById('v-knop').classList.remove('hidden');
-        };
+        b.innerText = opt;
+        b.onclick = () => checkAnswer(opt, v.a, b);
         zone.appendChild(b);
     });
 }
 
-function goNext() { qIndex++; laadVraag(); }
-
-function unlockGame() {
-    const b = document.getElementById('game-start-btn');
-    b.disabled = false; b.classList.add('start-btn-active');
-    b.innerText = "START PACMAN XL";
+function checkAnswer(chosen, correct, btn) {
+    clearInterval(timer);
+    document.querySelectorAll('#ans-zone button').forEach(k => k.disabled = true);
+    if(chosen === correct) {
+        if(btn) btn.classList.add('correct');
+        pnts++; document.getElementById('pts').innerText = pnts;
+    } else if(btn) {
+        btn.classList.add('incorrect');
+    }
+    if(pnts >= 5) {
+        let gb = document.getElementById('game-btn');
+        gb.disabled = false; gb.classList.add('bg-yellow-500', 'text-black');
+        gb.innerText = "START PACMAN XL";
+    }
+    document.getElementById('v-knop').classList.remove('hidden');
 }
 
-// ================= PACMAN XL ENGINE =================
-const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-const TILE = 25;
-let gameOn = false, gScore = 0, lives = 3;
-let pac = { x: 25, y: 25, dir: 0, next: 0, speed: 2.5 };
+function goNext() { qIdx++; showQ(); }
+
+// PACMAN ENGINE
+const cvs = document.getElementById('gameCanvas'), ctx = cvs.getContext('2d');
+const T = 20; 
+let running = false, score = 0, lives = 3;
+let p = { x: T, y: T, d: 0, n: 0, s: 2.5 };
 let ghosts = [];
 
 const maze = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,3,1],
-    [1,2,1,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,2,1],
-    [1,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1],
-    [1,2,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1],
-    [1,2,2,2,2,2,1,2,2,2,2,2,2,2,1,0,0,0,0,1,2,2,2,2,2,2,1,2,2,2,2,1],
-    [1,1,1,1,1,2,1,2,1,1,1,1,1,2,1,0,0,0,0,1,2,1,1,1,1,2,1,2,1,1,1,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,2,1,1,1,1,1,2,1,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,2,1],
-    [1,2,2,2,1,2,2,2,2,2,1,2,2,2,1,1,1,1,1,1,2,2,2,1,2,2,2,2,2,1,2,1],
-    [1,1,1,2,1,2,1,1,1,2,1,2,1,2,1,2,2,2,2,1,2,1,2,1,2,1,1,1,2,1,1,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,3,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,3,2,1],
+    [1,2,1,1,2,1,2,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1],
+    [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,1,1,1,1,2,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,2,1,1,2,2,2,1,2,2,2,2,2,1,0,0,0,0,0,1,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1],
+    [1,1,1,1,1,2,1,1,2,1,2,1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,1,1,2,1],
+    [1,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,2,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 let curM = [];
 
-function resetMap() {
+function playGame() {
+    score = 0; lives = 3; running = true;
     curM = maze.map(r => [...r]);
-    pac.x = TILE; pac.y = TILE; pac.dir = 0; pac.next = 0;
+    p.x = T; p.y = T; p.d = 0; p.n = 0;
     ghosts = [
-        {x:375, y:125, c:'#ef4444', d:0, s:2},
-        {x:400, y:125, c:'#ec4899', d:2, s:2.1},
-        {x:425, y:125, c:'#06b6d4', d:3, s:1.9}
+        {x:T*18, y:T*5, c:'#ff0000', d:0, s:2},
+        {x:T*20, y:T*5, c:'#ffb8ff', d:1, s:2.2}
     ];
+    requestAnimationFrame(loop);
 }
 
-function beginGame() {
-    gScore = 0; lives = 3; gameOn = true;
-    resetMap(); anim();
-}
-
-function can(x, y, d) {
-    let nx = x, ny = y;
-    const padding = 3; 
-    if(d === 0) nx += padding;
-    if(d === 1) ny += padding;
-    if(d === 2) nx -= padding;
-    if(d === 3) ny -= padding;
-    let r = Math.floor((ny + TILE/2) / TILE);
-    let c = Math.floor((nx + TILE/2) / TILE);
-    return curM[r] && curM[r][c] !== 1;
-}
-
-function drawGhost(g) {
-    const x = g.x + TILE/2, y = g.y + TILE/2;
-    ctx.fillStyle = g.c;
-    ctx.beginPath();
-    ctx.arc(x, y - 2, 10, Math.PI, 0);
-    ctx.lineTo(x + 10, y + 10);
-    // Golvende onderkant
-    for (let i = 0; i < 3; i++) {
-        let wave = Math.sin(Date.now()/100 + i) * 2;
-        ctx.lineTo(x + 10 - (i*6.6), y + 10 + wave);
+function loop() {
+    if(!running) return;
+    if(p.x%T===0 && p.y%T===0) {
+        let nx=0, ny=0;
+        if(p.n===0) nx=T; if(p.n===1) ny=T; if(p.n===2) nx=-T; if(p.n===3) ny=-T;
+        let r=Math.round((p.y+ny)/T), c=Math.round((p.x+nx)/T);
+        if(curM[r] && curM[r][c] !== 1) p.d = p.n;
     }
-    ctx.lineTo(x - 10, y + 10);
-    ctx.fill();
-    // Oogjes
-    ctx.fillStyle = "white";
-    ctx.beginPath(); ctx.arc(x - 4, y - 4, 3, 0, 7); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 4, y - 4, 3, 0, 7); ctx.fill();
-    ctx.fillStyle = "black";
-    ctx.beginPath(); ctx.arc(x - 4, y - 4, 1.5, 0, 7); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 4, y - 4, 1.5, 0, 7); ctx.fill();
-}
+    let dx=0, dy=0;
+    if(p.d===0) dx=p.s; if(p.d===1) dy=p.s; if(p.d===2) dx=-p.s; if(p.d===3) dy=-p.s;
+    let nr=Math.round((p.y+dy+(dy>0?10:-10))/T), nc=Math.round((p.x+dx+(dx>0?10:-10))/T);
+    if(curM[nr] && curM[nr][nc] !== 1) { p.x += dx; p.y += dy; }
 
-function anim() {
-    if(!gameOn) return;
-    
-    // Smooth turn logic
-    if(pac.dir !== pac.next) {
-        if(Math.abs(pac.x % TILE) < 6 && Math.abs(pac.y % TILE) < 6) {
-            let gx = Math.round(pac.x/TILE)*TILE, gy = Math.round(pac.y/TILE)*TILE;
-            if(can(gx, gy, pac.next)) { pac.x = gx; pac.y = gy; pac.dir = pac.next; }
+    let r = Math.round(p.y/T), c = Math.round(p.x/T);
+    if(curM[r] && curM[r][c] > 1) { score += curM[r][c]===2?10:50; curM[r][c]=0; }
+
+    ctx.fillStyle = "black"; ctx.fillRect(0,0,cvs.width,cvs.height);
+    for(let ri=0; ri<curM.length; ri++) {
+        for(let ci=0; ci<curM[ri].length; ci++) {
+            let x=ci*T, y=ri*T;
+            if(curM[ri][ci]===1) { ctx.fillStyle="#1e40af"; ctx.fillRect(x+1,y+1,T-2,T-2); }
+            if(curM[ri][ci]===2) { ctx.fillStyle="#fbbf24"; ctx.beginPath(); ctx.arc(x+T/2,y+T/2,2,0,7); ctx.fill(); }
+            if(curM[ri][ci]===3) { ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x+T/2,y+T/2,5,0,7); ctx.fill(); }
         }
     }
-    
-    let dx=0, dy=0;
-    if(pac.dir===0) dx=pac.speed; if(pac.dir===1) dy=pac.speed;
-    if(pac.dir===2) dx=-pac.speed; if(pac.dir===3) dy=-pac.speed;
-    if(can(pac.x+dx, pac.y+dy, pac.dir)) { pac.x+=dx; pac.y+=dy; }
 
-    let r = Math.floor((pac.y+TILE/2)/TILE), c = Math.floor((pac.x+TILE/2)/TILE);
-    if(curM[r] && curM[r][c] > 1) {
-        gScore += (curM[r][c]===2?10:50); curM[r][c]=0;
-    }
+    ctx.fillStyle = "yellow"; ctx.beginPath();
+    ctx.arc(p.x+T/2, p.y+T/2, 9, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(p.x+T/2, p.y+T/2); ctx.fill();
 
     ghosts.forEach(g => {
-        if(Math.random()<0.02 || !can(g.x, g.y, g.d)) g.d = Math.floor(Math.random()*4);
-        let gx=0, gy=0;
-        if(g.d===0) gx=g.s; if(g.d===1) gy=g.s; if(g.d===2) gx=-g.s; if(g.d===3) gy=-g.s;
-        if(can(g.x+gx, g.y+gy, g.d)) { g.x+=gx; g.y+=gy; }
-        if(Math.hypot(pac.x-g.x, pac.y-g.y)<18) {
-            lives--; if(lives<=0) { gameOn=false; alert("Game Over! Score: "+gScore); location.reload(); } else resetMap();
+        if(Math.random()<0.02) g.d = Math.floor(Math.random()*4);
+        let gdx=0, gdy=0;
+        if(g.d===0) gdx=g.s; if(g.d===1) gdy=g.s; if(g.d===2) gdx=-g.s; if(g.d===3) gdy=-g.s;
+        let gr=Math.round((g.y+gdy)/T), gc=Math.round((g.x+gdx)/T);
+        if(curM[gr] && curM[gr][gc] !== 1) { g.x+=gdx; g.y+=gdy; }
+        ctx.fillStyle = g.c; ctx.beginPath(); ctx.arc(g.x+T/2, g.y+T/2, 9, 0, 7); ctx.fill();
+        if(Math.hypot(p.x-g.x, p.y-g.y) < 15) {
+            lives--; if(lives<=0) gameOver(); else { p.x=T; p.y=T; }
         }
     });
 
-    ctx.fillStyle="black"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=0; i<curM.length; i++){
-        for(let j=0; j<curM[i].length; j++){
-            let x=j*TILE, y=i*TILE;
-            if(curM[i][j]===1){ 
-                ctx.fillStyle="#1e40af"; ctx.beginPath();
-                ctx.roundRect ? ctx.roundRect(x+2,y+2,TILE-4,TILE-4, 5) : ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
-                ctx.fill(); 
-            }
-            if(curM[i][j]===2){ ctx.fillStyle="#fbbf24"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,2,0,7); ctx.fill(); }
-            if(curM[i][j]===3){ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,6,0,7); ctx.fill(); }
-        }
-    }
-    // Draw Pacman
-    ctx.fillStyle="yellow"; ctx.beginPath(); 
-    let mouth = Math.sin(Date.now()/100)*0.2 + 0.2;
-    ctx.arc(pac.x+TILE/2, pac.y+TILE/2, 10, (mouth + pac.dir*0.5)*Math.PI, (2-mouth + pac.dir*0.5)*Math.PI);
-    ctx.lineTo(pac.x+TILE/2, pac.y+TILE/2); ctx.fill();
-
-    ghosts.forEach(drawGhost);
-
-    document.getElementById('game-score').innerText = gScore;
-    document.getElementById('game-lives').innerText = lives;
-    requestAnimationFrame(anim);
+    document.getElementById('g-score').innerText = score;
+    document.getElementById('g-lives').innerText = lives;
+    requestAnimationFrame(loop);
 }
 
-window.addEventListener("keydown", e => {
-    const k = {ArrowRight:0, ArrowDown:1, ArrowLeft:2, ArrowUp:3};
-    if(k[e.key]!==undefined){ e.preventDefault(); pac.next=k[e.key]; }
+function gameOver() {
+    running = false;
+    const name = prompt(`GAME OVER! Score: ${score}\nVul je naam in voor het scorebord:`, "Speler");
+    if(name) {
+        const scores = JSON.parse(localStorage.getItem('pacmanScores') || '[]');
+        scores.push({name, score});
+        localStorage.setItem('pacmanScores', JSON.stringify(scores));
+        updateHighscores();
+    }
+    location.reload();
+}
+
+window.addEventListener("keydown", (e) => {
+    const keys = { "ArrowRight": 0, "ArrowDown": 1, "ArrowLeft": 2, "ArrowUp": 3 };
+    if (keys[e.key] !== undefined) { e.preventDefault(); p.n = keys[e.key]; }
 });
+
+updateHighscores();
 </script>
 </body>
 </html>

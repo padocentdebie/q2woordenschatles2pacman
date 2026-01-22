@@ -125,7 +125,7 @@
         }
         
         .word-list {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             margin-bottom: 20px;
             padding: 15px;
@@ -405,7 +405,7 @@
     <div class="container">
         <header>
             <h1>Pacman Woordenschat Avontuur</h1>
-            <p class="subtitle">Voer woorden in met hun betekenis, genereer quizvragen, en speel Pacman wanneer je 5 vragen goed hebt!</p>
+            <p class="subtitle">Leer woordenschat door Pacman te spelen! Beantwoord 5 vragen correct om te beginnen.</p>
         </header>
         
         <div class="main-content">
@@ -445,11 +445,11 @@
                 <div class="quiz-info">
                     <div class="quiz-progress">Correct: <span id="correct-count">0</span>/5</div>
                     <div class="quiz-progress">Vraag: <span id="current-question">1</span>/<span id="total-questions">0</span></div>
-                    <div class="quiz-progress">Woorden: <span id="word-count">0</span></div>
+                    <div class="quiz-progress">Woorden: <span id="word-count">32</span></div>
                 </div>
                 
                 <div class="question-box" id="question-box">
-                    Voeg woorden met betekenissen toe en klik op "Vragen Genereren"
+                    Klik op "Vragen Genereren" om te beginnen met de quiz!
                 </div>
                 
                 <div class="options-grid" id="options-container">
@@ -508,19 +508,19 @@
                 <div class="instruction-steps">
                     <div class="step">
                         <div class="step-number">Stap 1</div>
-                        <p>Voer woorden in met hun betekenis (minimaal 3)</p>
+                        <p>Klik op "Vragen Genereren" om de quiz te starten</p>
                     </div>
                     <div class="step">
                         <div class="step-number">Stap 2</div>
-                        <p>Klik op "Vragen Genereren" om een quiz te maken</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">Stap 3</div>
                         <p>Beantwoord 5 vragen correct om Pacman te ontgrendelen</p>
                     </div>
                     <div class="step">
+                        <div class="step-number">Stap 3</div>
+                        <p>Klik op "Start Pacman" en speel het doolhofspel</p>
+                    </div>
+                    <div class="step">
                         <div class="step-number">Stap 4</div>
-                        <p>Speel Pacman! Spoken verlaten hun hok en jagen je op</p>
+                        <p>Voeg zelf woorden toe om je woordenschat uit te breiden</p>
                     </div>
                 </div>
             </div>
@@ -530,7 +530,36 @@
     <script>
         // ==================== GLOBALE VARIABELEN ====================
         let vocabularyWords = [
-            // Start met enkele voorbeeldwoorden met correcte betekenissen
+            // Standaard woordenlijst met alle gevraagde woorden
+            { word: "hypocrisie", meaning: "het veinzen van deugden of goede bedoelingen die men niet heeft" },
+            { word: "reprimande", meaning: "een strenge berisping of terechtwijzing" },
+            { word: "collectoren", meaning: "personen die belastingen of andere gelden innen" },
+            { word: "mechanica", meaning: "de wetenschap die beweging en krachten in voorwerpen bestudeert" },
+            { word: "sanatorium", meaning: "een inrichting voor langdurig zieke patiënten, vooral voor tuberculosepatiënten" },
+            { word: "annexeren", meaning: "het inlijven van een gebied bij een ander land" },
+            { word: "scala", meaning: "een reeks van oplopende of aflopende waarden of mogelijkheden" },
+            { word: "sculptuur", meaning: "een kunstwerk dat door beeldhouwen is gemaakt" },
+            { word: "futiel", meaning: "zinloos, nutteloos, onbeduidend" },
+            { word: "recessief", meaning: "in de genetica: een eigenschap die alleen tot uiting komt als beide ouders het gen doorgeven" },
+            { word: "dispuut", meaning: "een verhitte discussie of twistgesprek" },
+            { word: "negatie", meaning: "ontkenning, weigering, tegenovergestelde" },
+            { word: "occupatie", meaning: "bezetting, het innemen en controleren van een gebied" },
+            { word: "denigreren", meaning: "geringschatten, kleineren, in een slecht daglicht stellen" },
+            { word: "endoscopie", meaning: "medisch onderzoek waarbij men met een buisje in het lichaam kijkt" },
+            { word: "confidentieel", meaning: "vertrouwelijk, strikt geheim" },
+            { word: "integratie", meaning: "het opnemen in een groter geheel, het samenvoegen tot een eenheid" },
+            { word: "kaste", meaning: "een gesloten sociale groep waar men door geboorte toe behoort" },
+            { word: "totalitair", meaning: "een regeringsvorm waarbij de staat totale controle heeft over alles" },
+            { word: "postscriptum", meaning: "een toevoeging aan een brief na de handtekening (afgekort als P.S.)" },
+            { word: "squadron", meaning: "een militaire eenheid, vooral in de luchtmacht of marine" },
+            { word: "veinzen", meaning: "doen alsof, voorwenden, simuleren" },
+            { word: "elementair", meaning: "fundamenteel, basis-, van het allergrootste belang" },
+            { word: "guitig", meaning: "ondeugend maar lief, speels stout" },
+            { word: "adolescent", meaning: "een jongere in de overgangsfase van kind naar volwassene" },
+            { word: "capitulatie", meaning: "overgave, het zich overgeven aan een tegenstander" },
+            { word: "aristocraten", meaning: "leden van de adel, mensen van hoge afkomst" },
+            { word: "decadentie", meaning: "verval, morele of culturele achteruitgang" },
+            { word: "curriculum vitae", meaning: "levensloop, overzicht van iemands opleiding en werkervaring (CV)" },
             { word: "fascinerend", meaning: "interessant en boeiend" },
             { word: "kritisch", meaning: "zich bewust van fouten en problemen" },
             { word: "initiatief", meaning: "het nemen van de eerste stap" },
@@ -571,7 +600,7 @@
                 wordItem.innerHTML = `
                     <div>
                         <strong>${item.word}</strong><br>
-                        <small>${item.meaning}</small>
+                        <small style="font-size: 0.8em; color: #cbd5e1;">${item.meaning}</small>
                     </div>
                     <button class="remove-btn" data-index="${index}">×</button>
                 `;
@@ -585,8 +614,10 @@
             document.querySelectorAll('.remove-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const index = parseInt(this.getAttribute('data-index'));
-                    vocabularyWords.splice(index, 1);
-                    updateWordList();
+                    if (confirm(`Weet je zeker dat je '${vocabularyWords[index].word}' wilt verwijderen?`)) {
+                        vocabularyWords.splice(index, 1);
+                        updateWordList();
+                    }
                 });
             });
         }
@@ -635,10 +666,12 @@
             setTimeout(() => {
                 vocabularyQuestions = [];
                 
-                // Maak vragen voor elk woord
-                vocabularyWords.forEach((wordItem, index) => {
-                    if (index >= 15) return; // Max 15 vragen
-                    
+                // Selecteer willekeurige woorden voor vragen (max 15)
+                const shuffledWords = [...vocabularyWords].sort(() => 0.5 - Math.random());
+                const selectedWords = shuffledWords.slice(0, Math.min(15, vocabularyWords.length));
+                
+                // Maak vragen voor elk geselecteerd woord
+                selectedWords.forEach((wordItem) => {
                     const word = wordItem.word;
                     const correctMeaning = wordItem.meaning;
                     
@@ -646,7 +679,7 @@
                     const questionText = `Wat is de betekenis van '${word}'?`;
                     
                     // Genereer foute antwoorden
-                    const wrongAnswers = generateWrongAnswers(wordItem);
+                    const wrongAnswers = generateWrongAnswers(wordItem, selectedWords);
                     
                     // Combineer antwoorden en plaats correct antwoord op willekeurige positie
                     const correctIndex = Math.floor(Math.random() * 4);
@@ -657,9 +690,13 @@
                         question: questionText,
                         options: allOptions,
                         correct: correctIndex,
-                        explanation: `Correct! '${word}' betekent: ${correctMeaning}`
+                        explanation: `Correct! '${word}' betekent: ${correctMeaning}`,
+                        word: word
                     });
                 });
+                
+                // Shuffle de vragen
+                vocabularyQuestions = vocabularyQuestions.sort(() => 0.5 - Math.random());
                 
                 totalQuestionsElement.textContent = vocabularyQuestions.length;
                 aiStatusElement.innerHTML = `<p style="color: #22c55e;">✓ ${vocabularyQuestions.length} vragen gegenereerd!</p>`;
@@ -683,34 +720,31 @@
             }, 800);
         }
         
-        function generateWrongAnswers(correctWordItem) {
+        function generateWrongAnswers(correctWordItem, availableWords) {
             const wrongAnswers = [];
             const usedMeanings = new Set();
             usedMeanings.add(correctWordItem.meaning);
             
-            // Verzamel alle andere betekenissen
-            const otherMeanings = vocabularyWords
-                .filter(item => item.word !== correctWordItem.word)
-                .map(item => item.meaning);
+            // Verzamel betekenissen van andere woorden (exclusief het correcte woord)
+            const otherWords = availableWords.filter(item => item.word !== correctWordItem.word);
             
-            // Voeg 3 foute antwoorden toe
-            while (wrongAnswers.length < 3 && (otherMeanings.length > 0 || wrongAnswers.length < 3)) {
-                let wrongAnswer;
-                
-                if (otherMeanings.length > 0) {
-                    // Gebruik een echte betekenis van een ander woord
-                    const randomIndex = Math.floor(Math.random() * otherMeanings.length);
-                    wrongAnswer = otherMeanings[randomIndex];
-                    otherMeanings.splice(randomIndex, 1);
-                } else {
-                    // Genereer een plausible fout antwoord
-                    wrongAnswer = generatePlausibleWrongMeaning(correctWordItem.word);
+            // Probeer eerst betekenissen van andere woorden te gebruiken
+            const shuffledOtherWords = [...otherWords].sort(() => 0.5 - Math.random());
+            
+            for (const wordItem of shuffledOtherWords) {
+                if (wrongAnswers.length >= 3) break;
+                if (!usedMeanings.has(wordItem.meaning)) {
+                    wrongAnswers.push(wordItem.meaning);
+                    usedMeanings.add(wordItem.meaning);
                 }
-                
-                // Zorg dat het antwoord uniek is
-                if (!usedMeanings.has(wrongAnswer)) {
-                    wrongAnswers.push(wrongAnswer);
-                    usedMeanings.add(wrongAnswer);
+            }
+            
+            // Als er nog niet genoeg foute antwoorden zijn, genereer plausible alternatieven
+            while (wrongAnswers.length < 3) {
+                const plausibleWrong = generatePlausibleWrongMeaning(correctWordItem.word);
+                if (!usedMeanings.has(plausibleWrong)) {
+                    wrongAnswers.push(plausibleWrong);
+                    usedMeanings.add(plausibleWrong);
                 }
             }
             
@@ -718,27 +752,30 @@
         }
         
         function generatePlausibleWrongMeaning(word) {
-            // Genereer plausible foute betekenissen gebaseerd op het woord
-            const wrongMeaningTemplates = [
-                "een soort voedsel",
-                "een muziekinstrument",
-                "een weersomstandigheid",
-                "een transportmiddel",
-                "een gebouwtype",
-                "een diersoort",
-                "een wetenschappelijke term",
-                "een emotionele staat",
-                "een kleur",
-                "een getal"
-            ];
+            // Genereer plausible foute betekenissen gebaseerd op het woordtype
+            const categories = {
+                medisch: ["een medische behandeling", "een diagnoseprocedure", "een chirurgische ingreep", "een geneesmiddel"],
+                politiek: ["een politieke beweging", "een regeringsvorm", "een diplomatieke handeling", "een bestuurslaag"],
+                wetenschap: ["een wetenschappelijke theorie", "een natuurkundig verschijnsel", "een wiskundige formule", "een chemisch element"],
+                kunst: ["een kunststroming", "een schildertechniek", "een muziekgenre", "een literaire stijl"],
+                algemeen: ["een vorm van communicatie", "een sociale gewoonte", "een economisch begrip", "een psychologische term"]
+            };
             
-            return wrongMeaningTemplates[Math.floor(Math.random() * wrongMeaningTemplates.length)];
+            // Kies categorie op basis van woord (simpele detectie)
+            let category = 'algemeen';
+            if (word.includes('scop') || word.includes('med') || word === 'sanatorium') category = 'medisch';
+            else if (word.includes('crat') || word.includes('polit') || word === 'annexeren' || word === 'occupatie') category = 'politiek';
+            else if (word.includes('mechan') || word.includes('scala') || word === 'recessief') category = 'wetenschap';
+            else if (word.includes('sculp') || word.includes('artist') || word === 'decadentie') category = 'kunst';
+            
+            const options = categories[category];
+            return options[Math.floor(Math.random() * options.length)];
         }
         
         // ==================== QUIZ LOGICA ====================
         function loadQuestion() {
             if (vocabularyQuestions.length === 0) {
-                questionBox.textContent = "Voeg woorden met betekenissen toe en klik op 'Vragen Genereren'";
+                questionBox.textContent = "Klik op 'Vragen Genereren' om te beginnen";
                 optionsContainer.innerHTML = '';
                 return;
             }
@@ -782,16 +819,11 @@
                 // Controleer of spel nu unlocked is
                 if (correctAnswers >= neededForGame && !gameUnlocked) {
                     gameUnlocked = true;
-                    feedbackElement.textContent += `\n\n🎉 Pacman is nu ontgrendeld! Klik op "Start Pacman" om te spelen.`;
+                    feedbackElement.textContent += `\n\n🎉 Gefeliciteerd! Pacman is nu ontgrendeld! Klik op "Start Pacman" om te spelen.`;
                 }
                 
                 optionButtons[selectedIndex].classList.add('correct');
             } else {
-                // Zoek het juiste woord voor deze vraag
-                const questionText = question.question;
-                const wordMatch = questionText.match(/'([^']+)'/);
-                const word = wordMatch ? wordMatch[1] : "dit woord";
-                
                 feedbackElement.textContent = `Helaas! Het juiste antwoord was: ${question.options[question.correct]}`;
                 feedbackElement.className = 'feedback incorrect';
                 
@@ -816,9 +848,18 @@
                 
                 const endMessage = document.createElement('div');
                 endMessage.className = 'feedback correct';
-                endMessage.textContent = `Alle vragen doorlopen! Correct: ${correctAnswers}/${vocabularyQuestions.length}`;
+                endMessage.textContent = `Alle vragen doorlopen! Je had ${correctAnswers} van de ${vocabularyQuestions.length} vragen goed.`;
                 endMessage.style.display = 'block';
                 feedbackElement.parentNode.insertBefore(endMessage, feedbackElement.nextSibling);
+                
+                // Als spel nog niet ontgrendeld was, toon aanmoediging
+                if (!gameUnlocked && correctAnswers >= neededForGame) {
+                    gameUnlocked = true;
+                    updateStartGameButton();
+                    setTimeout(() => {
+                        alert(`Gefeliciteerd! Je hebt genoeg vragen goed beantwoord. Klik op "Start Pacman" om te spelen!`);
+                    }, 500);
+                }
             }
         }
         
@@ -932,6 +973,9 @@
             gameState.dotsRemaining = 0;
             gameState.gameRunning = false;
             
+            // Reset maze naar originele staat
+            resetMaze();
+            
             // Tel dots
             for (let y = 0; y < GRID_HEIGHT; y++) {
                 for (let x = 0; x < GRID_WIDTH; x++) {
@@ -957,6 +1001,39 @@
             });
             
             updateGameUI();
+        }
+        
+        function resetMaze() {
+            // Herstel de maze naar originele staat
+            const originalMaze = [
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+                [1,3,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,3,1],
+                [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                [1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1],
+                [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+                [1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1],
+                [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+                [1,1,1,1,2,1,0,1,1,4,1,1,0,1,2,1,1,1,1],
+                [0,0,0,0,2,0,0,1,4,4,4,1,0,0,2,0,0,0,0],
+                [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+                [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+                [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+                [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+                [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+                [1,3,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,3,1],
+                [1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1],
+                [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+                [1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1],
+                [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            ];
+            
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    maze[y][x] = originalMaze[y][x];
+                }
+            }
         }
         
         function updateGameUI() {
@@ -1188,7 +1265,7 @@
                         if (gameState.lives <= 0) {
                             gameState.gameOver = true;
                             gameState.gameRunning = false;
-                            alert('Game Over! Beantwoord weer 5 vragen om opnieuw te spelen.');
+                            alert('Game Over! Je hebt al je levens verloren. Beantwoord weer 5 vragen om opnieuw te spelen.');
                             resetGame();
                         } else {
                             // Reset posities
@@ -1211,7 +1288,7 @@
             if (gameState.dotsRemaining <= 0) {
                 gameState.gameOver = true;
                 gameState.gameRunning = false;
-                alert('Gewonnen! Alle bolletjes opgegeten! Score: ' + gameState.score);
+                alert(`Gewonnen! Alle ${gameState.dotsRemaining} bolletjes opgegeten! Eindscore: ${gameState.score}`);
                 resetGame();
             }
         }
@@ -1386,31 +1463,6 @@
                 return;
             }
             
-            // Reset het doolhof naar originele staat
-            for (let y = 0; y < GRID_HEIGHT; y++) {
-                for (let x = 0; x < GRID_WIDTH; x++) {
-                    // Reset alleen dots en power pellets
-                    if (maze[y][x] === 0) {
-                        // Zoek originele waarde uit mapTemplate (hier hardcoded)
-                        // Dit zou eigenlijk uit een originele map array moeten komen
-                        if ((y === 1 && x >= 1 && x <= 7) || (y === 1 && x >= 11 && x <= 17) ||
-                            (y === 2 && x === 1) || (y === 2 && x === 17) ||
-                            (y === 3 && x >= 1 && x <= 17) ||
-                            (y === 4 && (x === 1 || x === 4 || x === 7 || x === 11 || x === 14 || x === 17)) ||
-                            (y === 5 && x >= 1 && x <= 17) ||
-                            (y === 13 && x >= 1 && x <= 17) ||
-                            (y === 14 && (x === 1 || x === 4 || x === 7 || x === 11 || x === 14 || x === 17)) ||
-                            (y === 15 && x >= 1 && x <= 17) ||
-                            (y === 19 && x >= 1 && x <= 17)) {
-                            maze[y][x] = 2;
-                        } else if ((y === 2 && x === 2) || (y === 2 && x === 16) || 
-                                  (y === 15 && x === 2) || (y === 15 && x === 16)) {
-                            maze[y][x] = 3;
-                        }
-                    }
-                }
-            }
-            
             initGame();
             gameState.gameRunning = true;
             canvas.focus();
@@ -1466,7 +1518,7 @@
         updateWordList();
         initGame();
         
-        console.log('Game geïnitialiseerd! Voeg woorden met betekenissen toe om te beginnen.');
+        console.log('Game geïnitialiseerd met 32 woorden! Klik op "Vragen Genereren" om te beginnen.');
     </script>
 </body>
 </html>

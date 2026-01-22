@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Woordenschat PRO - Level Up Edition</title>
+    <title>Pacman Woordenschat PRO - FIXED BUTTONS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: #020617; color: #fff; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
-        header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; }
+        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
+        header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; margin-bottom: 10px; }
         .section { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #334155; }
-        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 15px 0; min-height: 120px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.1em; }
-        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 15px 0; min-height: 100px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.1rem; }
+        
+        .option-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; transition: 0.2s; }
         .option-btn:hover:not(:disabled) { background: #475569; border-color: #fbbf24; }
-        .correct { background: #15803d !important; }
-        .incorrect { background: #b91c1c !important; }
+        .correct { background: #15803d !important; border-color: #22c55e !important; }
+        .incorrect { background: #b91c1c !important; border-color: #ef4444 !important; }
+        
         canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; }
-        .unlocked { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; cursor: pointer !important; animation: pulse 1.5s infinite; }
+        .start-btn-active { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; cursor: pointer !important; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
 </head>
@@ -25,37 +27,39 @@
 
 <div class="container">
     <header>
-        <h1 class="text-3xl font-black text-yellow-400">PACMAN XL: LEVEL UP</h1>
-        <p>Haal 5 punten en ontgrendel oneindige levels!</p>
+        <h1 class="text-2xl font-black text-yellow-400 uppercase">Pacman Woordenschat XL</h1>
+        <p>Los de vragen op om Pacman te starten!</p>
     </header>
 
     <div class="section">
-        <h3 class="text-xl font-bold mb-4 text-blue-400">Woordentest (<span id="correct-count">0</span>/5)</h3>
-        <div id="quiz-area">
-            <div id="question-box" class="question-box">Klik op de knop om te starten!</div>
-            <div id="options-container">
-                <button class="option-btn" style="background:#10b981; text-align:center;" onclick="initQuiz()">START QUIZ</button>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-blue-400">De Quiz</h3>
+            <span class="bg-blue-900 px-3 py-1 rounded text-yellow-400 font-bold">Score: <span id="pts">0</span>/5</span>
+        </div>
+
+        <div id="quiz-box-container">
+            <div id="q-text" class="question-box">Klik op de groene knop om te starten!</div>
+            <div id="ans-zone">
+                <button class="option-btn" style="background:#10b981; text-align:center; font-weight:bold;" onclick="startQuizNow()">START DE QUIZ</button>
             </div>
-            <div id="feedback" class="h-8 text-center font-bold mt-2"></div>
-            <button id="next-btn" class="option-btn mt-4" style="display:none; background:#fbbf24; color:black; text-align:center; font-weight:bold;" onclick="renderQuestion()">VOLGENDE VRAAG ➔</button>
+            <div id="feed" class="h-8 text-center font-bold mt-2"></div>
+            <button id="v-knop" class="option-btn mt-4 hidden" style="background:#fbbf24; color:black; text-align:center; font-weight:bold;" onclick="goNext()">VOLGENDE VRAAG ➔</button>
         </div>
     </div>
 
-    <div class="game-section section">
-        <div class="flex justify-between items-center mb-4 bg-slate-900 p-3 rounded-lg border border-slate-700">
-            <span class="text-yellow-400 font-bold">SCORE: <span id="game-score" class="text-white text-xl">0</span></span>
-            <span class="text-blue-400 font-bold">LEVEL: <span id="game-level" class="text-white text-xl">1</span></span>
-            <span class="text-red-500 font-bold">LIVES: <span id="game-lives" class="text-white text-xl">3</span></span>
-            <span id="power-indicator" class="hidden text-green-400 animate-pulse font-black">SUPER PACMAN!</span>
+    <div class="section">
+        <div class="flex justify-between p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 font-bold">
+            <span class="text-yellow-400">PUNTEN: <span id="game-score">0</span></span>
+            <span class="text-blue-400">LEVEL: <span id="game-lvl">1</span></span>
+            <span class="text-red-500">LEVENS: <span id="game-lives">3</span></span>
         </div>
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        <button id="start-game-btn" class="w-full p-4 mt-4 rounded-xl font-bold bg-slate-700 text-slate-500" disabled onclick="startGame()">QUIZ EERST VOLTOOIEN</button>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <button id="game-start-btn" class="w-full p-4 mt-4 rounded-xl font-bold bg-slate-800 text-slate-600 cursor-not-allowed" disabled onclick="beginGame()">GAME VERGRENDELD (HAAL 5 PUNTEN)</button>
     </div>
 </div>
 
 <script>
-// (VocabData en Quiz logica blijven hetzelfde voor stabiliteit)
-const vocabData = [
+const woorden = [
     { w: "zeer goede", c: "uitmuntende", o: ["aangename", "flinke"] },
     { w: "crèche", c: "kinderdagverblijf", o: ["gietemmer", "mensen met wie je verbonden bent"] },
     { w: "voerbakken", c: "troggen", o: ["donateurs", "filialen"] },
@@ -65,183 +69,181 @@ const vocabData = [
     { w: "correspondentie", c: "briefwisseling", o: ["armstoel", "goedkeuring"] },
     { w: "barok", c: "stijl met overdadige vormen", o: ["godsdienstuiting", "meer dan nodig"] },
     { w: "aangewakkerd", c: "feller doen branden", o: ["niet fris", "met betrekking tot"] },
-    { w: ".... weer", c: "onstuimig", o: ["sober", "uitbundig"] },
+    { w: "onstuimig weer", c: "stormachtig", o: ["sober", "uitbundig"] },
     { w: "eerbied", c: "respect", o: ["plotselinge gedachte", "godsdienst"] },
-    { w: "traject", c: "een afgelegde weg", o: ["paviljoen", "festival"] },
     { w: "flora", c: "plantenwereld", o: ["bodemkunde", "dierenwereld"] }
 ];
 
-let activeQuestions = [], currentIdx = 0, points = 0;
+let qIndex = 0;
+let quizPunten = 0;
+let huidigeVragen = [];
 
-function initQuiz() {
-    points = 0; currentIdx = 0;
-    document.getElementById('correct-count').innerText = "0";
-    activeQuestions = [...vocabData].sort(() => Math.random() - 0.5);
-    renderQuestion();
+function startQuizNow() {
+    qIndex = 0;
+    quizPunten = 0;
+    document.getElementById('pts').innerText = "0";
+    huidigeVragen = [...woorden].sort(() => Math.random() - 0.5);
+    laadVraag();
 }
 
-function renderQuestion() {
-    if (currentIdx >= activeQuestions.length) { initQuiz(); return; }
-    const q = activeQuestions[currentIdx];
-    const options = [q.c, ...q.o].sort(() => Math.random() - 0.5);
-    document.getElementById('question-box').innerText = `Betekenis: "${q.w}"?`;
-    document.getElementById('feedback').innerText = "";
-    document.getElementById('next-btn').style.display = "none";
-    const container = document.getElementById('options-container');
-    container.innerHTML = "";
-    options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = opt;
-        btn.onclick = () => {
-            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-            if(opt === q.c) {
-                btn.classList.add('correct');
-                points++; document.getElementById('correct-count').innerText = points;
-                if(points >= 5) {
-                    const sb = document.getElementById('start-game-btn');
-                    sb.disabled = false; sb.classList.add('unlocked'); sb.innerText = "START HET SPEL!";
-                }
-            } else { btn.classList.add('incorrect'); }
-            currentIdx++; document.getElementById('next-btn').style.display = "block";
-        };
-        container.appendChild(btn);
+function laadVraag() {
+    if (qIndex >= huidigeVragen.length) {
+        document.getElementById('q-text').innerText = "Quiz klaar! Start opnieuw voor meer punten.";
+        document.getElementById('ans-zone').innerHTML = `<button class="option-btn" style="background:#10b981; text-align:center;" onclick="startQuizNow()">OPNIEUW STARTEN</button>`;
+        document.getElementById('v-knop').classList.add('hidden');
+        return;
+    }
+
+    const vraag = huidigeVragen[qIndex];
+    const opties = [vraag.c, ...vraag.o].sort(() => Math.random() - 0.5);
+    
+    document.getElementById('q-text').innerText = `Wat betekent: "${vraag.w}"?`;
+    document.getElementById('feed').innerText = "";
+    document.getElementById('v-knop').classList.add('hidden');
+    
+    const zone = document.getElementById('ans-zone');
+    zone.innerHTML = "";
+    
+    opties.forEach(o => {
+        const b = document.createElement('button');
+        b.className = "option-btn";
+        b.innerText = o;
+        b.onclick = function() { check(o, vraag.c, b); };
+        zone.appendChild(b);
     });
 }
 
-// ================= GAME LOGICA V5 (LEVELS) =================
-const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-const TILE = 25;
-let gameRunning = false, score = 0, lives = 3, power = 0, level = 1;
-let pacman = { x: 25, y: 25, dir: 0, nextDir: 0, speed: 2.5 };
-let ghosts = [];
-
-const mazeLayout = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,3,1],
-    [1,2,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,1,1,2,1],
-    [1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,2,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1],
-    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,1],
-    [1,1,1,1,1,1,2,1,1,1,1,1,2,1,2,1,1,1,2,1,2,1,1,1,1,1,2,1,1,1,1,1],
-    [1,0,0,0,0,1,2,1,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,1,2,2,1,0,0,0,1],
-    [1,1,1,1,1,1,2,1,2,1,1,1,0,0,0,0,0,0,1,1,1,2,1,2,1,1,2,1,1,1,1,1],
-    [1,2,2,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,1],
-    [1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,2,1],
-    [1,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,1],
-    [1,2,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1,2,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-];
-let curMap = [];
-
-function checkWin() {
-    let dots = 0;
-    curMap.forEach(row => row.forEach(tile => { if(tile === 2 || tile === 3) dots++; }));
-    if(dots === 0) {
-        level++;
-        document.getElementById('game-level').innerText = level;
-        alert("GEFELICITEERD! Level " + level + " begint nu. De spoken zijn sneller!");
-        resetLevel();
+function check(gekozen, correct, knop) {
+    const alleKnoppen = document.querySelectorAll('#ans-zone .option-btn');
+    alleKnoppen.forEach(k => k.disabled = true);
+    
+    if (gekozen === correct) {
+        knop.classList.add('correct');
+        quizPunten++;
+        document.getElementById('pts').innerText = quizPunten;
+        document.getElementById('feed').innerText = "✅ GOED!";
+        document.getElementById('feed').style.color = "#22c55e";
+        if (quizPunten >= 5) unlockGame();
+    } else {
+        knop.classList.add('incorrect');
+        document.getElementById('feed').innerText = "❌ FOUT";
+        document.getElementById('feed').style.color = "#ef4444";
     }
+    
+    document.getElementById('v-knop').classList.remove('hidden');
 }
 
-function resetLevel() {
-    curMap = mazeLayout.map(r => [...r]);
-    pacman.x = TILE; pacman.y = TILE; pacman.dir = 0; pacman.nextDir = 0;
+function goNext() {
+    qIndex++;
+    laadVraag();
+}
+
+function unlockGame() {
+    const b = document.getElementById('game-start-btn');
+    b.disabled = false;
+    b.classList.add('start-btn-active');
+    b.innerText = "START PACMAN XL (NU BESCHIKBAAR)";
+}
+
+// ================= PACMAN XL ENGINE =================
+const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+const TILE = 20;
+let gameOn = false, gScore = 0, gLvl = 1, lives = 3;
+let pac = { x: 20, y: 20, dir: 0, next: 0, speed: 2 };
+let ghosts = [];
+
+const maze = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,2,1],
+    [1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,2,1],
+    [1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,1,2,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,2,1,1,1,2,1,1,1,2,1],
+    [1,3,2,2,2,2,1,1,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,3,1],
+    [1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,0,0,0,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1],
+    [1,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0,0,1],
+    [1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+let curM = [];
+
+function resetMap() {
+    curM = maze.map(r => [...r]);
+    pac.x = 20; pac.y = 20; pac.dir = 0; pac.next = 0;
     ghosts = [
-        {x:350, y:200, color:'#ef4444', dir:0, speed: 1.5 + (level * 0.2)}, 
-        {x:400, y:200, color:'#ec4899', dir:2, speed: 1.5 + (level * 0.2)}, 
-        {x:375, y:225, color:'#06b6d4', dir:3, speed: 1.5 + (level * 0.2)}
+        {x:360, y:160, c:'#ef4444', d:0, s:1.5+(gLvl*0.3)},
+        {x:400, y:160, c:'#ec4899', d:2, s:1.5+(gLvl*0.3)},
+        {x:380, y:140, c:'#06b6d4', d:3, s:1.5+(gLvl*0.3)}
     ];
 }
 
-function draw() {
-    ctx.fillStyle = "black"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let r=0; r<curMap.length; r++) {
-        for(let c=0; c<curMap[r].length; c++) {
-            let x = c*TILE, y = r*TILE;
-            if(curMap[r][c]===1) {
-                ctx.fillStyle = "#1e40af"; ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
-            } else if(curMap[r][c]===2) {
-                ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,2,0,7); ctx.fill();
-            } else if(curMap[r][c]===3) {
-                ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,6,0,7); ctx.fill();
-            }
-        }
-    }
-    // Pacman
-    ctx.fillStyle = "yellow"; ctx.beginPath();
-    let mouth = Math.sin(Date.now()/100)*0.2 + 0.2;
-    ctx.arc(pacman.x+TILE/2, pacman.y+TILE/2, 10, (mouth + pacman.dir*0.5)*Math.PI, (2-mouth + pacman.dir*0.5)*Math.PI);
-    ctx.lineTo(pacman.x+TILE/2, pacman.y+TILE/2); ctx.fill();
-    // Ghosts
-    ghosts.forEach(g => {
-        ctx.fillStyle = power > 0 ? "#2563eb" : g.color;
-        ctx.beginPath(); ctx.arc(g.x+TILE/2, g.y+TILE/2, 10, Math.PI, 0);
-        ctx.lineTo(g.x+TILE-4, g.y+TILE-4); ctx.lineTo(g.x+4, g.y+TILE-4); ctx.fill();
-    });
+function beginGame() {
+    gScore = 0; gLvl = 1; lives = 3; gameOn = true;
+    resetMap();
+    anim();
 }
 
-function canMove(x,y,dir) {
-    let nx = x, ny = y, margin = 4;
-    if(dir===0) nx+=margin; if(dir===1) ny+=margin; if(dir===2) nx-=margin; if(dir===3) ny-=margin;
-    let c = Math.floor((nx+TILE/2)/TILE), r = Math.floor((ny+TILE/2)/TILE);
-    return curMap[r] && curMap[r][c] !== 1;
+function can(x,y,d) {
+    let nx=x, ny=y, m=2;
+    if(d===0)nx+=m; if(d===1)ny+=m; if(d===2)nx-=m; if(d===3)ny-=m;
+    let r = Math.floor((ny+10)/TILE), c = Math.floor((nx+10)/TILE);
+    return curM[r] && curM[r][c] !== 1;
 }
 
-function loop() {
-    if(!gameRunning) return;
+function anim() {
+    if(!gameOn) return;
     
-    // Smooth turning
-    if(pacman.dir !== pacman.nextDir) {
-        if(Math.abs(pacman.x%TILE) < 5 && Math.abs(pacman.y%TILE) < 5) {
-            let gx = Math.round(pacman.x/TILE)*TILE, gy = Math.round(pacman.y/TILE)*TILE;
-            if(canMove(gx,gy,pacman.nextDir)) { pacman.x=gx; pacman.y=gy; pacman.dir=pacman.nextDir; }
-        }
+    // Smooth turn
+    if(pac.dir !== pac.next && Math.abs(pac.x%TILE)<5 && Math.abs(pac.y%TILE)<5) {
+        let gx = Math.round(pac.x/TILE)*TILE, gy = Math.round(pac.y/TILE)*TILE;
+        if(can(gx,gy,pac.next)) { pac.x=gx; pac.y=gy; pac.dir=pac.next; }
     }
     
     let dx=0, dy=0;
-    if(pacman.dir===0) dx=pacman.speed; if(pacman.dir===1) dy=pacman.speed;
-    if(pacman.dir===2) dx=-pacman.speed; if(pacman.dir===3) dy=-pacman.speed;
-    if(canMove(pacman.x+dx, pacman.y+dy, pacman.dir)) { pacman.x+=dx; pacman.y+=dy; }
+    if(pac.dir===0) dx=pac.speed; if(pac.dir===1) dy=pac.speed;
+    if(pac.dir===2) dx=-pac.speed; if(pac.dir===3) dy=-pac.speed;
+    if(can(pac.x+dx, pac.y+dy, pac.dir)) { pac.x+=dx; pac.y+=dy; }
 
-    let pr = Math.floor((pacman.y+TILE/2)/TILE), pc = Math.floor((pacman.x+TILE/2)/TILE);
-    if(curMap[pr] && curMap[pr][pc] > 1) {
-        if(curMap[pr][pc]===2) score+=10; 
-        else { score+=50; power = Math.max(100, 400 - (level*30)); document.getElementById('power-indicator').classList.remove('hidden'); }
-        curMap[pr][pc]=0;
-        checkWin();
+    let r = Math.floor((pac.y+10)/TILE), c = Math.floor((pac.x+10)/TILE);
+    if(curM[r] && curM[r][c] > 1) {
+        gScore += (curM[r][c]===2?10:50); curM[r][c]=0;
+        let dots = 0; curM.forEach(row => row.forEach(t => {if(t>1) dots++;}));
+        if(dots===0) { gLvl++; resetMap(); alert("Level Up!"); }
     }
-    
-    if(power>0) { power--; if(power===0) document.getElementById('power-indicator').classList.add('hidden'); }
 
     ghosts.forEach(g => {
-        if(Math.random()<0.02 || !canMove(g.x, g.y, g.dir)) g.dir = Math.floor(Math.random()*4);
-        let gdx=0, gdy=0, gs = power > 0 ? g.speed * 0.5 : g.speed;
-        if(g.dir===0) gdx=gs; if(g.dir===1) gdy=gs; if(g.dir===2) gdx=-gs; if(g.dir===3) gdy=-gs;
-        if(canMove(g.x+gdx, g.y+gdy, g.dir)) { g.x+=gdx; g.y+=gdy; }
-        if(Math.hypot(pacman.x-g.x, pacman.y-g.y)<15) {
-            if(power>0) { g.x=350; g.y=200; score+=200; }
-            else { lives--; if(lives<=0) { gameRunning=false; alert("GAME OVER! Score: "+score); location.reload(); } else { resetLevel(); } }
+        if(Math.random()<0.02 || !can(g.x, g.y, g.d)) g.d = Math.floor(Math.random()*4);
+        let gx=0, gy=0;
+        if(g.d===0) gx=g.s; if(g.d===1) gy=g.s; if(g.d===2) gx=-g.s; if(g.d===3) gy=-g.s;
+        if(can(g.x+gx, g.y+gy, g.d)) { g.x+=gx; g.y+=gy; }
+        if(Math.hypot(pac.x-g.x, pac.y-g.y)<15) {
+            lives--; if(lives<=0) { gameOn=false; alert("Game Over! Score: "+gScore); location.reload(); } else resetMap();
         }
     });
 
-    document.getElementById('game-score').innerText = score;
+    ctx.fillStyle="black"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let i=0; i<curM.length; i++) {
+        for(let j=0; j<curM[i].length; j++) {
+            let x=j*TILE, y=i*TILE;
+            if(curM[i][j]===1){ ctx.fillStyle="#1e40af"; ctx.fillRect(x+1,y+1,TILE-2,TILE-2); }
+            if(curM[i][j]===2){ ctx.fillStyle="#fbbf24"; ctx.beginPath(); ctx.arc(x+10,y+10,2,0,7); ctx.fill(); }
+            if(curM[i][j]===3){ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x+10,y+10,5,0,7); ctx.fill(); }
+        }
+    }
+    ctx.fillStyle="yellow"; ctx.beginPath(); ctx.arc(pac.x+10, pac.y+10, 8, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pac.x+10,pac.y+10); ctx.fill();
+    ghosts.forEach(g => { ctx.fillStyle=g.c; ctx.beginPath(); ctx.arc(g.x+10, g.y+10, 8, 0, 7); ctx.fill(); });
+
+    document.getElementById('game-score').innerText = gScore;
+    document.getElementById('game-lvl').innerText = gLvl;
     document.getElementById('game-lives').innerText = lives;
-    draw(); requestAnimationFrame(loop);
+    requestAnimationFrame(anim);
 }
 
-function startGame() {
-    level = 1; score = 0; lives = 3; gameRunning = true;
-    document.getElementById('game-level').innerText = level;
-    resetLevel();
-    loop();
-}
-
-window.addEventListener("keydown", e => {
-    const keys = {ArrowRight:0, ArrowDown:1, ArrowLeft:2, ArrowUp:3};
-    if(keys[e.key] !== undefined) { e.preventDefault(); pacman.nextDir = keys[e.key]; }
-});
+window.onkeydown = e => {
+    const k = {ArrowRight:0, ArrowDown:1, ArrowLeft:2, ArrowUp:3};
+    if(k[e.key]!==undefined){ e.preventDefault(); pac.next=k[e.key]; }
+};
 </script>
 </body>
 </html>

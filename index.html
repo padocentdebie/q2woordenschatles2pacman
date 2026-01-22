@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pac-Man: Ghost Edition</title>
+    <title>Pac-Man: Woordenschat & Ghost Hunt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -16,6 +16,7 @@
             margin: 0;
             color: white;
             font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
         }
         canvas {
             border: 4px solid #222;
@@ -23,56 +24,115 @@
             background-color: black;
             max-width: 100%;
         }
-        .stats {
-            margin-bottom: 10px;
-            font-size: 1.5rem;
-            display: flex;
-            gap: 20px;
-        }
-        .controls {
-            margin-top: 20px;
+        #quiz-container {
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid #3b82f6;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
             text-align: center;
-            color: #888;
+            z-index: 50;
         }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="stats">
-        <div>Score: <span id="score">0</span></div>
-        <div>Levens: <span id="lives">3</span></div>
+    <!-- Woordenschat Quiz Sluis -->
+    <div id="quiz-container" class="flex flex-col gap-4">
+        <h2 class="text-2xl font-bold text-blue-400">Woordenschat Uitdaging</h2>
+        <p class="text-gray-300">Beantwoord 5 vragen correct om het doolhof te ontgrendelen!</p>
+        <div class="bg-gray-800 p-4 rounded text-xl" id="question-box">Laden...</div>
+        <div id="options-container" class="grid grid-cols-1 gap-2"></div>
+        <div class="mt-2 text-sm text-gray-400">Voortgang: <span id="quiz-progress">0</span> / 5</div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-
-    <div class="controls">
-        Gebruik de <b>Pijltjestoetsen</b> om te bewegen<br>
-        Eet de grote bollen om de spoken te kunnen vangen!
+    <!-- Game UI -->
+    <div id="game-ui" class="hidden flex flex-col items-center">
+        <div class="mb-2 text-xl flex gap-10">
+            <div>Score: <span id="score">0</span></div>
+            <div>Levens: <span id="lives">3</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div class="mt-4 text-gray-500 text-sm">Pijltjestoetsen om te jagen • Eet Power Pellets om terug te vechten!</div>
     </div>
 
-    <!-- Game Over Overlay -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden flex-col">
+    <!-- Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center hidden flex-col z-50">
         <h1 id="status-text" class="text-6xl font-bold mb-8 text-yellow-400">GAME OVER</h1>
-        <button onclick="resetGame()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-full text-xl transition">Opnieuw Spelen</button>
+        <button onclick="restartFromQuiz()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-full text-xl transition">Opnieuw Proberen</button>
     </div>
 
     <script>
+        // --- QUIZ LOGICA ---
+        const vocabulary = [
+            { q: "Wat is een synoniem voor 'reusachtig'?", a: ["Enorm", "Klein", "Snel", "Zwaar"], correct: 0 },
+            { q: "Wat betekent 'valide'?", a: ["Geldig", "Stuk", "Oud", "Geheim"], correct: 0 },
+            { q: "Wat is het tegenovergestelde van 'optimistisch'?", a: ["Pessimistisch", "Vrolijk", "Actief", "Kalm"], correct: 0 },
+            { q: "Wat betekent 'incognito'?", a: ["Onherkenbaar", "Beroemd", "Snel", "Digitaal"], correct: 0 },
+            { q: "Wat is een 'manusje-van-alles'?", a: ["Iemand die veel kan", "Een dief", "Een kok", "Een luiaard"], correct: 0 },
+            { q: "Wat betekent 'subtiel'?", a: ["Bijna niet merkbaar", "Heel luid", "Gevaarlijk", "Kleurrijk"], correct: 0 }
+        ];
+
+        let quizCount = 0;
+        const targetQuiz = 5;
+
+        function loadQuestion() {
+            const q = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            document.getElementById('question-box').innerText = q.q;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.a.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "bg-blue-900 hover:bg-blue-700 p-2 rounded transition text-left px-4";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index === q.correct);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect) {
+            if (isCorrect) {
+                quizCount++;
+                document.getElementById('quiz-progress').innerText = quizCount;
+                if (quizCount >= targetQuiz) {
+                    startPacman();
+                } else {
+                    loadQuestion();
+                }
+            } else {
+                alert("Helaas, probeer het nog eens!");
+                loadQuestion();
+            }
+        }
+
+        function startPacman() {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            initGame();
+        }
+
+        function restartFromQuiz() {
+            quizCount = 0;
+            document.getElementById('quiz-progress').innerText = 0;
+            overlay.classList.add('hidden');
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // --- PAC-MAN GAME LOGICA ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const livesElement = document.getElementById('lives');
-        const overlay = document.getElementById('overlay');
-        const statusText = document.getElementById('status-text');
-
         const TILE_SIZE = 24;
         const GRID_WIDTH = 19;
         const GRID_HEIGHT = 21;
-
         canvas.width = TILE_SIZE * GRID_WIDTH;
         canvas.height = TILE_SIZE * GRID_HEIGHT;
 
-        // 0: Pad, 1: Muur, 2: Puntje, 3: Power Pellet, 4: Ghost Home
-        const map = [
+        const mapTemplate = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
             [1,3,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,3,1],
@@ -96,279 +156,197 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        let currentMap = [];
-        let score = 0;
-        let lives = 3;
-        let gameOver = false;
-        let powerMode = 0; // Timer voor power mode
+        let currentMap, score, lives, gameOver, powerMode, pacman, ghosts;
 
-        const pacman = {
-            x: 9 * TILE_SIZE + TILE_SIZE/2,
-            y: 15 * TILE_SIZE + TILE_SIZE/2,
-            dir: 0, // 0: Right, 1: Down, 2: Left, 3: Up
-            nextDir: 0,
-            speed: 2,
-            mouth: 0,
-            mouthSpeed: 0.1
-        };
-
-        const ghosts = [
-            { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FF0000', dir: 3, speed: 1.5, state: 'normal', name: 'Blinky' },
-            { x: 8 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FFB8FF', dir: 3, speed: 1.5, state: 'normal', name: 'Pinky' },
-            { x: 10 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#00FFFF', dir: 3, speed: 1.5, state: 'normal', name: 'Inky' },
-            { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 8 * TILE_SIZE + TILE_SIZE/2, color: '#FFB852', dir: 3, speed: 1.5, state: 'normal', name: 'Clyde' }
-        ];
-
-        function resetMap() {
-            currentMap = JSON.parse(JSON.stringify(map));
-        }
-
-        function resetPositions() {
-            pacman.x = 9 * TILE_SIZE + TILE_SIZE/2;
-            pacman.y = 15 * TILE_SIZE + TILE_SIZE/2;
-            pacman.dir = 0;
-            pacman.nextDir = 0;
-            
-            ghosts.forEach((g, i) => {
-                g.x = (8 + (i % 3)) * TILE_SIZE + TILE_SIZE/2;
-                g.y = 9 * TILE_SIZE + TILE_SIZE/2;
-                g.state = 'normal';
-            });
-        }
-
-        function resetGame() {
+        function initGame() {
+            currentMap = JSON.parse(JSON.stringify(mapTemplate));
             score = 0;
             lives = 3;
             gameOver = false;
             powerMode = 0;
-            scoreElement.innerText = score;
-            livesElement.innerText = lives;
-            overlay.classList.add('hidden');
-            resetMap();
-            resetPositions();
+            
+            pacman = { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 15 * TILE_SIZE + TILE_SIZE/2, dir: 0, nextDir: 0, speed: 2, mouth: 0, mouthSpeed: 0.1 };
+            
+            ghosts = [
+                { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FF0000', dir: 3, speed: 1.5, type: 'chase', state: 'normal' }, // Blinky
+                { x: 8 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FFB8FF', dir: 3, speed: 1.5, type: 'ambush', state: 'normal' }, // Pinky
+                { x: 10 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#00FFFF', dir: 3, speed: 1.5, type: 'random', state: 'normal' }, // Inky
+                { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 8 * TILE_SIZE + TILE_SIZE/2, color: '#FFB852', dir: 3, speed: 1.5, type: 'random', state: 'normal' }  // Clyde
+            ];
+
+            updateUI();
             requestAnimationFrame(gameLoop);
         }
 
-        window.addEventListener('keydown', (e) => {
+        function updateUI() {
+            document.getElementById('score').innerText = score;
+            document.getElementById('lives').innerText = lives;
+        }
+
+        // Beweeglogica
+        function canMove(x, y, dir) {
+            let nx = x, ny = y;
+            const b = 10;
+            if (dir === 0) nx += b; if (dir === 1) ny += b; if (dir === 2) nx -= b; if (dir === 3) ny -= b;
+            const c = Math.floor(nx / TILE_SIZE), r = Math.floor(ny / TILE_SIZE);
+            return currentMap[r] && currentMap[r][c] !== 1 && currentMap[r][c] !== 4;
+        }
+
+        function moveEntity(e, isPacman = false) {
+            if (isPacman && e.dir !== e.nextDir) {
+                const cx = Math.floor(e.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+                const cy = Math.floor(e.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+                if (Math.abs(e.x - cx) < 4 && Math.abs(e.y - cy) < 4 && canMove(cx, cy, e.nextDir)) {
+                    e.x = cx; e.y = cy; e.dir = e.nextDir;
+                }
+            }
+
+            let mx = 0, my = 0;
+            if (e.dir === 0) mx = e.speed; if (e.dir === 1) my = e.speed; if (e.dir === 2) mx = -e.speed; if (e.dir === 3) my = -e.speed;
+
+            if (canMove(e.x + mx, e.y + my, e.dir)) {
+                e.x += mx; e.y += my;
+            } else if (!isPacman) {
+                e.dir = Math.floor(Math.random() * 4);
+            }
+
+            if (e.x < 0) e.x = canvas.width; if (e.x > canvas.width) e.x = 0;
+        }
+
+        // Ghost AI "Jacht" Logica
+        function updateGhosts() {
+            ghosts.forEach(g => {
+                if (g.state === 'eaten') {
+                    // Ga terug naar huis
+                    const homeX = 9 * TILE_SIZE + TILE_SIZE/2;
+                    const homeY = 9 * TILE_SIZE + TILE_SIZE/2;
+                    if (Math.abs(g.x - homeX) < 10 && Math.abs(g.y - homeY) < 10) g.state = 'normal';
+                }
+
+                // AI Beslissing op kruispunten
+                const cx = Math.floor(g.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+                const cy = Math.floor(g.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+
+                if (Math.abs(g.x - cx) < 2 && Math.abs(g.y - cy) < 2) {
+                    let bestDir = g.dir;
+                    let minDist = Infinity;
+
+                    // Target bepalen
+                    let targetX = pacman.x, targetY = pacman.y;
+                    if (powerMode > 0) { // Vluchten
+                        targetX = canvas.width - pacman.x;
+                        targetY = canvas.height - pacman.y;
+                    } else if (g.type === 'ambush') { // Pinky mikt voor Pacman
+                        if (pacman.dir === 0) targetX += TILE_SIZE * 4;
+                        else if (pacman.dir === 2) targetX -= TILE_SIZE * 4;
+                        else if (pacman.dir === 1) targetY += TILE_SIZE * 4;
+                        else targetY -= TILE_SIZE * 4;
+                    }
+
+                    [0,1,2,3].forEach(d => {
+                        if (d === (g.dir + 2) % 4) return; // Niet direct omdraaien
+                        if (canMove(cx, cy, d)) {
+                            let nx = cx, ny = cy;
+                            if (d === 0) nx += TILE_SIZE; if (d === 1) ny += TILE_SIZE; if (d === 2) nx -= TILE_SIZE; if (d === 3) ny -= TILE_SIZE;
+                            let dist = Math.hypot(nx - targetX, ny - targetY);
+                            if (dist < minDist) { minDist = dist; bestDir = d; }
+                        }
+                    });
+                    g.dir = bestDir;
+                }
+
+                g.speed = (powerMode > 0 && g.state !== 'eaten') ? 0.7 : 1.6;
+                moveEntity(g);
+
+                // Collision
+                if (Math.hypot(pacman.x - g.x, pacman.y - g.y) < TILE_SIZE * 0.7) {
+                    if (powerMode > 0 && g.state !== 'eaten') {
+                        g.state = 'eaten';
+                        score += 200;
+                    } else if (g.state !== 'eaten') {
+                        lives--;
+                        if (lives <= 0) gameOver = true;
+                        else resetPositions();
+                    }
+                }
+            });
+        }
+
+        function resetPositions() {
+            pacman.x = 9 * TILE_SIZE + TILE_SIZE/2; pacman.y = 15 * TILE_SIZE + TILE_SIZE/2;
+            pacman.dir = 0; pacman.nextDir = 0;
+            ghosts.forEach((g, i) => {
+                g.x = (8 + (i % 3)) * TILE_SIZE + TILE_SIZE/2; g.y = 9 * TILE_SIZE + TILE_SIZE/2;
+                g.state = 'normal';
+            });
+            updateUI();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Map
+            for (let r = 0; r < GRID_HEIGHT; r++) {
+                for (let c = 0; c < GRID_WIDTH; c++) {
+                    const t = currentMap[r][c];
+                    if (t === 1) { ctx.fillStyle = '#1e3a8a'; ctx.fillRect(c*TILE_SIZE+2, r*TILE_SIZE+2, TILE_SIZE-4, TILE_SIZE-4); }
+                    else if (t === 2) { ctx.fillStyle = '#ffd'; ctx.beginPath(); ctx.arc(c*TILE_SIZE+TILE_SIZE/2, r*TILE_SIZE+TILE_SIZE/2, 2, 0, 7); ctx.fill(); }
+                    else if (t === 3) { ctx.fillStyle = '#ffd'; ctx.beginPath(); ctx.arc(c*TILE_SIZE+TILE_SIZE/2, r*TILE_SIZE+TILE_SIZE/2, 6, 0, 7); ctx.fill(); }
+                }
+            }
+            // Pacman
+            ctx.fillStyle = 'yellow'; ctx.beginPath();
+            const rot = pacman.dir * Math.PI/2;
+            pacman.mouth += pacman.mouthSpeed; if (pacman.mouth > 0.2 || pacman.mouth < 0) pacman.mouthSpeed *= -1;
+            ctx.moveTo(pacman.x, pacman.y);
+            ctx.arc(pacman.x, pacman.y, TILE_SIZE/2-2, rot + pacman.mouth, rot + 2*Math.PI - pacman.mouth);
+            ctx.fill();
+            // Ghosts
+            ghosts.forEach(g => {
+                ctx.fillStyle = (powerMode > 0 && g.state !== 'eaten') ? (powerMode < 100 && Math.floor(Date.now()/200)%2 ? 'white' : '#2121ff') : g.color;
+                if (g.state === 'eaten') ctx.globalAlpha = 0.3;
+                ctx.beginPath(); ctx.arc(g.x, g.y - 2, TILE_SIZE/2-3, Math.PI, 0);
+                ctx.lineTo(g.x + TILE_SIZE/2-3, g.y + TILE_SIZE/2-3);
+                ctx.lineTo(g.x - TILE_SIZE/2+3, g.y + TILE_SIZE/2-3);
+                ctx.fill(); ctx.globalAlpha = 1.0;
+            });
+        }
+
+        function gameLoop() {
+            if (gameOver) {
+                document.getElementById('status-text').innerText = "GAME OVER";
+                document.getElementById('overlay').classList.remove('hidden');
+                return;
+            }
+            moveEntity(pacman, true);
+            updateGhosts();
+
+            const c = Math.floor(pacman.x/TILE_SIZE), r = Math.floor(pacman.y/TILE_SIZE);
+            if (currentMap[r][c] === 2) { currentMap[r][c] = 0; score += 10; updateUI(); }
+            else if (currentMap[r][c] === 3) { currentMap[r][c] = 0; score += 50; powerMode = 400; updateUI(); }
+
+            if (powerMode > 0) powerMode--;
+            if (powerMode === 0) ghosts.forEach(g => g.state = 'normal');
+
+            if (!currentMap.some(row => row.includes(2))) {
+                gameOver = true;
+                document.getElementById('status-text').innerText = "GEWONNEN!";
+                document.getElementById('overlay').classList.remove('hidden');
+                return;
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.addEventListener('keydown', e => {
             if (e.key === 'ArrowRight') pacman.nextDir = 0;
             if (e.key === 'ArrowDown') pacman.nextDir = 1;
             if (e.key === 'ArrowLeft') pacman.nextDir = 2;
             if (e.key === 'ArrowUp') pacman.nextDir = 3;
         });
 
-        function canMove(x, y, dir) {
-            let nextX = x;
-            let nextY = y;
-            const buffer = 10; // Collision buffer
-
-            if (dir === 0) nextX += buffer;
-            if (dir === 1) nextY += buffer;
-            if (dir === 2) nextX -= buffer;
-            if (dir === 3) nextY -= buffer;
-
-            const col = Math.floor(nextX / TILE_SIZE);
-            const row = Math.floor(nextY / TILE_SIZE);
-
-            if (row < 0 || row >= GRID_HEIGHT || col < 0 || col >= GRID_WIDTH) return false;
-            const tile = currentMap[row][col];
-            return tile !== 1 && tile !== 4; // 1 is muur, 4 is spookhuis deur
-        }
-
-        function moveEntity(entity) {
-            // Probeer van richting te veranderen
-            if (entity === pacman && entity.dir !== entity.nextDir) {
-                // Alleen op het midden van een tile draaien voor betere controle
-                const centerX = Math.floor(entity.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
-                const centerY = Math.floor(entity.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
-                
-                if (Math.abs(entity.x - centerX) < 4 && Math.abs(entity.y - centerY) < 4) {
-                    if (canMove(centerX, centerY, entity.nextDir)) {
-                        entity.x = centerX;
-                        entity.y = centerY;
-                        entity.dir = entity.nextDir;
-                    }
-                }
-            }
-
-            // Beweging
-            let moveX = 0, moveY = 0;
-            if (entity.dir === 0) moveX = entity.speed;
-            if (entity.dir === 1) moveY = entity.speed;
-            if (entity.dir === 2) moveX = -entity.speed;
-            if (entity.dir === 3) moveY = -entity.speed;
-
-            if (canMove(entity.x + moveX, entity.y + moveY, entity.dir)) {
-                entity.x += moveX;
-                entity.y += moveY;
-            } else if (entity !== pacman) {
-                // Spoken kiezen een nieuwe willekeurige richting bij botsing
-                entity.dir = Math.floor(Math.random() * 4);
-            }
-
-            // Screen wrap-around
-            if (entity.x < 0) entity.x = canvas.width;
-            if (entity.x > canvas.width) entity.x = 0;
-        }
-
-        function updateGhosts() {
-            ghosts.forEach(ghost => {
-                // Simpele AI: als in powerMode, vlucht. Anders, beweeg random of volg een beetje.
-                if (Math.random() < 0.02) { // Af en toe van koers veranderen
-                    const directions = [0, 1, 2, 3];
-                    ghost.dir = directions[Math.floor(Math.random() * 4)];
-                }
-                
-                ghost.speed = (powerMode > 0 && ghost.state !== 'eaten') ? 0.8 : 1.5;
-                moveEntity(ghost);
-
-                // Check collision met Pac-Man
-                const dist = Math.hypot(pacman.x - ghost.x, pacman.y - ghost.y);
-                if (dist < TILE_SIZE * 0.8) {
-                    if (powerMode > 0) {
-                        if (ghost.state !== 'eaten') {
-                            ghost.state = 'eaten';
-                            score += 200;
-                            scoreElement.innerText = score;
-                        }
-                    } else if (ghost.state !== 'eaten') {
-                        lives--;
-                        livesElement.innerText = lives;
-                        if (lives <= 0) {
-                            gameOver = true;
-                        } else {
-                            resetPositions();
-                        }
-                    }
-                }
-            });
-        }
-
-        function drawMap() {
-            for (let r = 0; r < GRID_HEIGHT; r++) {
-                for (let c = 0; c < GRID_WIDTH; c++) {
-                    const tile = currentMap[r][c];
-                    const x = c * TILE_SIZE;
-                    const y = r * TILE_SIZE;
-
-                    if (tile === 1) {
-                        ctx.fillStyle = '#2222FF';
-                        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-                    } else if (tile === 2) {
-                        ctx.fillStyle = '#FFB8AE';
-                        ctx.beginPath();
-                        ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else if (tile === 3) {
-                        ctx.fillStyle = '#FFB8AE';
-                        ctx.beginPath();
-                        ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 6, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-            }
-        }
-
-        function drawPacman() {
-            ctx.fillStyle = 'yellow';
-            ctx.beginPath();
-            const centerX = pacman.x;
-            const centerY = pacman.y;
-            const radius = TILE_SIZE / 2 - 2;
-            
-            // Mond animatie
-            pacman.mouth += pacman.mouthSpeed;
-            if (pacman.mouth > 0.2 || pacman.mouth < 0) pacman.mouthSpeed *= -1;
-
-            const rotation = pacman.dir * (Math.PI / 2);
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, rotation + pacman.mouth, rotation + (2 * Math.PI) - pacman.mouth);
-            ctx.fill();
-        }
-
-        function drawGhosts() {
-            ghosts.forEach(ghost => {
-                ctx.fillStyle = (powerMode > 0 && ghost.state !== 'eaten') ? (powerMode < 100 && Math.floor(Date.now()/200)%2 ? 'white' : '#2121ff') : ghost.color;
-                if (ghost.state === 'eaten') ctx.fillStyle = 'rgba(255,255,255,0.2)';
-
-                const x = ghost.x - TILE_SIZE/2 + 2;
-                const y = ghost.y - TILE_SIZE/2 + 2;
-                const size = TILE_SIZE - 4;
-
-                // Lichaam spook
-                ctx.beginPath();
-                ctx.arc(x + size/2, y + size/2, size/2, Math.PI, 0);
-                ctx.lineTo(x + size, y + size);
-                // Golvende onderkant
-                for(let i=0; i<3; i++) {
-                    ctx.lineTo(x + size - (i*size/3) - size/6, y + size - 4);
-                    ctx.lineTo(x + size - (i*size/3) - size/3, y + size);
-                }
-                ctx.lineTo(x, y + size/2);
-                ctx.fill();
-
-                // Ogen
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(x + size*0.3, y + size*0.4, 3, 0, Math.PI*2);
-                ctx.arc(x + size*0.7, y + size*0.4, 3, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = 'black';
-                ctx.beginPath();
-                ctx.arc(x + size*0.3, y + size*0.4, 1.5, 0, Math.PI*2);
-                ctx.arc(x + size*0.7, y + size*0.4, 1.5, 0, Math.PI*2);
-                ctx.fill();
-            });
-        }
-
-        function gameLoop() {
-            if (gameOver) {
-                statusText.innerText = "GAME OVER";
-                overlay.classList.remove('hidden');
-                return;
-            }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            moveEntity(pacman);
-            updateGhosts();
-
-            // Eet check
-            const col = Math.floor(pacman.x / TILE_SIZE);
-            const row = Math.floor(pacman.y / TILE_SIZE);
-            if (currentMap[row][col] === 2) {
-                currentMap[row][col] = 0;
-                score += 10;
-                scoreElement.innerText = score;
-            } else if (currentMap[row][col] === 3) {
-                currentMap[row][col] = 0;
-                score += 50;
-                powerMode = 500; // Frames van power mode
-                scoreElement.innerText = score;
-            }
-
-            if (powerMode > 0) powerMode--;
-            if (powerMode === 0) {
-                ghosts.forEach(g => g.state = 'normal');
-            }
-
-            // Win check
-            if (!currentMap.some(row => row.includes(2) || row.includes(3))) {
-                statusText.innerText = "GEWONNEN!";
-                statusText.className = "text-6xl font-bold mb-8 text-green-400";
-                overlay.classList.remove('hidden');
-                return;
-            }
-
-            drawMap();
-            drawPacman();
-            drawGhosts();
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        resetMap();
-        requestAnimationFrame(gameLoop);
-
+        // Start de quiz bij laden
+        loadQuestion();
     </script>
 </body>
 </html>

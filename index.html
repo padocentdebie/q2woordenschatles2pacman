@@ -520,7 +520,7 @@
                     </div>
                     <div class="step">
                         <div class="step-number">Stap 4</div>
-                        <p>Voeg zelf woorden toe om je woordenschat uit te breiden</p>
+                        <p>Als Pacman gepakt wordt, beantwoord opnieuw 5 vragen</p>
                     </div>
                 </div>
             </div>
@@ -572,6 +572,7 @@
         let correctAnswers = 0;
         const neededForGame = 5;
         let gameUnlocked = false;
+        let gameActive = false;
         
         // DOM elementen
         const wordInput = document.getElementById('word-input');
@@ -902,7 +903,8 @@
             gameOver: false,
             powerMode: 0,
             dotsRemaining: 0,
-            gameRunning: false
+            gameRunning: false,
+            pacmanCaught: false
         };
         
         // Pacman
@@ -951,7 +953,7 @@
                 leavingTimer: 60,
                 target: { x: 0, y: 0 }
             },
-            { // Clyde - schuw, gaat weg als Pacman dichtbij
+            { // Clyde - schuw, gaat weg als Pacman dichtbij is
                 x: 9 * TILE_SIZE + TILE_SIZE/2,
                 y: 8 * TILE_SIZE + TILE_SIZE/2,
                 color: '#FFB852',
@@ -972,11 +974,13 @@
             gameState.powerMode = 0;
             gameState.dotsRemaining = 0;
             gameState.gameRunning = false;
+            gameState.pacmanCaught = false;
             
             // Reset maze naar originele staat
             resetMaze();
             
             // Tel dots
+            gameState.dotsRemaining = 0;
             for (let y = 0; y < GRID_HEIGHT; y++) {
                 for (let x = 0; x < GRID_WIDTH; x++) {
                     if (maze[y][x] === 2 || maze[y][x] === 3) {
@@ -1215,16 +1219,6 @@
             // Warp door tunnels
             if (ghost.x < 0) ghost.x = canvas.width;
             if (ghost.x > canvas.width) ghost.x = 0;
-            
-            // Terug naar hok als opgegeten
-            if (ghost.state === 'eaten') {
-                const homeX = 9 * TILE_SIZE + TILE_SIZE/2;
-                const homeY = 9 * TILE_SIZE + TILE_SIZE/2;
-                if (Math.abs(ghost.x - homeX) < 5 && Math.abs(ghost.y - homeY) < 5) {
-                    ghost.state = 'inHouse';
-                    ghost.leavingTimer = 60;
-                }
-            }
         }
         
         function checkCollisions() {
@@ -1258,15 +1252,22 @@
                         ghost.state = 'eaten';
                         gameState.score += 200;
                         gameState.powerMode = 0;
+                        
+                        // Stuur ghost terug naar huis
+                        ghost.x = 9 * TILE_SIZE + TILE_SIZE/2;
+                        ghost.y = 9 * TILE_SIZE + TILE_SIZE/2;
+                        ghost.state = 'inHouse';
+                        ghost.leavingTimer = 60;
                     } else if (ghost.state !== 'eaten' && ghost.state !== 'inHouse') {
-                        // Verlies leven
+                        // Pacman wordt gepakt!
                         gameState.lives--;
+                        gameState.pacmanCaught = true;
                         
                         if (gameState.lives <= 0) {
                             gameState.gameOver = true;
                             gameState.gameRunning = false;
                             alert('Game Over! Je hebt al je levens verloren. Beantwoord weer 5 vragen om opnieuw te spelen.');
-                            resetGame();
+                            resetQuizAndGame();
                         } else {
                             // Reset posities
                             pacman.x = 9 * TILE_SIZE + TILE_SIZE/2;
@@ -1279,6 +1280,11 @@
                                     g.state = 'chasing';
                                 }
                             });
+                            
+                            // Laat speler weten dat Pacman gepakt is
+                            setTimeout(() => {
+                                alert(`Pacman is gepakt! Je hebt nog ${gameState.lives} levens over.`);
+                            }, 100);
                         }
                     }
                 }
@@ -1288,9 +1294,23 @@
             if (gameState.dotsRemaining <= 0) {
                 gameState.gameOver = true;
                 gameState.gameRunning = false;
-                alert(`Gewonnen! Alle ${gameState.dotsRemaining} bolletjes opgegeten! Eindscore: ${gameState.score}`);
-                resetGame();
+                alert(`Gewonnen! Alle bolletjes opgegeten! Eindscore: ${gameState.score}`);
+                resetQuizAndGame();
             }
+        }
+        
+        function resetQuizAndGame() {
+            // Reset quiz scores
+            correctAnswers = 0;
+            correctCountElement.textContent = correctAnswers;
+            gameUnlocked = false;
+            updateStartGameButton();
+            
+            // Reset game
+            initGame();
+            
+            // Laat bericht zien
+            alert('Pacman spel is afgelopen! Beantwoord opnieuw 5 vragen correct om Pacman te spelen.');
         }
         
         function drawGame() {
@@ -1444,6 +1464,25 @@
             drawGame();
             updateGameUI();
             
+            // Check of Pacman is gepakt en geen levens meer heeft
+            if (gameState.pacmanCaught && gameState.lives <= 0) {
+                gameState.gameRunning = false;
+                resetQuizAndGame();
+                return;
+            }
+            
+            // Als Pacman gepakt is maar nog levens heeft, reset positie en ga door
+            if (gameState.pacmanCaught) {
+                gameState.pacmanCaught = false;
+                // Korte pauze voordat Pacman weer beweegt
+                setTimeout(() => {
+                    if (!gameState.gameOver && gameState.gameRunning) {
+                        requestAnimationFrame(gameLoop);
+                    }
+                }, 1000);
+                return;
+            }
+            
             if (!gameState.gameOver && gameState.gameRunning) {
                 requestAnimationFrame(gameLoop);
             }
@@ -1455,6 +1494,7 @@
             correctAnswers = 0;
             correctCountElement.textContent = correctAnswers;
             updateStartGameButton();
+            alert('Spel gereset! Beantwoord 5 vragen opnieuw om te spelen.');
         }
         
         function startGame() {
@@ -1486,10 +1526,7 @@
         generateQuestionsBtn.addEventListener('click', generateQuestions);
         startGameBtn.addEventListener('click', startGame);
         nextBtn.addEventListener('click', nextQuestion);
-        resetGameBtn.addEventListener('click', function() {
-            resetGame();
-            alert('Spel gereset! Beantwoord 5 vragen opnieuw om te spelen.');
-        });
+        resetGameBtn.addEventListener('click', resetGame);
         
         // Keyboard controls voor Pacman
         document.addEventListener('keydown', function(e) {

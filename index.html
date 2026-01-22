@@ -3,136 +3,821 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pac-Man: Woordenschat & Ghost Hunt</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Pacman Woordenschat Avontuur</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
         body {
-            background-color: #111;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
+            gap: 30px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 25px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 15px;
+            border: 3px solid #3b82f6;
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        h1 {
+            color: #fbbf24;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            color: #60a5fa;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Woordenschat sectie */
+        .word-section {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #3b82f6;
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.2);
+        }
+        
+        .section-title {
+            color: #fbbf24;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3b82f6;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::before {
+            content: "📚";
+        }
+        
+        /* Woorden invoer */
+        .word-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .word-input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 2px solid #3b82f6;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .word-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .add-btn {
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .add-btn:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+        
+        .word-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+        
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(59, 130, 246, 0.2);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .word-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Quiz sectie */
+        .quiz-section {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #10b981;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.2);
+        }
+        
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .quiz-progress {
+            color: #60a5fa;
+            font-size: 1.1rem;
+        }
+        
+        .question-box {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .option-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateX(5px);
+        }
+        
+        .option-letter {
+            width: 30px;
+            height: 30px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
+            font-weight: bold;
+        }
+        
+        .correct {
+            background: rgba(34, 197, 94, 0.3) !important;
+            border-color: #22c55e !important;
+        }
+        
+        .incorrect {
+            background: rgba(239, 68, 68, 0.3) !important;
+            border-color: #ef4444 !important;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+        
+        .feedback.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
         }
-        canvas {
-            border: 4px solid #222;
-            box-shadow: 0 0 20px rgba(0,0,255,0.3);
-            background-color: black;
-            max-width: 100%;
+        
+        .generate-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: scale(1.05);
         }
-        #quiz-container {
-            background: rgba(20, 20, 30, 0.95);
-            border: 2px solid #3b82f6;
-            padding: 2rem;
-            border-radius: 1rem;
-            max-width: 500px;
-            width: 90%;
+        
+        .start-game-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .start-game-btn:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: scale(1.05);
+        }
+        
+        .start-game-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Game sectie */
+        .game-section {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #f59e0b;
+            box-shadow: 0 5px 20px rgba(245, 158, 11, 0.2);
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        
+        .game-stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat {
             text-align: center;
-            z-index: 50;
         }
-        .hidden { display: none !important; }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+        
+        .game-canvas-container {
+            width: 600px;
+            height: 660px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        canvas {
+            display: block;
+            border: 4px solid #3b82f6;
+            border-radius: 10px;
+            background: black;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .instructions {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .instructions h3 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions h3::before {
+            content: "🎮";
+        }
+        
+        .instruction-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .step {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .step-number {
+            color: #fbbf24;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
-
-    <!-- Woordenschat Quiz Sluis -->
-    <div id="quiz-container" class="flex flex-col gap-4">
-        <h2 class="text-2xl font-bold text-blue-400">Woordenschat Uitdaging</h2>
-        <p class="text-gray-300">Beantwoord 5 vragen correct om het doolhof te ontgrendelen!</p>
-        <div class="bg-gray-800 p-4 rounded text-xl" id="question-box">Laden...</div>
-        <div id="options-container" class="grid grid-cols-1 gap-2"></div>
-        <div class="mt-2 text-sm text-gray-400">Voortgang: <span id="quiz-progress">0</span> / 5</div>
-    </div>
-
-    <!-- Game UI -->
-    <div id="game-ui" class="hidden flex flex-col items-center">
-        <div class="mb-2 text-xl flex gap-10">
-            <div>Score: <span id="score">0</span></div>
-            <div>Levens: <span id="lives">3</span></div>
+    <div class="container">
+        <header>
+            <h1>Pacman Woordenschat Avontuur</h1>
+            <p class="subtitle">Voer woorden in, genereer quizvragen met AI, en speel Pacman wanneer je genoeg vragen goed hebt!</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Woorden invoer sectie -->
+            <div class="word-section">
+                <h2 class="section-title">Woorden Beheren</h2>
+                <div class="word-input-area">
+                    <input type="text" class="word-input" id="word-input" 
+                           placeholder="Voer een woord in (bijv. 'fascinerend')">
+                    <button class="add-btn" id="add-word-btn">Toevoegen</button>
+                </div>
+                
+                <div class="word-list" id="word-list">
+                    <!-- Woorden worden hier dynamisch toegevoegd -->
+                    <div class="word-item">
+                        <span>Woord: <strong>fascinerend</strong></span>
+                        <button class="remove-btn">×</button>
+                    </div>
+                    <div class="word-item">
+                        <span>Woord: <strong>kritisch</strong></span>
+                        <button class="remove-btn">×</button>
+                    </div>
+                    <div class="word-item">
+                        <span>Woord: <strong>initiatief</strong></span>
+                        <button class="remove-btn">×</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn generate-btn" id="generate-questions-btn">
+                        Vragen Genereren met AI
+                    </button>
+                    <button class="action-btn start-game-btn" id="start-game-btn" disabled>
+                        Start Pacman (0/5)
+                    </button>
+                </div>
+                
+                <div id="ai-status" style="margin-top: 15px; color: #60a5fa; display: none;">
+                    <p>AI genereert vragen...</p>
+                </div>
+            </div>
+            
+            <!-- Quiz sectie -->
+            <div class="quiz-section">
+                <h2 class="section-title">Woordenschat Quiz</h2>
+                
+                <div class="quiz-info">
+                    <div class="quiz-progress">Correct: <span id="correct-count">0</span>/5</div>
+                    <div class="quiz-progress">Vraag: <span id="current-question">1</span>/<span id="total-questions">15</span></div>
+                    <div class="quiz-progress">Woorden: <span id="word-count">3</span></div>
+                </div>
+                
+                <div class="question-box" id="question-box">
+                    Voeg woorden toe en klik op "Vragen Genereren met AI"
+                </div>
+                
+                <div class="options-grid" id="options-container">
+                    <!-- Opties worden hier dynamisch ingevoegd -->
+                </div>
+                
+                <div class="feedback" id="feedback">
+                    <!-- Feedback wordt hier weergegeven -->
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn" id="next-btn" disabled>
+                        Volgende Vraag
+                    </button>
+                </div>
+            </div>
         </div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="mt-4 text-gray-500 text-sm">Pijltjestoetsen om te jagen • Eet Power Pellets om terug te vechten!</div>
-    </div>
-
-    <!-- Overlay -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center hidden flex-col z-50">
-        <h1 id="status-text" class="text-6xl font-bold mb-8 text-yellow-400">GAME OVER</h1>
-        <button onclick="restartFromQuiz()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-full text-xl transition">Opnieuw Proberen</button>
+        
+        <!-- Game sectie -->
+        <div class="game-section">
+            <h2 class="section-title">Pacman Doolhof</h2>
+            
+            <div class="game-header">
+                <div class="game-stats">
+                    <div class="stat">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="game-score">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Levens</div>
+                        <div class="stat-value" id="game-lives">3</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Power Mode</div>
+                        <div class="stat-value" id="power-timer">0</div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="action-btn" id="reset-game-btn">
+                        Herstart Spel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="game-canvas-container">
+                <canvas id="gameCanvas" width="600" height="660" tabindex="0"></canvas>
+            </div>
+            
+            <div class="controls">
+                <p>Gebruik pijltjestoetsen om Pacman te bewegen | Eet Power Pellets (grote bollen) om spoken te kunnen eten!</p>
+            </div>
+            
+            <div class="instructions">
+                <h3>Hoe werkt het?</h3>
+                <div class="instruction-steps">
+                    <div class="step">
+                        <div class="step-number">Stap 1</div>
+                        <p>Voer woorden in die je wilt leren (minimaal 5)</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Stap 2</div>
+                        <p>Klik op "Vragen Genereren met AI" om een quiz te maken</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Stap 3</div>
+                        <p>Beantwoord 5 vragen correct om Pacman te ontgrendelen</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Stap 4</div>
+                        <p>Speel Pacman! Spoken verlaten hun hok en jagen je op</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- QUIZ LOGICA ---
-        const vocabulary = [
-            { q: "Wat is een synoniem voor 'reusachtig'?", a: ["Enorm", "Klein", "Snel", "Zwaar"], correct: 0 },
-            { q: "Wat betekent 'valide'?", a: ["Geldig", "Stuk", "Oud", "Geheim"], correct: 0 },
-            { q: "Wat is het tegenovergestelde van 'optimistisch'?", a: ["Pessimistisch", "Vrolijk", "Actief", "Kalm"], correct: 0 },
-            { q: "Wat betekent 'incognito'?", a: ["Onherkenbaar", "Beroemd", "Snel", "Digitaal"], correct: 0 },
-            { q: "Wat is een 'manusje-van-alles'?", a: ["Iemand die veel kan", "Een dief", "Een kok", "Een luiaard"], correct: 0 },
-            { q: "Wat betekent 'subtiel'?", a: ["Bijna niet merkbaar", "Heel luid", "Gevaarlijk", "Kleurrijk"], correct: 0 }
+        // ==================== GLOBALE VARIABELEN ====================
+        let vocabularyWords = [
+            { word: "fascinerend", meaning: "interessant en boeiend" },
+            { word: "kritisch", meaning: "zich bewust van fouten en problemen" },
+            { word: "initiatief", meaning: "het nemen van het eerste stap" }
         ];
-
-        let quizCount = 0;
-        const targetQuiz = 5;
-
-        function loadQuestion() {
-            const q = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-            document.getElementById('question-box').innerText = q.q;
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
+        
+        let vocabularyQuestions = [];
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        const neededForGame = 5;
+        let gameUnlocked = false;
+        
+        // DOM elementen
+        const wordInput = document.getElementById('word-input');
+        const addWordBtn = document.getElementById('add-word-btn');
+        const wordListElement = document.getElementById('word-list');
+        const wordCountElement = document.getElementById('word-count');
+        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const aiStatusElement = document.getElementById('ai-status');
+        const questionBox = document.getElementById('question-box');
+        const optionsContainer = document.getElementById('options-container');
+        const correctCountElement = document.getElementById('correct-count');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const feedbackElement = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const resetGameBtn = document.getElementById('reset-game-btn');
+        
+        // ==================== WOORDEN BEHEER ====================
+        function updateWordList() {
+            wordListElement.innerHTML = '';
+            vocabularyWords.forEach((item, index) => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.innerHTML = `
+                    <span>Woord: <strong>${item.word}</strong></span>
+                    <button class="remove-btn" data-index="${index}">×</button>
+                `;
+                wordListElement.appendChild(wordItem);
+            });
             
-            q.a.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.className = "bg-blue-900 hover:bg-blue-700 p-2 rounded transition text-left px-4";
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(index === q.correct);
-                container.appendChild(btn);
+            wordCountElement.textContent = vocabularyWords.length;
+            updateStartGameButton();
+            
+            // Voeg event listeners toe aan remove knoppen
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    vocabularyWords.splice(index, 1);
+                    updateWordList();
+                });
             });
         }
-
-        function checkAnswer(isCorrect) {
-            if (isCorrect) {
-                quizCount++;
-                document.getElementById('quiz-progress').innerText = quizCount;
-                if (quizCount >= targetQuiz) {
-                    startPacman();
-                } else {
+        
+        function addWord() {
+            const word = wordInput.value.trim();
+            if (!word) return;
+            
+            // Voeg toe met lege betekenis (AI zal deze later invullen)
+            vocabularyWords.push({ word: word, meaning: '' });
+            wordInput.value = '';
+            updateWordList();
+        }
+        
+        function updateStartGameButton() {
+            const correctNeeded = neededForGame - correctAnswers;
+            startGameBtn.textContent = `Start Pacman (${correctAnswers}/${neededForGame})`;
+            startGameBtn.disabled = !gameUnlocked || vocabularyQuestions.length === 0;
+        }
+        
+        // ==================== AI VRAAG GENERATIE ====================
+        function generateQuestionsWithAI() {
+            if (vocabularyWords.length < 3) {
+                alert('Voeg minimaal 3 woorden toe om vragen te genereren.');
+                return;
+            }
+            
+            aiStatusElement.style.display = 'block';
+            aiStatusElement.innerHTML = '<p>AI genereert vragen met gevarieerde vraagstelling...</p>';
+            
+            // Simuleer AI verwerking (in werkelijkheid zou je hier een API aanroepen)
+            setTimeout(() => {
+                vocabularyQuestions = [];
+                
+                // Maak gevarieerde vragen voor elk woord
+                vocabularyWords.forEach((wordItem, index) => {
+                    if (index >= 15) return; // Max 15 vragen
+                    
+                    const word = wordItem.word;
+                    
+                    // Genereer 4 verschillende vraagtypes
+                    const questionTypes = [
+                        `Wat is de betekenis van '${word}'?`,
+                        `Welke beschrijving past het beste bij '${word}'?`,
+                        `Hoe zou je '${word}' in een zin gebruiken?`,
+                        `Wat is een synoniem voor '${word}'?`,
+                        `Wat is het tegenovergestelde van '${word}'?`,
+                        `In welke context gebruik je '${word}'?`
+                    ];
+                    
+                    // Kies willekeurig vraagtype
+                    const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+                    
+                    // Genereer antwoorden
+                    const answers = generateAnswers(word);
+                    
+                    vocabularyQuestions.push({
+                        question: questionType,
+                        options: answers.options,
+                        correct: answers.correctIndex,
+                        explanation: `Het correcte antwoord is '${answers.correctAnswer}'. Dit betekent dat iets ${word} is.`
+                    });
+                });
+                
+                totalQuestionsElement.textContent = vocabularyQuestions.length;
+                aiStatusElement.innerHTML = `<p style="color: #22c55e;">✓ ${vocabularyQuestions.length} vragen gegenereerd!</p>`;
+                
+                // Reset quiz state
+                currentQuestionIndex = 0;
+                correctAnswers = 0;
+                correctCountElement.textContent = correctAnswers;
+                gameUnlocked = false;
+                updateStartGameButton();
+                
+                if (vocabularyQuestions.length > 0) {
                     loadQuestion();
                 }
+                
+                // Verberg status na 3 seconden
+                setTimeout(() => {
+                    aiStatusElement.style.display = 'none';
+                }, 3000);
+                
+            }, 1500); // Simuleer AI verwerkingstijd
+        }
+        
+        function generateAnswers(word) {
+            // Dit zou normaal door AI worden gegenereerd
+            // Hier een eenvoudige simulatie
+            
+            const answerTypes = [
+                "Een positieve eigenschap",
+                "Iets dat aandacht vraagt",
+                "Een moeilijk begrip",
+                "Een eenvoudig concept",
+                "Een technische term",
+                "Een emotionele staat",
+                "Een fysieke eigenschap",
+                "Een mentale vaardigheid"
+            ];
+            
+            const wrongAnswers = [];
+            while (wrongAnswers.length < 3) {
+                const randomType = answerTypes[Math.floor(Math.random() * answerTypes.length)];
+                if (!wrongAnswers.includes(randomType)) {
+                    wrongAnswers.push(randomType);
+                }
+            }
+            
+            // Genereer correct antwoord op basis van woord
+            let correctAnswer;
+            switch(word.toLowerCase()) {
+                case 'fascinerend':
+                    correctAnswer = "Interessant en boeiend";
+                    break;
+                case 'kritisch':
+                    correctAnswer = "Zich bewust van fouten en problemen";
+                    break;
+                case 'initiatief':
+                    correctAnswer = "Het nemen van de eerste stap";
+                    break;
+                default:
+                    correctAnswer = `Betekenis gerelateerd aan ${word}`;
+            }
+            
+            // Voeg correct antwoord toe op willekeurige positie
+            const correctIndex = Math.floor(Math.random() * 4);
+            const allOptions = [...wrongAnswers];
+            allOptions.splice(correctIndex, 0, correctAnswer);
+            
+            return {
+                options: allOptions,
+                correctIndex: correctIndex,
+                correctAnswer: correctAnswer
+            };
+        }
+        
+        // ==================== QUIZ LOGICA ====================
+        function loadQuestion() {
+            if (vocabularyQuestions.length === 0) {
+                questionBox.textContent = "Voeg woorden toe en genereer vragen met AI";
+                optionsContainer.innerHTML = '';
+                return;
+            }
+            
+            const question = vocabularyQuestions[currentQuestionIndex];
+            questionBox.textContent = `${currentQuestionIndex + 1}. ${question.question}`;
+            
+            optionsContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            question.options.forEach((option, index) => {
+                const optionBtn = document.createElement('button');
+                optionBtn.className = 'option-btn';
+                optionBtn.innerHTML = `
+                    <div class="option-letter">${letters[index]}</div>
+                    <div class="option-text">${option}</div>
+                `;
+                optionBtn.dataset.index = index;
+                optionBtn.addEventListener('click', () => selectAnswer(index));
+                optionsContainer.appendChild(optionBtn);
+            });
+            
+            currentQuestionElement.textContent = currentQuestionIndex + 1;
+            feedbackElement.style.display = 'none';
+            nextBtn.disabled = true;
+            updateStartGameButton();
+        }
+        
+        function selectAnswer(selectedIndex) {
+            const question = vocabularyQuestions[currentQuestionIndex];
+            const optionButtons = document.querySelectorAll('.option-btn');
+            
+            // Toon feedback
+            if (selectedIndex === question.correct) {
+                correctAnswers++;
+                correctCountElement.textContent = correctAnswers;
+                
+                feedbackElement.textContent = `Goed gedaan! ${question.explanation}`;
+                feedbackElement.className = 'feedback correct';
+                
+                // Controleer of spel nu unlocked is
+                if (correctAnswers >= neededForGame && !gameUnlocked) {
+                    gameUnlocked = true;
+                    feedbackElement.textContent += `\n\n🎉 Pacman is nu ontgrendeld! Klik op "Start Pacman" om te spelen.`;
+                }
+                
+                optionButtons[selectedIndex].classList.add('correct');
             } else {
-                alert("Helaas, probeer het nog eens!");
+                feedbackElement.textContent = `Helaas! ${question.explanation}`;
+                feedbackElement.className = 'feedback incorrect';
+                
+                optionButtons[selectedIndex].classList.add('incorrect');
+                optionButtons[question.correct].classList.add('correct');
+            }
+            
+            feedbackElement.style.display = 'block';
+            nextBtn.disabled = false;
+            updateStartGameButton();
+        }
+        
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < vocabularyQuestions.length) {
                 loadQuestion();
+            } else {
+                // Start opnieuw
+                currentQuestionIndex = 0;
+                loadQuestion();
+                
+                const endMessage = document.createElement('div');
+                endMessage.className = 'feedback correct';
+                endMessage.textContent = `Alle vragen doorlopen! Correct: ${correctAnswers}/${vocabularyQuestions.length}`;
+                endMessage.style.display = 'block';
+                feedbackElement.parentNode.insertBefore(endMessage, feedbackElement.nextSibling);
             }
         }
-
-        function startPacman() {
-            document.getElementById('quiz-container').classList.add('hidden');
-            document.getElementById('game-ui').classList.remove('hidden');
-            initGame();
-        }
-
-        function restartFromQuiz() {
-            quizCount = 0;
-            document.getElementById('quiz-progress').innerText = 0;
-            overlay.classList.add('hidden');
-            document.getElementById('game-ui').classList.add('hidden');
-            document.getElementById('quiz-container').classList.remove('hidden');
-            loadQuestion();
-        }
-
-        // --- PAC-MAN GAME LOGICA ---
+        
+        // ==================== PACMAN GAME LOGICA ====================
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const TILE_SIZE = 24;
+        const TILE_SIZE = 30;
         const GRID_WIDTH = 19;
-        const GRID_HEIGHT = 21;
-        canvas.width = TILE_SIZE * GRID_WIDTH;
-        canvas.height = TILE_SIZE * GRID_HEIGHT;
-
-        const mapTemplate = [
+        const GRID_HEIGHT = 22;
+        
+        // Maze design - met hok voor spoken in het midden
+        const maze = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
             [1,3,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,3,1],
@@ -155,198 +840,580 @@
             [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
-
-        let currentMap, score, lives, gameOver, powerMode, pacman, ghosts;
-
+        
+        // Game state
+        let gameState = {
+            score: 0,
+            lives: 3,
+            gameOver: false,
+            powerMode: 0,
+            dotsRemaining: 0
+        };
+        
+        // Pacman
+        let pacman = {
+            x: 9 * TILE_SIZE + TILE_SIZE/2,
+            y: 15 * TILE_SIZE + TILE_SIZE/2,
+            dir: 0, // 0=right, 1=down, 2=left, 3=up
+            nextDir: 0,
+            speed: 3,
+            mouthOpen: 0,
+            mouthSpeed: 0.1
+        };
+        
+        // Ghosts - met verschillende AI types
+        let ghosts = [
+            { // Blinky - directe jager
+                x: 9 * TILE_SIZE + TILE_SIZE/2,
+                y: 9 * TILE_SIZE + TILE_SIZE/2,
+                color: '#FF0000',
+                dir: 3,
+                speed: 1.8,
+                type: 'chase',
+                state: 'inHouse', // inHouse, leaving, chasing, frightened, eaten
+                leavingTimer: 0,
+                target: { x: 0, y: 0 }
+            },
+            { // Pinky - probeert voor Pacman te komen
+                x: 8 * TILE_SIZE + TILE_SIZE/2,
+                y: 9 * TILE_SIZE + TILE_SIZE/2,
+                color: '#FFB8FF',
+                dir: 3,
+                speed: 1.7,
+                type: 'ambush',
+                state: 'inHouse',
+                leavingTimer: 30,
+                target: { x: 0, y: 0 }
+            },
+            { // Inky - onvoorspelbaar
+                x: 10 * TILE_SIZE + TILE_SIZE/2,
+                y: 9 * TILE_SIZE + TILE_SIZE/2,
+                color: '#00FFFF',
+                dir: 3,
+                speed: 1.6,
+                type: 'random',
+                state: 'inHouse',
+                leavingTimer: 60,
+                target: { x: 0, y: 0 }
+            },
+            { // Clyde - schuw, gaat weg als Pacman dichtbij
+                x: 9 * TILE_SIZE + TILE_SIZE/2,
+                y: 8 * TILE_SIZE + TILE_SIZE/2,
+                color: '#FFB852',
+                dir: 3,
+                speed: 1.5,
+                type: 'coward',
+                state: 'inHouse',
+                leavingTimer: 90,
+                target: { x: 0, y: 0 }
+            }
+        ];
+        
         function initGame() {
-            currentMap = JSON.parse(JSON.stringify(mapTemplate));
-            score = 0;
-            lives = 3;
-            gameOver = false;
-            powerMode = 0;
+            // Reset game state
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.gameOver = false;
+            gameState.powerMode = 0;
+            gameState.dotsRemaining = 0;
             
-            pacman = { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 15 * TILE_SIZE + TILE_SIZE/2, dir: 0, nextDir: 0, speed: 2, mouth: 0, mouthSpeed: 0.1 };
-            
-            ghosts = [
-                { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FF0000', dir: 3, speed: 1.5, type: 'chase', state: 'normal' }, // Blinky
-                { x: 8 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FFB8FF', dir: 3, speed: 1.5, type: 'ambush', state: 'normal' }, // Pinky
-                { x: 10 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#00FFFF', dir: 3, speed: 1.5, type: 'random', state: 'normal' }, // Inky
-                { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 8 * TILE_SIZE + TILE_SIZE/2, color: '#FFB852', dir: 3, speed: 1.5, type: 'random', state: 'normal' }  // Clyde
-            ];
-
-            updateUI();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function updateUI() {
-            document.getElementById('score').innerText = score;
-            document.getElementById('lives').innerText = lives;
-        }
-
-        // Beweeglogica
-        function canMove(x, y, dir) {
-            let nx = x, ny = y;
-            const b = 10;
-            if (dir === 0) nx += b; if (dir === 1) ny += b; if (dir === 2) nx -= b; if (dir === 3) ny -= b;
-            const c = Math.floor(nx / TILE_SIZE), r = Math.floor(ny / TILE_SIZE);
-            return currentMap[r] && currentMap[r][c] !== 1 && currentMap[r][c] !== 4;
-        }
-
-        function moveEntity(e, isPacman = false) {
-            if (isPacman && e.dir !== e.nextDir) {
-                const cx = Math.floor(e.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
-                const cy = Math.floor(e.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
-                if (Math.abs(e.x - cx) < 4 && Math.abs(e.y - cy) < 4 && canMove(cx, cy, e.nextDir)) {
-                    e.x = cx; e.y = cy; e.dir = e.nextDir;
-                }
-            }
-
-            let mx = 0, my = 0;
-            if (e.dir === 0) mx = e.speed; if (e.dir === 1) my = e.speed; if (e.dir === 2) mx = -e.speed; if (e.dir === 3) my = -e.speed;
-
-            if (canMove(e.x + mx, e.y + my, e.dir)) {
-                e.x += mx; e.y += my;
-            } else if (!isPacman) {
-                e.dir = Math.floor(Math.random() * 4);
-            }
-
-            if (e.x < 0) e.x = canvas.width; if (e.x > canvas.width) e.x = 0;
-        }
-
-        // Ghost AI "Jacht" Logica
-        function updateGhosts() {
-            ghosts.forEach(g => {
-                if (g.state === 'eaten') {
-                    // Ga terug naar huis
-                    const homeX = 9 * TILE_SIZE + TILE_SIZE/2;
-                    const homeY = 9 * TILE_SIZE + TILE_SIZE/2;
-                    if (Math.abs(g.x - homeX) < 10 && Math.abs(g.y - homeY) < 10) g.state = 'normal';
-                }
-
-                // AI Beslissing op kruispunten
-                const cx = Math.floor(g.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
-                const cy = Math.floor(g.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
-
-                if (Math.abs(g.x - cx) < 2 && Math.abs(g.y - cy) < 2) {
-                    let bestDir = g.dir;
-                    let minDist = Infinity;
-
-                    // Target bepalen
-                    let targetX = pacman.x, targetY = pacman.y;
-                    if (powerMode > 0) { // Vluchten
-                        targetX = canvas.width - pacman.x;
-                        targetY = canvas.height - pacman.y;
-                    } else if (g.type === 'ambush') { // Pinky mikt voor Pacman
-                        if (pacman.dir === 0) targetX += TILE_SIZE * 4;
-                        else if (pacman.dir === 2) targetX -= TILE_SIZE * 4;
-                        else if (pacman.dir === 1) targetY += TILE_SIZE * 4;
-                        else targetY -= TILE_SIZE * 4;
+            // Tel dots
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    if (maze[y][x] === 2 || maze[y][x] === 3) {
+                        gameState.dotsRemaining++;
                     }
-
-                    [0,1,2,3].forEach(d => {
-                        if (d === (g.dir + 2) % 4) return; // Niet direct omdraaien
-                        if (canMove(cx, cy, d)) {
-                            let nx = cx, ny = cy;
-                            if (d === 0) nx += TILE_SIZE; if (d === 1) ny += TILE_SIZE; if (d === 2) nx -= TILE_SIZE; if (d === 3) ny -= TILE_SIZE;
-                            let dist = Math.hypot(nx - targetX, ny - targetY);
-                            if (dist < minDist) { minDist = dist; bestDir = d; }
+                }
+            }
+            
+            // Reset Pacman
+            pacman.x = 9 * TILE_SIZE + TILE_SIZE/2;
+            pacman.y = 15 * TILE_SIZE + TILE_SIZE/2;
+            pacman.dir = 0;
+            pacman.nextDir = 0;
+            
+            // Reset ghosts naar hun hok
+            ghosts.forEach((ghost, index) => {
+                ghost.x = (8 + (index % 3)) * TILE_SIZE + TILE_SIZE/2;
+                ghost.y = 9 * TILE_SIZE + TILE_SIZE/2;
+                ghost.dir = 3;
+                ghost.state = 'inHouse';
+                ghost.leavingTimer = index * 30;
+            });
+            
+            updateGameUI();
+        }
+        
+        function updateGameUI() {
+            document.getElementById('game-score').textContent = gameState.score;
+            document.getElementById('game-lives').textContent = gameState.lives;
+            document.getElementById('power-timer').textContent = Math.floor(gameState.powerMode / 60);
+        }
+        
+        function canMove(x, y, dir) {
+            let testX = x, testY = y;
+            const offset = 5;
+            
+            if (dir === 0) testX += offset;
+            else if (dir === 1) testY += offset;
+            else if (dir === 2) testX -= offset;
+            else if (dir === 3) testY -= offset;
+            
+            const gridX = Math.floor(testX / TILE_SIZE);
+            const gridY = Math.floor(testY / TILE_SIZE);
+            
+            if (gridX < 0 || gridX >= GRID_WIDTH || gridY < 0 || gridY >= GRID_HEIGHT) {
+                return false;
+            }
+            
+            return maze[gridY][gridX] !== 1;
+        }
+        
+        function movePacman() {
+            // Probeer volgende richting als Pacman in het midden van een tile is
+            const centerX = Math.floor(pacman.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+            const centerY = Math.floor(pacman.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+            
+            if (Math.abs(pacman.x - centerX) < 2 && Math.abs(pacman.y - centerY) < 2) {
+                if (pacman.dir !== pacman.nextDir && canMove(centerX, centerY, pacman.nextDir)) {
+                    pacman.dir = pacman.nextDir;
+                    pacman.x = centerX;
+                    pacman.y = centerY;
+                }
+            }
+            
+            // Beweeg in huidige richting
+            let moveX = 0, moveY = 0;
+            if (pacman.dir === 0) moveX = pacman.speed;
+            else if (pacman.dir === 1) moveY = pacman.speed;
+            else if (pacman.dir === 2) moveX = -pacman.speed;
+            else if (pacman.dir === 3) moveY = -pacman.speed;
+            
+            if (canMove(pacman.x + moveX, pacman.y + moveY, pacman.dir)) {
+                pacman.x += moveX;
+                pacman.y += moveY;
+            }
+            
+            // Warp door tunnels
+            if (pacman.x < 0) pacman.x = canvas.width;
+            if (pacman.x > canvas.width) pacman.x = 0;
+            
+            // Update mond animatie
+            pacman.mouthOpen += pacman.mouthSpeed;
+            if (pacman.mouthOpen > 0.3 || pacman.mouthOpen < 0) {
+                pacman.mouthSpeed *= -1;
+            }
+        }
+        
+        function updateGhostAI(ghost) {
+            // Ghost hok logica
+            if (ghost.state === 'inHouse') {
+                ghost.leavingTimer--;
+                if (ghost.leavingTimer <= 0) {
+                    ghost.state = 'leaving';
+                }
+                return;
+            }
+            
+            if (ghost.state === 'leaving') {
+                // Beweeg naar uitgang
+                if (ghost.y > 8 * TILE_SIZE + TILE_SIZE/2) {
+                    ghost.dir = 3; // Omhoog
+                } else {
+                    ghost.state = 'chasing';
+                }
+                return;
+            }
+            
+            // Bepaal target op basis van ghost type
+            let targetX = pacman.x;
+            let targetY = pacman.y;
+            
+            if (gameState.powerMode > 0 && ghost.state !== 'eaten') {
+                ghost.state = 'frightened';
+            }
+            
+            if (ghost.state === 'frightened') {
+                // Willekeurige beweging
+                if (Math.random() < 0.1) {
+                    ghost.dir = Math.floor(Math.random() * 4);
+                }
+                return;
+            }
+            
+            if (ghost.state === 'chasing') {
+                switch(ghost.type) {
+                    case 'chase': // Direct achter Pacman aan
+                        targetX = pacman.x;
+                        targetY = pacman.y;
+                        break;
+                    case 'ambush': // Probeer voor Pacman te komen
+                        if (pacman.dir === 0) targetX = pacman.x + TILE_SIZE * 4;
+                        else if (pacman.dir === 2) targetX = pacman.x - TILE_SIZE * 4;
+                        else if (pacman.dir === 1) targetY = pacman.y + TILE_SIZE * 4;
+                        else targetY = pacman.y - TILE_SIZE * 4;
+                        break;
+                    case 'random': // Semi-willekeurig
+                        if (Math.random() < 0.3) {
+                            targetX = Math.random() * canvas.width;
+                            targetY = Math.random() * canvas.height;
+                        }
+                        break;
+                    case 'coward': // Gaat weg als Pacman dichtbij is
+                        const distance = Math.sqrt(Math.pow(pacman.x - ghost.x, 2) + Math.pow(pacman.y - ghost.y, 2));
+                        if (distance < TILE_SIZE * 5) {
+                            targetX = 0;
+                            targetY = 0;
+                        }
+                        break;
+                }
+            }
+            
+            // Kies beste richting
+            const directions = [0, 1, 2, 3];
+            let bestDir = ghost.dir;
+            let bestDistance = Infinity;
+            
+            directions.forEach(dir => {
+                if (dir === (ghost.dir + 2) % 4) return; // Geen directe omdraai
+                
+                let testX = ghost.x, testY = ghost.y;
+                if (dir === 0) testX += TILE_SIZE;
+                else if (dir === 1) testY += TILE_SIZE;
+                else if (dir === 2) testX -= TILE_SIZE;
+                else if (dir === 3) testY -= TILE_SIZE;
+                
+                if (canMove(ghost.x, ghost.y, dir)) {
+                    const distance = Math.sqrt(Math.pow(testX - targetX, 2) + Math.pow(testY - targetY, 2));
+                    if (distance < bestDistance) {
+                        bestDistance = distance;
+                        bestDir = dir;
+                    }
+                }
+            });
+            
+            ghost.dir = bestDir;
+        }
+        
+        function moveGhost(ghost) {
+            // Snelheid aanpassen op basis van state
+            let speed = ghost.speed;
+            if (ghost.state === 'frightened') speed = 0.8;
+            if (ghost.state === 'eaten') speed = 3;
+            
+            // Beweeg
+            let moveX = 0, moveY = 0;
+            if (ghost.dir === 0) moveX = speed;
+            else if (ghost.dir === 1) moveY = speed;
+            else if (ghost.dir === 2) moveX = -speed;
+            else if (ghost.dir === 3) moveY = -speed;
+            
+            if (canMove(ghost.x + moveX, ghost.y + moveY, ghost.dir)) {
+                ghost.x += moveX;
+                ghost.y += moveY;
+            } else {
+                // Kies nieuwe richting
+                const directions = [0, 1, 2, 3].filter(dir => dir !== (ghost.dir + 2) % 4);
+                const validDirs = directions.filter(dir => canMove(ghost.x, ghost.y, dir));
+                if (validDirs.length > 0) {
+                    ghost.dir = validDirs[Math.floor(Math.random() * validDirs.length)];
+                }
+            }
+            
+            // Warp door tunnels
+            if (ghost.x < 0) ghost.x = canvas.width;
+            if (ghost.x > canvas.width) ghost.x = 0;
+            
+            // Terug naar hok als opgegeten
+            if (ghost.state === 'eaten') {
+                const homeX = 9 * TILE_SIZE + TILE_SIZE/2;
+                const homeY = 9 * TILE_SIZE + TILE_SIZE/2;
+                if (Math.abs(ghost.x - homeX) < 5 && Math.abs(ghost.y - homeY) < 5) {
+                    ghost.state = 'inHouse';
+                    ghost.leavingTimer = 60;
+                }
+            }
+        }
+        
+        function checkCollisions() {
+            // Check dot collection
+            const gridX = Math.floor(pacman.x / TILE_SIZE);
+            const gridY = Math.floor(pacman.y / TILE_SIZE);
+            
+            if (maze[gridY][gridX] === 2) {
+                maze[gridY][gridX] = 0;
+                gameState.score += 10;
+                gameState.dotsRemaining--;
+            } else if (maze[gridY][gridX] === 3) {
+                maze[gridY][gridX] = 0;
+                gameState.score += 50;
+                gameState.powerMode = 420; // 7 seconden
+                ghosts.forEach(g => {
+                    if (g.state !== 'inHouse' && g.state !== 'eaten') {
+                        g.state = 'frightened';
+                    }
+                });
+                gameState.dotsRemaining--;
+            }
+            
+            // Check ghost collisions
+            ghosts.forEach(ghost => {
+                const distance = Math.sqrt(Math.pow(pacman.x - ghost.x, 2) + Math.pow(pacman.y - ghost.y, 2));
+                
+                if (distance < TILE_SIZE * 0.8) {
+                    if (ghost.state === 'frightened') {
+                        // Eet ghost
+                        ghost.state = 'eaten';
+                        gameState.score += 200;
+                        gameState.powerMode = 0;
+                    } else if (ghost.state !== 'eaten' && ghost.state !== 'inHouse') {
+                        // Verlies leven
+                        gameState.lives--;
+                        
+                        if (gameState.lives <= 0) {
+                            gameState.gameOver = true;
+                            alert('Game Over! Beantwoord weer 5 vragen om opnieuw te spelen.');
+                            resetGame();
+                        } else {
+                            // Reset posities
+                            pacman.x = 9 * TILE_SIZE + TILE_SIZE/2;
+                            pacman.y = 15 * TILE_SIZE + TILE_SIZE/2;
+                            pacman.dir = 0;
+                            pacman.nextDir = 0;
+                            
+                            ghosts.forEach(g => {
+                                if (g.state !== 'inHouse') {
+                                    g.state = 'chasing';
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Check win conditie
+            if (gameState.dotsRemaining <= 0) {
+                gameState.gameOver = true;
+                alert('Gewonnen! Alle bolletjes opgegeten! Score: ' + gameState.score);
+                resetGame();
+            }
+        }
+        
+        function drawGame() {
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw maze
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const tile = maze[y][x];
+                    const posX = x * TILE_SIZE;
+                    const posY = y * TILE_SIZE;
+                    
+                    if (tile === 1) {
+                        // Wall
+                        ctx.fillStyle = '#1e40af';
+                        ctx.fillRect(posX, posY, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = '#0f172a';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(posX, posY, TILE_SIZE, TILE_SIZE);
+                    } else if (tile === 2) {
+                        // Dot
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(posX + TILE_SIZE/2, posY + TILE_SIZE/2, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (tile === 3) {
+                        // Power pellet
+                        ctx.fillStyle = '#fbbf24';
+                        ctx.beginPath();
+                        ctx.arc(posX + TILE_SIZE/2, posY + TILE_SIZE/2, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Glow effect
+                        ctx.shadowColor = '#fbbf24';
+                        ctx.shadowBlur = 10;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    } else if (tile === 4) {
+                        // Ghost house
+                        ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+                        ctx.fillRect(posX, posY, TILE_SIZE, TILE_SIZE);
+                    }
+                }
+            }
+            
+            // Draw ghosts
+            ghosts.forEach(ghost => {
+                let color = ghost.color;
+                let eyeColor = '#ffffff';
+                
+                if (ghost.state === 'frightened') {
+                    color = gameState.powerMode < 120 && Math.floor(Date.now()/200)%2 === 0 ? '#ffffff' : '#0000ff';
+                    eyeColor = '#ffffff';
+                } else if (ghost.state === 'eaten') {
+                    color = '#222222';
+                    eyeColor = '#ffffff';
+                }
+                
+                // Draw ghost body
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(ghost.x, ghost.y - 2, TILE_SIZE/2 - 3, Math.PI, 0, false);
+                ctx.lineTo(ghost.x + TILE_SIZE/2 - 3, ghost.y + TILE_SIZE/2 - 3);
+                
+                // Wavy bottom
+                for (let i = 0; i < 4; i++) {
+                    const x = ghost.x - TILE_SIZE/2 + 3 + (i * (TILE_SIZE - 6) / 3);
+                    const wave = Math.sin(Date.now()/200 + i) * 3;
+                    ctx.lineTo(x, ghost.y + TILE_SIZE/2 - 3 + wave);
+                }
+                
+                ctx.lineTo(ghost.x - TILE_SIZE/2 + 3, ghost.y + TILE_SIZE/2 - 3);
+                ctx.fill();
+                
+                // Draw eyes
+                ctx.fillStyle = eyeColor;
+                ctx.beginPath();
+                ctx.arc(ghost.x - 4, ghost.y - 4, 4, 0, Math.PI * 2);
+                ctx.arc(ghost.x + 4, ghost.y - 4, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw pupils
+                ctx.fillStyle = '#0000ff';
+                let pupilX = 0, pupilY = 0;
+                if (ghost.dir === 0) { pupilX = 2; pupilY = 0; }
+                else if (ghost.dir === 1) { pupilX = 0; pupilY = 2; }
+                else if (ghost.dir === 2) { pupilX = -2; pupilY = 0; }
+                else if (ghost.dir === 3) { pupilX = 0; pupilY = -2; }
+                
+                ctx.beginPath();
+                ctx.arc(ghost.x - 4 + pupilX, ghost.y - 4 + pupilY, 2, 0, Math.PI * 2);
+                ctx.arc(ghost.x + 4 + pupilX, ghost.y - 4 + pupilY, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw Pacman
+            ctx.save();
+            ctx.translate(pacman.x, pacman.y);
+            
+            // Rotate based on direction
+            let rotation = 0;
+            if (pacman.dir === 0) rotation = 0;
+            else if (pacman.dir === 1) rotation = Math.PI / 2;
+            else if (pacman.dir === 2) rotation = Math.PI;
+            else if (pacman.dir === 3) rotation = 3 * Math.PI / 2;
+            
+            ctx.rotate(rotation);
+            
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(0, 0, TILE_SIZE/2 - 2, pacman.mouthOpen, Math.PI * 2 - pacman.mouthOpen);
+            ctx.lineTo(0, 0);
+            ctx.fill();
+            
+            // Draw eye
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(4, -4, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function gameLoop() {
+            if (!gameUnlocked) return;
+            
+            movePacman();
+            
+            // Update ghosts
+            ghosts.forEach(ghost => {
+                updateGhostAI(ghost);
+                moveGhost(ghost);
+            });
+            
+            checkCollisions();
+            
+            // Update power mode
+            if (gameState.powerMode > 0) {
+                gameState.powerMode--;
+                if (gameState.powerMode === 0) {
+                    ghosts.forEach(g => {
+                        if (g.state === 'frightened') {
+                            g.state = 'chasing';
                         }
                     });
-                    g.dir = bestDir;
-                }
-
-                g.speed = (powerMode > 0 && g.state !== 'eaten') ? 0.7 : 1.6;
-                moveEntity(g);
-
-                // Collision
-                if (Math.hypot(pacman.x - g.x, pacman.y - g.y) < TILE_SIZE * 0.7) {
-                    if (powerMode > 0 && g.state !== 'eaten') {
-                        g.state = 'eaten';
-                        score += 200;
-                    } else if (g.state !== 'eaten') {
-                        lives--;
-                        if (lives <= 0) gameOver = true;
-                        else resetPositions();
-                    }
-                }
-            });
-        }
-
-        function resetPositions() {
-            pacman.x = 9 * TILE_SIZE + TILE_SIZE/2; pacman.y = 15 * TILE_SIZE + TILE_SIZE/2;
-            pacman.dir = 0; pacman.nextDir = 0;
-            ghosts.forEach((g, i) => {
-                g.x = (8 + (i % 3)) * TILE_SIZE + TILE_SIZE/2; g.y = 9 * TILE_SIZE + TILE_SIZE/2;
-                g.state = 'normal';
-            });
-            updateUI();
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Map
-            for (let r = 0; r < GRID_HEIGHT; r++) {
-                for (let c = 0; c < GRID_WIDTH; c++) {
-                    const t = currentMap[r][c];
-                    if (t === 1) { ctx.fillStyle = '#1e3a8a'; ctx.fillRect(c*TILE_SIZE+2, r*TILE_SIZE+2, TILE_SIZE-4, TILE_SIZE-4); }
-                    else if (t === 2) { ctx.fillStyle = '#ffd'; ctx.beginPath(); ctx.arc(c*TILE_SIZE+TILE_SIZE/2, r*TILE_SIZE+TILE_SIZE/2, 2, 0, 7); ctx.fill(); }
-                    else if (t === 3) { ctx.fillStyle = '#ffd'; ctx.beginPath(); ctx.arc(c*TILE_SIZE+TILE_SIZE/2, r*TILE_SIZE+TILE_SIZE/2, 6, 0, 7); ctx.fill(); }
                 }
             }
-            // Pacman
-            ctx.fillStyle = 'yellow'; ctx.beginPath();
-            const rot = pacman.dir * Math.PI/2;
-            pacman.mouth += pacman.mouthSpeed; if (pacman.mouth > 0.2 || pacman.mouth < 0) pacman.mouthSpeed *= -1;
-            ctx.moveTo(pacman.x, pacman.y);
-            ctx.arc(pacman.x, pacman.y, TILE_SIZE/2-2, rot + pacman.mouth, rot + 2*Math.PI - pacman.mouth);
-            ctx.fill();
-            // Ghosts
-            ghosts.forEach(g => {
-                ctx.fillStyle = (powerMode > 0 && g.state !== 'eaten') ? (powerMode < 100 && Math.floor(Date.now()/200)%2 ? 'white' : '#2121ff') : g.color;
-                if (g.state === 'eaten') ctx.globalAlpha = 0.3;
-                ctx.beginPath(); ctx.arc(g.x, g.y - 2, TILE_SIZE/2-3, Math.PI, 0);
-                ctx.lineTo(g.x + TILE_SIZE/2-3, g.y + TILE_SIZE/2-3);
-                ctx.lineTo(g.x - TILE_SIZE/2+3, g.y + TILE_SIZE/2-3);
-                ctx.fill(); ctx.globalAlpha = 1.0;
-            });
+            
+            drawGame();
+            updateGameUI();
+            
+            if (!gameState.gameOver) {
+                requestAnimationFrame(gameLoop);
+            }
         }
-
-        function gameLoop() {
-            if (gameOver) {
-                document.getElementById('status-text').innerText = "GAME OVER";
-                document.getElementById('overlay').classList.remove('hidden');
+        
+        function resetGame() {
+            initGame();
+            gameUnlocked = false;
+            correctAnswers = 0;
+            correctCountElement.textContent = correctAnswers;
+            updateStartGameButton();
+            
+            alert('Pacman spel gereset! Beantwoord 5 vragen opnieuw om te spelen.');
+        }
+        
+        function startGame() {
+            if (!gameUnlocked) {
+                alert('Beantwoord eerst 5 vragen correct om Pacman te spelen!');
                 return;
             }
-            moveEntity(pacman, true);
-            updateGhosts();
-
-            const c = Math.floor(pacman.x/TILE_SIZE), r = Math.floor(pacman.y/TILE_SIZE);
-            if (currentMap[r][c] === 2) { currentMap[r][c] = 0; score += 10; updateUI(); }
-            else if (currentMap[r][c] === 3) { currentMap[r][c] = 0; score += 50; powerMode = 400; updateUI(); }
-
-            if (powerMode > 0) powerMode--;
-            if (powerMode === 0) ghosts.forEach(g => g.state = 'normal');
-
-            if (!currentMap.some(row => row.includes(2))) {
-                gameOver = true;
-                document.getElementById('status-text').innerText = "GEWONNEN!";
-                document.getElementById('overlay').classList.remove('hidden');
-                return;
-            }
-
-            draw();
-            requestAnimationFrame(gameLoop);
+            
+            initGame();
+            canvas.focus();
+            gameLoop();
         }
-
-        window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowRight') pacman.nextDir = 0;
-            if (e.key === 'ArrowDown') pacman.nextDir = 1;
-            if (e.key === 'ArrowLeft') pacman.nextDir = 2;
-            if (e.key === 'ArrowUp') pacman.nextDir = 3;
+        
+        // ==================== EVENT LISTENERS ====================
+        addWordBtn.addEventListener('click', addWord);
+        wordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addWord();
         });
-
-        // Start de quiz bij laden
+        
+        generateQuestionsBtn.addEventListener('click', generateQuestionsWithAI);
+        startGameBtn.addEventListener('click', startGame);
+        nextBtn.addEventListener('click', nextQuestion);
+        resetGameBtn.addEventListener('click', resetGame);
+        
+        // Keyboard controls voor Pacman
+        document.addEventListener('keydown', function(e) {
+            if (!gameUnlocked) return;
+            
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                
+                switch(e.key) {
+                    case 'ArrowUp': pacman.nextDir = 3; break;
+                    case 'ArrowDown': pacman.nextDir = 1; break;
+                    case 'ArrowLeft': pacman.nextDir = 2; break;
+                    case 'ArrowRight': pacman.nextDir = 0; break;
+                }
+            }
+        });
+        
+        // Focus canvas voor keyboard controls
+        canvas.addEventListener('click', function() {
+            this.focus();
+        });
+        
+        // ==================== INITIALISATIE ====================
+        updateWordList();
         loadQuestion();
+        initGame();
+        
+        console.log('Game geïnitialiseerd!');
     </script>
 </body>
 </html>

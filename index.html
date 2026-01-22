@@ -10,12 +10,13 @@
         .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 20px; }
         header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; }
         .section { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #334155; }
-        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 10px 0; min-height: 100px; border-left: 5px solid #fbbf24; text-align: center; font-weight: bold; }
+        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 10px 0; min-height: 100px; border-left: 5px solid #fbbf24; text-align: center; font-weight: bold; font-size: 1.1rem; }
         .timer-bar { width: 100%; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
         .timer-fill { width: 100%; height: 100%; background: #ef4444; transition: width 0.1s linear; }
-        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; }
-        .correct { background: #15803d !important; }
-        .incorrect { background: #b91c1c !important; }
+        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .option-btn:hover { background: #475569; border-color: #fbbf24; }
+        .correct { background: #15803d !important; border-color: #22c55e !important; }
+        .incorrect { background: #b91c1c !important; border-color: #ef4444 !important; }
         canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; }
         #highscore-list { list-style: none; padding: 0; }
         #highscore-list li { background: #0f172a; padding: 8px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; border: 1px solid #1e40af; }
@@ -27,11 +28,11 @@
     <header><h1 class="text-3xl font-black text-yellow-400">PACMAN MASTER XL</h1></header>
 
     <div class="section">
-        <div class="flex justify-between mb-2"><h3 class="font-bold text-blue-400">Quiz</h3><span class="text-yellow-400">Score: <span id="pts">0</span>/5</span></div>
+        <div class="flex justify-between mb-2"><h3 class="font-bold text-blue-400">Quiz</h3><span class="text-yellow-400 font-bold">Punten: <span id="pts">0</span>/5</span></div>
         <div class="timer-bar"><div id="t-fill" class="timer-fill"></div></div>
         <div id="q-text" class="question-box">Klaar voor de start?</div>
-        <div id="ans-zone"><button class="option-btn bg-green-600 text-center font-bold" onclick="startQuiz()">START</button></div>
-        <button id="v-knop" class="option-btn mt-4 hidden bg-yellow-500 text-black font-bold text-center" onclick="goNext()">VOLGENDE ➔</button>
+        <div id="ans-zone"><button class="option-btn bg-green-600 text-center font-bold" onclick="startQuiz()">START DE QUIZ</button></div>
+        <button id="v-knop" class="option-btn mt-4 hidden bg-yellow-500 text-black font-bold text-center" onclick="goNext()">VOLGENDE VRAAG ➔</button>
         
         <div class="mt-8 border-t border-slate-700 pt-4">
             <h4 class="text-yellow-400 font-bold mb-2 uppercase text-sm">Top Scores</h4>
@@ -41,24 +42,50 @@
 
     <div class="section">
         <div class="flex justify-between p-3 bg-slate-900 rounded mb-4 border border-slate-700 font-bold">
-            <span class="text-yellow-400 text-xl">SCORE: <span id="g-score">0</span></span>
+            <span class="text-yellow-400 text-xl">GAME SCORE: <span id="g-score">0</span></span>
             <span class="text-red-500 text-xl">LEVENS: <span id="g-lives">3</span></span>
         </div>
         <canvas id="gameCanvas" width="800" height="460"></canvas>
-        <button id="game-btn" class="w-full p-4 mt-4 rounded font-bold bg-slate-800 text-slate-600" disabled onclick="playGame()">WIN DE QUIZ OM TE SPELEN</button>
+        <button id="game-btn" class="w-full p-4 mt-4 rounded font-bold bg-slate-800 text-slate-600 cursor-not-allowed" disabled onclick="playGame()">WIN DE QUIZ (5 PUNTEN) OM TE SPELEN</button>
     </div>
 </div>
 
 <script>
-const woordenDB = [
-    { q: "De ober leverde een ____ prestatie in het drukke restaurant.", a: "uitmuntende", o: ["onstuimige", "flauwe"] },
-    { q: "Wat is een ander woord voor 'correspondentie'?", a: "briefwisseling", o: ["armstoel", "afspraak"] },
-    { q: "De paarden aten uit grote houten ____.", a: "troggen", o: ["flora", "fauteuils"] },
-    { q: "Wat betekent 'flora'?", a: "de plantenwereld", o: ["de dierenwereld", "oude gebouwen"] },
-    { q: "Hij toonde veel ____ voor de oude leraar.", a: "eerbied", o: ["ophef", "correspondentie"] }
+// --- WOORDEN DATABASE: Voeg hier simpelweg je woorden toe! ---
+const woordenLijst = [
+    { w: "uitmuntend", b: "zeer goed", z: "De leerling haalde een ____ resultaat voor het examen." },
+    { w: "crèche", b: "kinderdagverblijf", z: "De baby gaat drie dagen per week naar de ____." },
+    { w: "troggen", b: "voerbakken", z: "De boer vulde de houten ____ met vers water voor de paarden." },
+    { w: "beroering", b: "ophef", z: "Het verrassende nieuws zorgde voor veel ____ in het dorp." },
+    { w: "indrukwekkend", b: "groots", z: "Het uitzicht vanaf de berg was werkelijk ____." },
+    { w: "fauteuil", b: "armstoel", z: "Opa zit het liefst in zijn leren ____ bij de open haard." },
+    { w: "correspondentie", b: "briefwisseling", z: "Zijn zakelijke ____ verliep vroeger nog per post." },
+    { w: "barok", b: "stijl met overdadige vormen", z: "De kerk was prachtig versierd in de ____ stijl." },
+    { w: "flora", b: "plantenwereld", z: "In dit natuurgebied vind je een unieke ____." },
+    { w: "onstuimig", b: "stormachtig", z: "Door het ____ weer konden de boten niet uitvaren." },
+    { w: "eerbied", b: "respect", z: "Je moet ____ tonen voor de natuur." }
 ];
 
 let qIdx = 0, pnts = 0, activeQ = [], timer, timeRemaining;
+
+// Genereer vragen op basis van de lijst
+function generateQuestions() {
+    return woordenLijst.map(item => {
+        const isSentence = Math.random() > 0.5;
+        // Pak 2 willekeurige foute antwoorden uit de rest van de lijst
+        const distractors = woordenLijst
+            .filter(x => x.w !== item.w)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 2)
+            .map(x => isSentence ? x.w : x.b);
+
+        return {
+            q: isSentence ? item.z : `Wat is de betekenis van: "${item.w}"?`,
+            a: isSentence ? item.w : item.b,
+            o: distractors
+        };
+    }).sort(() => 0.5 - Math.random());
+}
 
 function updateHighscores() {
     const scores = JSON.parse(localStorage.getItem('pacmanScores') || '[]');
@@ -68,7 +95,8 @@ function updateHighscores() {
 }
 
 function startQuiz() {
-    pnts = 0; qIdx = 0; activeQ = [...woordenDB].sort(() => 0.5 - Math.random());
+    pnts = 0; qIdx = 0; 
+    activeQ = generateQuestions();
     document.getElementById('pts').innerText = "0";
     showQ();
 }
@@ -84,15 +112,16 @@ function showQ() {
     zone.innerHTML = "";
     
     timer = setInterval(() => {
-        timeRemaining -= 1;
-        document.getElementById('t-fill').style.width = timeRemaining + "%";
+        timeRemaining -= 1.2;
+        document.getElementById('t-fill').style.width = Math.max(0, timeRemaining) + "%";
         if(timeRemaining <= 0) {
             clearInterval(timer);
             checkAnswer(null, v.a);
         }
     }, 100);
 
-    [v.a, ...v.o].sort(() => 0.5 - Math.random()).forEach(opt => {
+    const opties = [v.a, ...v.o].sort(() => 0.5 - Math.random());
+    opties.forEach(opt => {
         const b = document.createElement('button');
         b.className = "option-btn";
         b.innerText = opt;
@@ -104,23 +133,28 @@ function showQ() {
 function checkAnswer(chosen, correct, btn) {
     clearInterval(timer);
     document.querySelectorAll('#ans-zone button').forEach(k => k.disabled = true);
+    
     if(chosen === correct) {
         if(btn) btn.classList.add('correct');
-        pnts++; document.getElementById('pts').innerText = pnts;
-    } else if(btn) {
-        btn.classList.add('incorrect');
+        pnts++; 
+        document.getElementById('pts').innerText = pnts; // Score direct updaten!
+    } else {
+        if(btn) btn.classList.add('incorrect');
     }
+
     if(pnts >= 5) {
         let gb = document.getElementById('game-btn');
-        gb.disabled = false; gb.classList.add('bg-yellow-500', 'text-black');
-        gb.innerText = "START PACMAN XL";
+        gb.disabled = false; 
+        gb.classList.remove('bg-slate-800', 'text-slate-600');
+        gb.classList.add('bg-yellow-500', 'text-black');
+        gb.innerText = "START PACMAN XL (BESCHIKBAAR)";
     }
     document.getElementById('v-knop').classList.remove('hidden');
 }
 
 function goNext() { qIdx++; showQ(); }
 
-// PACMAN ENGINE
+// --- PACMAN ENGINE ---
 const cvs = document.getElementById('gameCanvas'), ctx = cvs.getContext('2d');
 const T = 20; 
 let running = false, score = 0, lives = 3;

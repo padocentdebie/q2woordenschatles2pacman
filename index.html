@@ -3,72 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Woordenschat PRO - Final Alignment</title>
+    <title>Pacman Woordenschat PRO - XL Maze</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: #020617; color: #fff; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
-        header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; margin-bottom: 10px; }
-        h1 { color: #fbbf24; text-transform: uppercase; font-size: 1.8rem; }
-        
+        .container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        header { grid-column: span 2; text-align: center; padding: 15px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; }
         .section { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #334155; }
-        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 15px 0; min-height: 120px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.2em; line-height: 1.4; }
-        
-        .option-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 10px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; font-size: 1rem; transition: all 0.2s; }
-        .option-btn:hover:not(:disabled) { background: #475569; transform: translateX(5px); }
-        .option-btn:disabled { cursor: default; }
-        .correct { background: #15803d !important; border-color: #22c55e !important; font-weight: bold; }
-        .incorrect { background: #b91c1c !important; border-color: #ef4444 !important; opacity: 0.8; }
-        
-        canvas { background: #000; border: 4px solid #334155; border-radius: 10px; display: block; margin: 0 auto; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .start-game-btn { 
-            width: 100%; padding: 20px; font-size: 1.4rem; font-weight: bold; border-radius: 10px; border: none; 
-            background: #334155; color: #64748b; cursor: not-allowed; margin-top: 20px; transition: all 0.3s;
-        }
+        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 15px 0; min-height: 120px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.1em; }
+        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; transition: 0.2s; }
+        .option-btn:hover:not(:disabled) { background: #475569; border-color: #fbbf24; }
+        .correct { background: #15803d !important; }
+        .incorrect { background: #b91c1c !important; }
+        canvas { background: #000; border: 4px solid #1e40af; border-radius: 10px; display: block; margin: 0 auto; }
         .unlocked { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; cursor: pointer !important; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0px #f59e0b; } 50% { transform: scale(1.02); box-shadow: 0 0 25px #f59e0b; } 100% { transform: scale(1); box-shadow: 0 0 0px #f59e0b; } }
-        
-        .stats-bar { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 12px; background: #0f172a; border-radius: 8px; color: #fbbf24; font-weight: bold; font-size: 1.1rem; }
-        .feedback-text { height: 40px; text-align: center; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Pacman Woordenschat PRO</h1>
-        <p>Scoor 5 punten in de quiz om Pacman vrij te spelen!</p>
+        <h1 class="text-3xl font-black text-yellow-400">PACMAN XL: VOCABULARY EDITION</h1>
+        <p>Haal 5 punten om de XL Maze te ontgrendelen!</p>
     </header>
 
     <div class="section">
-        <h3 class="text-xl font-bold mb-4 text-blue-400 flex justify-between items-center">
-            <span>Woordentest</span>
-            <span class="text-sm bg-blue-900 px-2 py-1 rounded">Punten: <span id="correct-count">0</span>/5</span>
-        </h3>
-        
-        <div id="quiz-container">
-            <div id="question-box" class="question-box">Klik op de startknop om de quiz te laden!</div>
+        <h3 class="text-xl font-bold mb-4 text-blue-400">Woordentest (<span id="correct-count">0</span>/5)</h3>
+        <div id="quiz-area">
+            <div id="question-box" class="question-box">Klik op de knop om te starten!</div>
             <div id="options-container">
-                <button class="option-btn" style="background: #10b981; text-align: center; font-weight: bold;" onclick="initQuiz()">START DE QUIZ</button>
+                <button class="option-btn" style="background:#10b981; text-align:center;" onclick="initQuiz()">START QUIZ</button>
             </div>
-            <div id="feedback" class="feedback-text"></div>
-            <button id="next-btn" class="option-btn" style="display:none; background:#fbbf24; color:black; text-align:center; font-weight:bold; border:none;" onclick="renderQuestion()">VOLGENDE VRAAG ➔</button>
+            <div id="feedback" class="h-8 text-center font-bold mt-2"></div>
+            <button id="next-btn" class="option-btn mt-4" style="display:none; background:#fbbf24; color:black; text-align:center; font-weight:bold;" onclick="renderQuestion()">VOLGENDE VRAAG ➔</button>
         </div>
     </div>
 
     <div class="game-section section">
-        <div class="stats-bar">
-            <span>Score: <span id="game-score">0</span></span>
-            <span>❤️ Levens: <span id="game-lives">3</span></span>
+        <div class="flex justify-between items-center mb-4 bg-slate-900 p-3 rounded-lg border border-slate-700">
+            <span class="text-yellow-400 font-bold">SCORE: <span id="game-score" class="text-white text-xl">0</span></span>
+            <span class="text-red-500 font-bold">LIVES: <span id="game-lives" class="text-white text-xl">3</span></span>
+            <span id="power-indicator" class="hidden text-green-400 animate-bounce">POWER-UP!</span>
         </div>
-        <canvas id="gameCanvas" width="560" height="300"></canvas>
-        <button id="start-game-btn" class="start-game-btn" disabled onclick="startGame()">SPEL VERGRENDELD</button>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <button id="start-game-btn" class="w-full p-4 mt-4 rounded-xl font-bold bg-slate-700 text-slate-500" disabled onclick="startGame()">SPEL VERGRENDELD</button>
     </div>
 </div>
 
 <script>
-// ================= DATA =================
 const vocabData = [
     { w: "zeer goede", c: "uitmuntende", o: ["aangename", "flinke"] },
     { w: "crèche", c: "kinderdagverblijf", o: ["gietemmer", "mensen met wie je verbonden bent"] },
@@ -85,260 +69,156 @@ const vocabData = [
     { w: "flora", c: "plantenwereld", o: ["bodemkunde", "dierenwereld"] }
 ];
 
-let activeQuestions = [];
-let currentIdx = 0;
-let points = 0;
-let gameUnlocked = false;
+let activeQuestions = [], currentIdx = 0, points = 0;
 
-// ================= QUIZ LOGICA =================
 function initQuiz() {
-    points = 0;
-    currentIdx = 0;
+    points = 0; currentIdx = 0;
     document.getElementById('correct-count').innerText = "0";
     activeQuestions = [...vocabData].sort(() => Math.random() - 0.5);
     renderQuestion();
 }
 
 function renderQuestion() {
-    if (currentIdx >= activeQuestions.length) {
-        document.getElementById('question-box').innerText = "Quiz voltooid! Start opnieuw voor meer punten.";
-        document.getElementById('options-container').innerHTML = `<button class="option-btn" style="background: #10b981; text-align: center; font-weight: bold;" onclick="initQuiz()">OPNIEUW STARTEN</button>`;
-        document.getElementById('next-btn').style.display = 'none';
-        return;
-    }
-
+    if (currentIdx >= activeQuestions.length) { initQuiz(); return; }
     const q = activeQuestions[currentIdx];
     const options = [q.c, ...q.o].sort(() => Math.random() - 0.5);
-    
-    document.getElementById('question-box').innerText = `Wat is de betekenis van: "${q.w}"?`;
+    document.getElementById('question-box').innerText = `Wat betekent: "${q.w}"?`;
     document.getElementById('feedback').innerText = "";
     document.getElementById('next-btn').style.display = "none";
-    
     const container = document.getElementById('options-container');
     container.innerHTML = "";
-    
     options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.innerText = opt;
-        btn.onclick = () => handleAnswer(opt, q.c, btn);
+        btn.onclick = () => {
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            if(opt === q.c) {
+                btn.classList.add('correct');
+                points++; document.getElementById('correct-count').innerText = points;
+                if(points >= 5) {
+                    const sb = document.getElementById('start-game-btn');
+                    sb.disabled = false; sb.classList.add('unlocked'); sb.innerText = "START XL PACMAN";
+                }
+            } else { btn.classList.add('incorrect'); }
+            currentIdx++; document.getElementById('next-btn').style.display = "block";
+        };
         container.appendChild(btn);
     });
 }
 
-function handleAnswer(selected, correct, btn) {
-    const allBtns = document.querySelectorAll('.option-btn');
-    allBtns.forEach(b => b.disabled = true);
-
-    if (selected === correct) {
-        btn.classList.add('correct');
-        document.getElementById('feedback').innerText = "GOED ZO! 🎉";
-        document.getElementById('feedback').style.color = "#22c55e";
-        points++;
-        document.getElementById('correct-count').innerText = points;
-        if (points >= 5) unlockGame();
-    } else {
-        btn.classList.add('incorrect');
-        document.getElementById('feedback').innerText = "Helaas, het was: " + correct;
-        document.getElementById('feedback').style.color = "#ef4444";
-    }
-
-    currentIdx++;
-    document.getElementById('next-btn').style.display = "block";
-}
-
-function unlockGame() {
-    if(gameUnlocked) return;
-    gameUnlocked = true;
-    const btn = document.getElementById('start-game-btn');
-    btn.disabled = false;
-    btn.classList.add('unlocked');
-    btn.innerText = "START PACMAN (NU BESCHIKBAAR!)";
-}
-
-// ================= PACMAN LOGICA =================
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const tileSize = 20;
-
-let gameRunning = false;
-let gameScore = 0;
-let gameLives = 3;
-let powerTimer = 0;
-let pacman = { x: 20, y: 20, dir: 0, nextDir: 0, speed: 2 };
+// ================= GAME LOGICA XL =================
+const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+const TILE = 25;
+let gameRunning = false, score = 0, lives = 3, power = 0;
+let pacman = { x: 25, y: 25, dir: 0, nextDir: 0, speed: 2.5 };
 let ghosts = [];
 
-const mazeMap = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,2,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2,2,1,1,2,2,3,1],
-    [1,2,1,1,2,1,1,1,1,2,1,1,2,1,1,1,1,2,1,1,1,2,1,1,2,1,2,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,2,1,1,2,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,2,1],
-    [1,2,2,2,2,1,1,2,2,2,1,1,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
-    [1,1,1,1,2,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1],
-    [1,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0,0,0,1],
-    [1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1],
-    [1,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+const maze = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,3,1],
+    [1,2,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,1,1,2,1],
+    [1,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,1],
+    [1,1,1,1,1,1,2,1,1,1,1,1,2,1,2,1,1,1,2,1,2,1,1,1,1,1,2,1,1,1,1,1],
+    [1,0,0,0,0,1,2,1,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,1,2,2,1,0,0,0,1],
+    [1,1,1,1,1,1,2,1,2,1,1,1,0,0,0,0,0,0,1,1,1,2,1,2,1,1,2,1,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,2,1],
+    [1,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,1],
+    [1,2,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,2,1,1,1,1,2,1,1,2,1,2,1],
+    [1,2,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+    [1,2,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1],
+    [1,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,1,2,2,2,2,2,2,1],
+    [1,1,1,1,1,1,2,1,1,1,1,1,2,1,2,1,1,1,2,1,2,1,1,1,1,1,2,1,1,1,1,1],
+    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
-let currentMaze = mazeMap.map(row => [...row]);
+let curMap = [];
 
-function drawMaze() {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    for(let r=0; r < currentMaze.length; r++) {
-        for(let c=0; c < currentMaze[r].length; c++) {
-            let x = c * tileSize;
-            let y = r * tileSize;
-            if(currentMaze[r][c] === 1) {
-                ctx.fillStyle = "#1e40af";
-                ctx.fillRect(x + 2, y + 2, tileSize - 4, tileSize - 4);
-            } else if(currentMaze[r][c] === 2) {
-                ctx.fillStyle = "#fbbf24";
-                ctx.beginPath(); ctx.arc(x + 10, y + 10, 2, 0, Math.PI*2); ctx.fill();
-            } else if(currentMaze[r][c] === 3) {
-                ctx.fillStyle = "#fff";
-                ctx.beginPath(); ctx.arc(x + 10, y + 10, 6, 0, Math.PI*2); ctx.fill();
+function draw() {
+    ctx.fillStyle = "black"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let r=0; r<curMap.length; r++) {
+        for(let c=0; c<curMap[r].length; c++) {
+            let x = c*TILE, y = r*TILE;
+            if(curMap[r][c]===1) {
+                ctx.fillStyle = "#1e40af"; ctx.roundRect ? ctx.fill(new Path2D(`M${x+2} ${y+2} h${TILE-4} v${TILE-4} h-${TILE-4} z`)) : ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
+            } else if(curMap[r][c]===2) {
+                ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,2,0,7); ctx.fill();
+            } else if(curMap[r][c]===3) {
+                ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,6,0,7); ctx.fill();
             }
         }
     }
+    // Pacman
+    ctx.fillStyle = "yellow"; ctx.beginPath();
+    let mouth = Math.sin(Date.now()/100)*0.2 + 0.2;
+    ctx.arc(pacman.x+TILE/2, pacman.y+TILE/2, 10, (mouth + pacman.dir*0.5)*Math.PI, (2-mouth + pacman.dir*0.5)*Math.PI);
+    ctx.lineTo(pacman.x+TILE/2, pacman.y+TILE/2); ctx.fill();
+    // Ghosts
+    ghosts.forEach(g => {
+        ctx.fillStyle = power > 0 ? "#2563eb" : g.color;
+        ctx.beginPath(); ctx.arc(g.x+TILE/2, g.y+TILE/2, 10, Math.PI, 0);
+        ctx.lineTo(g.x+TILE-4, g.y+TILE-4); ctx.lineTo(g.x+4, g.y+TILE-4); ctx.fill();
+    });
 }
 
-function initEntities() {
-    // Pacman exact gecentreerd op (1,1) -> x:20, y:20
-    pacman = { x: 20, y: 20, dir: 0, nextDir: 0, speed: 2 };
-    ghosts = [
-        { x: 240, y: 140, color: '#ef4444', dir: 0, speed: 1.5 },
-        { x: 280, y: 140, color: '#ec4899', dir: 2, speed: 1.2 }
-    ];
+function canMove(x,y,dir) {
+    let nx = x, ny = y, margin = 4;
+    if(dir===0) nx+=margin; if(dir===1) ny+=margin; if(dir===2) nx-=margin; if(dir===3) ny-=margin;
+    let c = Math.floor((nx+TILE/2)/TILE), r = Math.floor((ny+TILE/2)/TILE);
+    return curMap[r] && curMap[r][c] !== 1;
 }
 
-function canMove(x, y, dir) {
-    // We checken de hoekpunten van de collision box
-    let nx = x, ny = y;
-    const margin = 7; // Iets kleiner dan 10 om soepel te draaien
-    
-    if(dir === 0) nx += margin; 
-    if(dir === 1) ny += margin;
-    if(dir === 2) nx -= margin; 
-    if(dir === 3) ny -= margin;
-    
-    const col = Math.floor(nx / tileSize);
-    const row = Math.floor(ny / tileSize);
-    return currentMaze[row] && currentMaze[row][col] !== 1;
-}
-
-function gameLoop() {
+function loop() {
     if(!gameRunning) return;
-
-    // Movement: Alleen draaien als we bijna exact in het midden van een tile zijn
-    const centerDistX = Math.abs((pacman.x + 10) % tileSize - 10);
-    const centerDistY = Math.abs((pacman.y + 10) % tileSize - 10);
-
-    if (pacman.dir !== pacman.nextDir) {
-        if (centerDistX < 3 && centerDistY < 3) {
-            const gridX = Math.round(pacman.x / tileSize) * tileSize;
-            const gridY = Math.round(pacman.y / tileSize) * tileSize;
-            
-            if (canMove(gridX + 10, gridY + 10, pacman.nextDir)) {
-                pacman.x = gridX;
-                pacman.y = gridY;
-                pacman.dir = pacman.nextDir;
-            }
+    // Smooth turn logic
+    if(pacman.dir !== pacman.nextDir) {
+        if(Math.abs(pacman.x%TILE) < 4 && Math.abs(pacman.y%TILE) < 4) {
+            let gx = Math.round(pacman.x/TILE)*TILE, gy = Math.round(pacman.y/TILE)*TILE;
+            if(canMove(gx,gy,pacman.nextDir)) { pacman.x=gx; pacman.y=gy; pacman.dir=pacman.nextDir; }
         }
     }
-
     let dx=0, dy=0;
-    if(pacman.dir===0) dx=pacman.speed; 
-    if(pacman.dir===1) dy=pacman.speed;
-    if(pacman.dir===2) dx=-pacman.speed; 
-    if(pacman.dir===3) dy=-pacman.speed;
-    
-    // Bewegen als het pad vrij is
-    if(canMove(pacman.x + 10 + dx, pacman.y + 10 + dy, pacman.dir)) {
-        pacman.x += dx; 
-        pacman.y += dy;
+    if(pacman.dir===0) dx=pacman.speed; if(pacman.dir===1) dy=pacman.speed;
+    if(pacman.dir===2) dx=-pacman.speed; if(pacman.dir===3) dy=-pacman.speed;
+    if(canMove(pacman.x+dx, pacman.y+dy, pacman.dir)) { pacman.x+=dx; pacman.y+=dy; }
+
+    let pr = Math.floor((pacman.y+TILE/2)/TILE), pc = Math.floor((pacman.x+TILE/2)/TILE);
+    if(curMap[pr][pc] > 1) {
+        if(curMap[pr][pc]===2) score+=10; else { score+=50; power=400; document.getElementById('power-indicator').classList.remove('hidden'); }
+        curMap[pr][pc]=0;
     }
+    if(power>0) { power--; if(power===0) document.getElementById('power-indicator').classList.add('hidden'); }
 
-    // Eten: Check het middelpunt van pacman
-    const pr = Math.floor((pacman.y + 10) / tileSize);
-    const pc = Math.floor((pacman.x + 10) / tileSize);
-    
-    if(currentMaze[pr] && currentMaze[pr][pc] > 1) { 
-        if(currentMaze[pr][pc] === 2) gameScore += 10;
-        if(currentMaze[pr][pc] === 3) { gameScore += 50; powerTimer = 400; }
-        currentMaze[pr][pc] = 0; 
-    }
-
-    if(powerTimer > 0) powerTimer--;
-
-    // Ghost Logic
     ghosts.forEach(g => {
-        const gx = g.x + 10, gy = g.y + 10;
-        if(Math.random() < 0.05 || !canMove(gx, gy, g.dir)) {
-            g.dir = Math.floor(Math.random()*4);
-        }
-        let gdx=0, gdy=0;
-        if(g.dir===0) gdx=g.speed; if(g.dir===1) gdy=g.speed;
-        if(g.dir===2) gdx=-g.speed; if(g.dir===3) gdy=-g.speed;
-        if(canMove(gx+gdx, gy+gdy, g.dir)) { g.x += gdx; g.y += gdy; }
-
-        if(Math.hypot(pacman.x - g.x, pacman.y - g.y) < 15) {
-            if(powerTimer > 0) {
-                g.x = 240; g.y = 140; gameScore += 200;
-            } else {
-                gameLives--;
-                if(gameLives <= 0) {
-                    gameRunning = false;
-                    alert("GAME OVER! Je eindscore: " + gameScore);
-                } else {
-                    initEntities();
-                }
-            }
+        if(Math.random()<0.02 || !canMove(g.x, g.y, g.dir)) g.dir = Math.floor(Math.random()*4);
+        let gdx=0, gdy=0, gs = power>0?1:1.5;
+        if(g.dir===0) gdx=gs; if(g.dir===1) gdy=gs; if(g.dir===2) gdx=-gs; if(g.dir===3) gdy=-gs;
+        if(canMove(g.x+gdx, g.y+gdy, g.dir)) { g.x+=gdx; g.y+=gdy; }
+        if(Math.hypot(pacman.x-g.x, pacman.y-g.y)<15) {
+            if(power>0) { g.x=350; g.y=200; score+=200; }
+            else { lives--; if(lives<=0) { gameRunning=false; alert("GAME OVER! Score: "+score); } else { pacman.x=TILE; pacman.y=TILE; } }
         }
     });
 
-    document.getElementById('game-score').innerText = gameScore;
-    document.getElementById('game-lives').innerText = gameLives;
-    
-    drawMaze();
-    
-    // Render Pacman (exact gecentreerd tekenen)
-    ctx.fillStyle = "yellow";
-    ctx.beginPath();
-    const mouthOpen = Math.sin(Date.now() / 100) * 0.2 + 0.2;
-    ctx.arc(pacman.x+10, pacman.y+10, 8, (mouthOpen + pacman.dir*0.5)*Math.PI, (2 - mouthOpen + pacman.dir*0.5)*Math.PI);
-    ctx.lineTo(pacman.x+10, pacman.y+10); 
-    ctx.fill();
-
-    // Render Ghosts
-    ghosts.forEach(g => {
-        ctx.fillStyle = powerTimer > 0 ? "#2563eb" : g.color;
-        ctx.beginPath(); ctx.arc(g.x+10, g.y+10, 8, Math.PI, 0);
-        ctx.lineTo(g.x+18, g.y+18); ctx.lineTo(g.x+2, g.y+18); ctx.fill();
-    });
-
-    requestAnimationFrame(gameLoop);
+    document.getElementById('game-score').innerText = score;
+    document.getElementById('game-lives').innerText = lives;
+    draw(); requestAnimationFrame(loop);
 }
 
 function startGame() {
-    if(!gameUnlocked || gameRunning) return;
-    currentMaze = mazeMap.map(row => [...row]);
-    gameScore = 0; gameLives = 3; gameRunning = true;
-    initEntities();
-    gameLoop();
+    curMap = maze.map(r => [...r]); score=0; lives=3; gameRunning=true;
+    pacman = { x: TILE, y: TILE, dir: 0, nextDir: 0, speed: 2.5 };
+    ghosts = [{x:350, y:200, color:'#ef4444', dir:0}, {x:400, y:200, color:'#ec4899', dir:2}, {x:375, y:225, color:'#06b6d4', dir:3}];
+    loop();
 }
 
 window.addEventListener("keydown", e => {
-    if(e.key === 'ArrowRight') pacman.nextDir = 0;
-    if(e.key === 'ArrowDown') pacman.nextDir = 1;
-    if(e.key === 'ArrowLeft') pacman.nextDir = 2;
-    if(e.key === 'ArrowUp') pacman.nextDir = 3;
-    if(e.key.includes("Arrow")) e.preventDefault();
+    const keys = {ArrowRight:0, ArrowDown:1, ArrowLeft:2, ArrowUp:3};
+    if(keys[e.key] !== undefined) { e.preventDefault(); pacman.nextDir = keys[e.key]; }
 });
-
-drawMaze();
 </script>
 </body>
 </html>

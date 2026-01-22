@@ -3,546 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Woordenschatspel met Pacman XL</title>
+    <title>Pac-Man: Ghost Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
         body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: #f1f5f9;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            background-color: #111;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
         }
-        
-        header {
-            text-align: center;
-            padding: 30px;
-            background: rgba(30, 41, 59, 0.7);
-            border-radius: 20px;
-            border: 2px solid #3b82f6;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+        canvas {
+            border: 4px solid #222;
+            box-shadow: 0 0 20px rgba(0,0,255,0.3);
+            background-color: black;
+            max-width: 100%;
         }
-        
-        h1 {
-            color: #fbbf24;
-            font-size: 3rem;
+        .stats {
             margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        .subtitle {
-            color: #94a3b8;
-            font-size: 1.1rem;
-        }
-
-        .game-layout {
-            display: grid;
-            grid-template-columns: 450px 1fr;
-            gap: 20px;
-        }
-
-        /* Quiz Styling */
-        .card {
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 20px;
-            padding: 25px;
-            border: 2px solid #334155;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            color: #fbbf24;
-            margin-bottom: 20px;
             font-size: 1.5rem;
             display: flex;
-            justify-content: space-between;
+            gap: 20px;
         }
-
-        .quiz-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #38bdf8;
-        }
-
-        .question-box {
-            background: #0f172a;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            min-height: 80px;
-            border-left: 5px solid #fbbf24;
-        }
-
-        .options {
-            display: grid;
-            gap: 10px;
-        }
-
-        .option-btn {
-            background: #1e293b;
-            border: 2px solid #334155;
-            color: white;
-            padding: 12px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: left;
-            transition: 0.2s;
-        }
-
-        .option-btn:hover:not(:disabled) {
-            background: #334155;
-            border-color: #3b82f6;
-        }
-
-        .option-btn.correct { background: #065f46; border-color: #10b981; }
-        .option-btn.wrong { background: #7f1d1d; border-color: #ef4444; }
-
-        /* Input section */
-        .input-group {
+        .controls {
             margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-gold { background: #fbbf24; color: #0f172a; }
-
-        /* Pacman Area */
-        .pacman-canvas-container {
-            background: #000;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 4px solid #334155;
-        }
-
-        #gameCanvas {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .level-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #fbbf24;
-            color: #000;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
-        .hidden { display: none !important; }
-
-        @media (max-width: 1000px) {
-            .game-layout { grid-template-columns: 1fr; }
+            text-align: center;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>Woordenschatspel XL</h1>
-        <p class="subtitle">Breid je woordenschat uit en ontgrendel uitdagende Pacman levels!</p>
-    </header>
-
-    <div class="game-layout">
-        <!-- LINKER KOLOM: QUIZ -->
-        <div class="card">
-            <div class="section-title">
-                <span>Quiz</span>
-                <span id="level-indicator">Nodig: 5</span>
-            </div>
-            
-            <div class="quiz-info">
-                <span>Score: <span id="quiz-score">0</span></span>
-                <span>Vraag: <span id="quiz-count">0</span></span>
-            </div>
-
-            <div id="quiz-play-area">
-                <div class="question-box" id="question-text">Voeg eerst woorden toe om te kunnen spelen...</div>
-                <div class="options" id="options-container"></div>
-            </div>
-
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #334155;">
-
-            <div class="word-management">
-                <p style="margin-bottom: 10px; font-weight: bold;">Woorden Beheren</p>
-                <div class="input-group">
-                    <input type="text" id="word-input" placeholder="Woord">
-                    <input type="text" id="def-input" placeholder="Betekenis">
-                </div>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="addWord()">Woord Toevoegen</button>
-                <div id="word-list-mini" style="margin-top: 10px; font-size: 0.8rem; color: #94a3b8;"></div>
-            </div>
-        </div>
-
-        <!-- RECHTER KOLOM: PACMAN -->
-        <div class="pacman-canvas-container" id="game-view">
-            <div class="level-badge">Level <span id="current-level">1</span></div>
-            
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-            <div id="game-overlay" class="overlay">
-                <h2 id="overlay-title" style="color: #fbbf24; font-size: 2.5rem; margin-bottom: 20px;">GEBLOKKEERD</h2>
-                <p id="overlay-desc" style="margin-bottom: 30px; text-align: center;">Beantwoord 5 vragen correct om dit level te spelen.</p>
-                <button class="btn btn-gold" id="start-btn" onclick="tryStartGame()" disabled>Start Level</button>
-            </div>
-
-            <div id="game-stats" style="width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; background: #1e293b;">
-                <span>Punten: <span id="game-score">0</span></span>
-                <span>Bolletjes: <span id="dots-left">0</span></span>
-            </div>
-        </div>
+    <div class="stats">
+        <div>Score: <span id="score">0</span></div>
+        <div>Levens: <span id="lives">3</span></div>
     </div>
-</div>
 
-<script>
-    // --- STATE MANAGEMENT ---
-    let words = [
-        {w: "Innovatie", d: "Vernieuwing van technologie of methoden"},
-        {w: "Ambivalentie", d: "Tegenstrijdige gevoelens hebben"},
-        {w: "Consensus", d: "Overeenstemming in een groep"},
-        {w: "Paradigma", d: "Een stelsel van opvattingen/denkkader"},
-        {w: "Authentiek", d: "Echt, betrouwbaar en origineel"},
-        {w: "Eloquente", d: "Welbespraakt en overtuigend"}
-    ];
+    <canvas id="gameCanvas"></canvas>
 
-    let gameState = {
-        quizScore: 0,
-        questionsAnswered: 0,
-        neededToPlay: 5,
-        level: 1,
-        unlocked: false,
-        playing: false
-    };
+    <div class="controls">
+        Gebruik de <b>Pijltjestoetsen</b> om te bewegen<br>
+        Eet de grote bollen om de spoken te kunnen vangen!
+    </div>
 
-    // --- QUIZ LOGICA ---
-    function addWord() {
-        const w = document.getElementById('word-input').value;
-        const d = document.getElementById('def-input').value;
-        if(w && d) {
-            words.push({w, d});
-            document.getElementById('word-input').value = '';
-            document.getElementById('def-input').value = '';
-            updateWordMiniList();
-            if(!gameState.playing) nextQuestion();
-        }
-    }
+    <!-- Game Over Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden flex-col">
+        <h1 id="status-text" class="text-6xl font-bold mb-8 text-yellow-400">GAME OVER</h1>
+        <button onclick="resetGame()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-full text-xl transition">Opnieuw Spelen</button>
+    </div>
 
-    function updateWordMiniList() {
-        document.getElementById('word-list-mini').innerText = "In lijst: " + words.map(x => x.w).join(', ');
-    }
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const overlay = document.getElementById('overlay');
+        const statusText = document.getElementById('status-text');
 
-    function generateQuestion() {
-        if(words.length < 4) return null;
-        const correct = words[Math.floor(Math.random() * words.length)];
-        let options = [correct.d];
-        
-        while(options.length < 4) {
-            const wrong = words[Math.floor(Math.random() * words.length)].d;
-            if(!options.includes(wrong)) options.push(wrong);
-        }
-        
-        return {
-            q: `Wat is de betekenis van '${correct.w}'?`,
-            options: options.sort(() => Math.random() - 0.5),
-            answer: correct.d
+        const TILE_SIZE = 24;
+        const GRID_WIDTH = 19;
+        const GRID_HEIGHT = 21;
+
+        canvas.width = TILE_SIZE * GRID_WIDTH;
+        canvas.height = TILE_SIZE * GRID_HEIGHT;
+
+        // 0: Pad, 1: Muur, 2: Puntje, 3: Power Pellet, 4: Ghost Home
+        const map = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+            [1,3,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,3,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,1,1,2,1,2,1,1,1,1,1,2,1,2,1,1,2,1],
+            [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+            [1,1,1,1,2,1,1,1,0,1,0,1,1,1,2,1,1,1,1],
+            [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+            [1,1,1,1,2,1,0,1,1,4,1,1,0,1,2,1,1,1,1],
+            [0,0,0,0,2,0,0,1,4,4,4,1,0,0,2,0,0,0,0],
+            [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+            [0,0,0,1,2,1,0,0,0,0,0,0,0,1,2,1,0,0,0],
+            [1,1,1,1,2,1,0,1,1,1,1,1,0,1,2,1,1,1,1],
+            [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1],
+            [1,2,1,1,2,1,1,1,2,1,2,1,1,1,2,1,1,2,1],
+            [1,3,2,1,2,2,2,2,2,0,2,2,2,2,2,1,2,3,1],
+            [1,1,2,1,2,1,2,1,1,1,1,1,2,1,2,1,2,1,1],
+            [1,2,2,2,2,1,2,2,2,1,2,2,2,1,2,2,2,2,1],
+            [1,2,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        let currentMap = [];
+        let score = 0;
+        let lives = 3;
+        let gameOver = false;
+        let powerMode = 0; // Timer voor power mode
+
+        const pacman = {
+            x: 9 * TILE_SIZE + TILE_SIZE/2,
+            y: 15 * TILE_SIZE + TILE_SIZE/2,
+            dir: 0, // 0: Right, 1: Down, 2: Left, 3: Up
+            nextDir: 0,
+            speed: 2,
+            mouth: 0,
+            mouthSpeed: 0.1
         };
-    }
 
-    function nextQuestion() {
-        const data = generateQuestion();
-        if(!data) return;
+        const ghosts = [
+            { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FF0000', dir: 3, speed: 1.5, state: 'normal', name: 'Blinky' },
+            { x: 8 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#FFB8FF', dir: 3, speed: 1.5, state: 'normal', name: 'Pinky' },
+            { x: 10 * TILE_SIZE + TILE_SIZE/2, y: 9 * TILE_SIZE + TILE_SIZE/2, color: '#00FFFF', dir: 3, speed: 1.5, state: 'normal', name: 'Inky' },
+            { x: 9 * TILE_SIZE + TILE_SIZE/2, y: 8 * TILE_SIZE + TILE_SIZE/2, color: '#FFB852', dir: 3, speed: 1.5, state: 'normal', name: 'Clyde' }
+        ];
 
-        document.getElementById('question-text').innerText = data.q;
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
-
-        data.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'option-btn';
-            btn.innerText = opt;
-            btn.onclick = () => checkAnswer(btn, opt === data.answer);
-            container.appendChild(btn);
-        });
-    }
-
-    function checkAnswer(btn, isCorrect) {
-        if(isCorrect) {
-            btn.classList.add('correct');
-            gameState.quizScore++;
-        } else {
-            btn.classList.add('wrong');
+        function resetMap() {
+            currentMap = JSON.parse(JSON.stringify(map));
         }
 
-        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-        gameState.questionsAnswered++;
-        
-        document.getElementById('quiz-score').innerText = gameState.quizScore;
-        document.getElementById('quiz-count').innerText = gameState.questionsAnswered;
-
-        if(gameState.quizScore >= gameState.neededToPlay) {
-            unlockGame();
-        }
-
-        setTimeout(nextQuestion, 1000);
-    }
-
-    function unlockGame() {
-        gameState.unlocked = true;
-        document.getElementById('overlay-title').innerText = "LEVEL VRIJGESPEELD";
-        document.getElementById('overlay-desc').innerText = "Je bent er klaar voor! Gebruik de pijltjestoetsen.";
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('start-btn').classList.add('btn-gold');
-    }
-
-    // --- PACMAN LOGICA (EXTRA GROOT & LEVELS) ---
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const TILE_SIZE = 30; // Grotere tiles
-    const COLS = 26;
-    const ROWS = 20;
-
-    let pacman = { x: 1, y: 1, dir: 0, nextDir: 0, anim: 0 };
-    let ghosts = [];
-    let map = [];
-    let dots = 0;
-    let gameLoop;
-
-    // Maze generator (simpel grid met muren)
-    function createMap() {
-        map = [];
-        dots = 0;
-        for(let y=0; y<ROWS; y++) {
-            map[y] = [];
-            for(let x=0; x<COLS; x++) {
-                // Muren rondom
-                if(x===0 || y===0 || x===COLS-1 || y===ROWS-1) {
-                    map[y][x] = 1;
-                } else if (x % 2 === 0 && y % 2 === 0) {
-                    map[y][x] = 1; // Raster van blokken
-                } else if (Math.random() < 0.15) {
-                    map[y][x] = 1; // Willekeurige extra muren
-                } else {
-                    map[y][x] = 0; // Pad
-                    dots++;
-                }
-            }
-        }
-        // Startplek Pacman leeg
-        map[1][1] = 0;
-        document.getElementById('dots-left').innerText = dots;
-    }
-
-    function spawnGhosts() {
-        ghosts = [];
-        const count = 2 + gameState.level; // Meer ghosts per level
-        for(let i=0; i<count; i++) {
-            ghosts.push({
-                x: COLS-2, 
-                y: ROWS-2, 
-                color: `hsl(${i * 60}, 100%, 50%)`,
-                speed: 0.05 + (gameState.level * 0.02) // Sneller per level
+        function resetPositions() {
+            pacman.x = 9 * TILE_SIZE + TILE_SIZE/2;
+            pacman.y = 15 * TILE_SIZE + TILE_SIZE/2;
+            pacman.dir = 0;
+            pacman.nextDir = 0;
+            
+            ghosts.forEach((g, i) => {
+                g.x = (8 + (i % 3)) * TILE_SIZE + TILE_SIZE/2;
+                g.y = 9 * TILE_SIZE + TILE_SIZE/2;
+                g.state = 'normal';
             });
         }
-    }
 
-    function tryStartGame() {
-        document.getElementById('game-overlay').classList.add('hidden');
-        gameState.playing = true;
-        createMap();
-        spawnGhosts();
-        pacman = { x: 1, y: 1, dir: 0, nextDir: 0, anim: 0 };
-        if(gameLoop) clearInterval(gameLoop);
-        gameLoop = setInterval(update, 1000/60);
-    }
-
-    function update() {
-        // Pacman beweging logic
-        moveEntity(pacman, pacman.nextDir, 0.12);
-        
-        // Eet bolletje
-        let gx = Math.round(pacman.x);
-        let gy = Math.round(pacman.y);
-        if(map[gy][gx] === 0) {
-            map[gy][gx] = 2; // Gegeten
-            dots--;
-            gameState.quizScore += 10;
-            document.getElementById('game-score').innerText = gameState.quizScore;
-            document.getElementById('dots-left').innerText = dots;
-            
-            if(dots <= 0) winLevel();
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            gameOver = false;
+            powerMode = 0;
+            scoreElement.innerText = score;
+            livesElement.innerText = lives;
+            overlay.classList.add('hidden');
+            resetMap();
+            resetPositions();
+            requestAnimationFrame(gameLoop);
         }
 
-        // Ghost AI
-        ghosts.forEach(g => {
-            // Simpele volg-beweging
-            let dx = pacman.x - g.x;
-            let dy = pacman.y - g.y;
-            if(Math.abs(dx) > Math.abs(dy)) {
-                moveEntity(g, dx > 0 ? 1 : 3, g.speed);
-            } else {
-                moveEntity(g, dy > 0 ? 2 : 0, g.speed);
-            }
-
-            // Botsing met Pacman
-            if(Math.hypot(pacman.x - g.x, pacman.y - g.y) < 0.6) {
-                gameOver();
-            }
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') pacman.nextDir = 0;
+            if (e.key === 'ArrowDown') pacman.nextDir = 1;
+            if (e.key === 'ArrowLeft') pacman.nextDir = 2;
+            if (e.key === 'ArrowUp') pacman.nextDir = 3;
         });
 
-        draw();
-    }
+        function canMove(x, y, dir) {
+            let nextX = x;
+            let nextY = y;
+            const buffer = 10; // Collision buffer
 
-    function moveEntity(ent, dir, speed) {
-        let nx = ent.x;
-        let ny = ent.y;
-        if(dir === 0) ny -= speed;
-        if(dir === 1) nx += speed;
-        if(dir === 2) ny += speed;
-        if(dir === 3) nx -= speed;
+            if (dir === 0) nextX += buffer;
+            if (dir === 1) nextY += buffer;
+            if (dir === 2) nextX -= buffer;
+            if (dir === 3) nextY -= buffer;
 
-        // Wall collision check
-        if(map[Math.floor(ny+0.1)][Math.floor(nx+0.1)] !== 1 && 
-           map[Math.ceil(ny-0.1)][Math.ceil(nx-0.1)] !== 1) {
-            ent.x = nx;
-            ent.y = ny;
-            ent.dir = dir;
+            const col = Math.floor(nextX / TILE_SIZE);
+            const row = Math.floor(nextY / TILE_SIZE);
+
+            if (row < 0 || row >= GRID_HEIGHT || col < 0 || col >= GRID_WIDTH) return false;
+            const tile = currentMap[row][col];
+            return tile !== 1 && tile !== 4; // 1 is muur, 4 is spookhuis deur
         }
-    }
 
-    function draw() {
-        ctx.fillStyle = "#000";
-        ctx.fillRect(0,0, canvas.width, canvas.height);
+        function moveEntity(entity) {
+            // Probeer van richting te veranderen
+            if (entity === pacman && entity.dir !== entity.nextDir) {
+                // Alleen op het midden van een tile draaien voor betere controle
+                const centerX = Math.floor(entity.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+                const centerY = Math.floor(entity.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE/2;
+                
+                if (Math.abs(entity.x - centerX) < 4 && Math.abs(entity.y - centerY) < 4) {
+                    if (canMove(centerX, centerY, entity.nextDir)) {
+                        entity.x = centerX;
+                        entity.y = centerY;
+                        entity.dir = entity.nextDir;
+                    }
+                }
+            }
 
-        // Map
-        for(let y=0; y<ROWS; y++) {
-            for(let x=0; x<COLS; x++) {
-                if(map[y][x] === 1) {
-                    ctx.fillStyle = "#1e40af";
-                    ctx.fillRect(x*TILE_SIZE+2, y*TILE_SIZE+2, TILE_SIZE-4, TILE_SIZE-4);
-                } else if(map[y][x] === 0) {
-                    ctx.fillStyle = "#fff";
-                    ctx.beginPath();
-                    ctx.arc(x*TILE_SIZE+TILE_SIZE/2, y*TILE_SIZE+TILE_SIZE/2, 2, 0, Math.PI*2);
-                    ctx.fill();
+            // Beweging
+            let moveX = 0, moveY = 0;
+            if (entity.dir === 0) moveX = entity.speed;
+            if (entity.dir === 1) moveY = entity.speed;
+            if (entity.dir === 2) moveX = -entity.speed;
+            if (entity.dir === 3) moveY = -entity.speed;
+
+            if (canMove(entity.x + moveX, entity.y + moveY, entity.dir)) {
+                entity.x += moveX;
+                entity.y += moveY;
+            } else if (entity !== pacman) {
+                // Spoken kiezen een nieuwe willekeurige richting bij botsing
+                entity.dir = Math.floor(Math.random() * 4);
+            }
+
+            // Screen wrap-around
+            if (entity.x < 0) entity.x = canvas.width;
+            if (entity.x > canvas.width) entity.x = 0;
+        }
+
+        function updateGhosts() {
+            ghosts.forEach(ghost => {
+                // Simpele AI: als in powerMode, vlucht. Anders, beweeg random of volg een beetje.
+                if (Math.random() < 0.02) { // Af en toe van koers veranderen
+                    const directions = [0, 1, 2, 3];
+                    ghost.dir = directions[Math.floor(Math.random() * 4)];
+                }
+                
+                ghost.speed = (powerMode > 0 && ghost.state !== 'eaten') ? 0.8 : 1.5;
+                moveEntity(ghost);
+
+                // Check collision met Pac-Man
+                const dist = Math.hypot(pacman.x - ghost.x, pacman.y - ghost.y);
+                if (dist < TILE_SIZE * 0.8) {
+                    if (powerMode > 0) {
+                        if (ghost.state !== 'eaten') {
+                            ghost.state = 'eaten';
+                            score += 200;
+                            scoreElement.innerText = score;
+                        }
+                    } else if (ghost.state !== 'eaten') {
+                        lives--;
+                        livesElement.innerText = lives;
+                        if (lives <= 0) {
+                            gameOver = true;
+                        } else {
+                            resetPositions();
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawMap() {
+            for (let r = 0; r < GRID_HEIGHT; r++) {
+                for (let c = 0; c < GRID_WIDTH; c++) {
+                    const tile = currentMap[r][c];
+                    const x = c * TILE_SIZE;
+                    const y = r * TILE_SIZE;
+
+                    if (tile === 1) {
+                        ctx.fillStyle = '#2222FF';
+                        ctx.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+                    } else if (tile === 2) {
+                        ctx.fillStyle = '#FFB8AE';
+                        ctx.beginPath();
+                        ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (tile === 3) {
+                        ctx.fillStyle = '#FFB8AE';
+                        ctx.beginPath();
+                        ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 6, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
             }
         }
 
-        // Pacman
-        ctx.fillStyle = "#fbbf24";
-        ctx.beginPath();
-        let px = pacman.x * TILE_SIZE + TILE_SIZE/2;
-        let py = pacman.y * TILE_SIZE + TILE_SIZE/2;
-        ctx.arc(px, py, TILE_SIZE/2-2, 0.2, Math.PI*2-0.2);
-        ctx.lineTo(px, py);
-        ctx.fill();
-
-        // Ghosts
-        ghosts.forEach(g => {
-            ctx.fillStyle = g.color;
+        function drawPacman() {
+            ctx.fillStyle = 'yellow';
             ctx.beginPath();
-            ctx.arc(g.x * TILE_SIZE + TILE_SIZE/2, g.y * TILE_SIZE + TILE_SIZE/2, TILE_SIZE/2-2, 0, Math.PI*2);
+            const centerX = pacman.x;
+            const centerY = pacman.y;
+            const radius = TILE_SIZE / 2 - 2;
+            
+            // Mond animatie
+            pacman.mouth += pacman.mouthSpeed;
+            if (pacman.mouth > 0.2 || pacman.mouth < 0) pacman.mouthSpeed *= -1;
+
+            const rotation = pacman.dir * (Math.PI / 2);
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, rotation + pacman.mouth, rotation + (2 * Math.PI) - pacman.mouth);
             ctx.fill();
-        });
-    }
+        }
 
-    function winLevel() {
-        clearInterval(gameLoop);
-        gameState.level++;
-        gameState.quizScore = 0;
-        gameState.unlocked = false;
-        gameState.playing = false;
-        
-        document.getElementById('current-level').innerText = gameState.level;
-        document.getElementById('overlay-title').innerText = "LEVEL VOLTOOID!";
-        document.getElementById('overlay-desc').innerText = "Beantwoord weer 5 vragen voor Level " + gameState.level;
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('game-overlay').classList.remove('hidden');
-    }
+        function drawGhosts() {
+            ghosts.forEach(ghost => {
+                ctx.fillStyle = (powerMode > 0 && ghost.state !== 'eaten') ? (powerMode < 100 && Math.floor(Date.now()/200)%2 ? 'white' : '#2121ff') : ghost.color;
+                if (ghost.state === 'eaten') ctx.fillStyle = 'rgba(255,255,255,0.2)';
 
-    function gameOver() {
-        clearInterval(gameLoop);
-        gameState.quizScore = 0;
-        gameState.unlocked = false;
-        gameState.playing = false;
-        
-        document.getElementById('overlay-title').innerText = "GAME OVER";
-        document.getElementById('overlay-desc').innerText = "De spoken hebben je gepakt! Oefen je woorden om opnieuw te proberen.";
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('game-overlay').classList.remove('hidden');
-        document.getElementById('quiz-score').innerText = 0;
-    }
+                const x = ghost.x - TILE_SIZE/2 + 2;
+                const y = ghost.y - TILE_SIZE/2 + 2;
+                const size = TILE_SIZE - 4;
 
-    // Controls
-    window.addEventListener('keydown', e => {
-        if(e.key === "ArrowUp") pacman.nextDir = 0;
-        if(e.key === "ArrowRight") pacman.nextDir = 1;
-        if(e.key === "ArrowDown") pacman.nextDir = 2;
-        if(e.key === "ArrowLeft") pacman.nextDir = 3;
-    });
+                // Lichaam spook
+                ctx.beginPath();
+                ctx.arc(x + size/2, y + size/2, size/2, Math.PI, 0);
+                ctx.lineTo(x + size, y + size);
+                // Golvende onderkant
+                for(let i=0; i<3; i++) {
+                    ctx.lineTo(x + size - (i*size/3) - size/6, y + size - 4);
+                    ctx.lineTo(x + size - (i*size/3) - size/3, y + size);
+                }
+                ctx.lineTo(x, y + size/2);
+                ctx.fill();
 
-    // Start
-    updateWordMiniList();
-    nextQuestion();
-    createMap();
-    draw();
+                // Ogen
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(x + size*0.3, y + size*0.4, 3, 0, Math.PI*2);
+                ctx.arc(x + size*0.7, y + size*0.4, 3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(x + size*0.3, y + size*0.4, 1.5, 0, Math.PI*2);
+                ctx.arc(x + size*0.7, y + size*0.4, 1.5, 0, Math.PI*2);
+                ctx.fill();
+            });
+        }
 
-</script>
+        function gameLoop() {
+            if (gameOver) {
+                statusText.innerText = "GAME OVER";
+                overlay.classList.remove('hidden');
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            moveEntity(pacman);
+            updateGhosts();
+
+            // Eet check
+            const col = Math.floor(pacman.x / TILE_SIZE);
+            const row = Math.floor(pacman.y / TILE_SIZE);
+            if (currentMap[row][col] === 2) {
+                currentMap[row][col] = 0;
+                score += 10;
+                scoreElement.innerText = score;
+            } else if (currentMap[row][col] === 3) {
+                currentMap[row][col] = 0;
+                score += 50;
+                powerMode = 500; // Frames van power mode
+                scoreElement.innerText = score;
+            }
+
+            if (powerMode > 0) powerMode--;
+            if (powerMode === 0) {
+                ghosts.forEach(g => g.state = 'normal');
+            }
+
+            // Win check
+            if (!currentMap.some(row => row.includes(2) || row.includes(3))) {
+                statusText.innerText = "GEWONNEN!";
+                statusText.className = "text-6xl font-bold mb-8 text-green-400";
+                overlay.classList.remove('hidden');
+                return;
+            }
+
+            drawMap();
+            drawPacman();
+            drawGhosts();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        resetMap();
+        requestAnimationFrame(gameLoop);
+
+    </script>
 </body>
 </html>

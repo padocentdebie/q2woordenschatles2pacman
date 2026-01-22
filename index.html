@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Woordenschat PRO - FINAL FIX</title>
+    <title>Pacman Woordenschat PRO - Final Alignment</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
@@ -41,7 +41,6 @@
         <p>Scoor 5 punten in de quiz om Pacman vrij te spelen!</p>
     </header>
 
-    <!-- LINKS: DE QUIZ -->
     <div class="section">
         <h3 class="text-xl font-bold mb-4 text-blue-400 flex justify-between items-center">
             <span>Woordentest</span>
@@ -58,7 +57,6 @@
         </div>
     </div>
 
-    <!-- RECHTS: HET SPEL -->
     <div class="game-section section">
         <div class="stats-bar">
             <span>Score: <span id="game-score">0</span></span>
@@ -90,13 +88,13 @@ const vocabData = [
 let activeQuestions = [];
 let currentIdx = 0;
 let points = 0;
+let gameUnlocked = false;
 
 // ================= QUIZ LOGICA =================
 function initQuiz() {
     points = 0;
     currentIdx = 0;
     document.getElementById('correct-count').innerText = "0";
-    // Shuffle en selecteer
     activeQuestions = [...vocabData].sort(() => Math.random() - 0.5);
     renderQuestion();
 }
@@ -150,6 +148,8 @@ function handleAnswer(selected, correct, btn) {
 }
 
 function unlockGame() {
+    if(gameUnlocked) return;
+    gameUnlocked = true;
     const btn = document.getElementById('start-game-btn');
     btn.disabled = false;
     btn.classList.add('unlocked');
@@ -176,4 +176,169 @@ const mazeMap = [
     [1,2,1,1,2,1,1,2,1,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,2,1],
     [1,2,2,2,2,1,1,2,2,2,1,1,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,1],
     [1,1,1,1,2,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1],
-    [1,0,0,0
+    [1,0,0,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,0,0,0,1],
+    [1,2,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1],
+    [1,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+let currentMaze = mazeMap.map(row => [...row]);
+
+function drawMaze() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    for(let r=0; r < currentMaze.length; r++) {
+        for(let c=0; c < currentMaze[r].length; c++) {
+            let x = c * tileSize;
+            let y = r * tileSize;
+            if(currentMaze[r][c] === 1) {
+                ctx.fillStyle = "#1e40af";
+                ctx.fillRect(x + 2, y + 2, tileSize - 4, tileSize - 4);
+            } else if(currentMaze[r][c] === 2) {
+                ctx.fillStyle = "#fbbf24";
+                ctx.beginPath(); ctx.arc(x + 10, y + 10, 2, 0, Math.PI*2); ctx.fill();
+            } else if(currentMaze[r][c] === 3) {
+                ctx.fillStyle = "#fff";
+                ctx.beginPath(); ctx.arc(x + 10, y + 10, 6, 0, Math.PI*2); ctx.fill();
+            }
+        }
+    }
+}
+
+function initEntities() {
+    // Pacman exact gecentreerd op (1,1) -> x:20, y:20
+    pacman = { x: 20, y: 20, dir: 0, nextDir: 0, speed: 2 };
+    ghosts = [
+        { x: 240, y: 140, color: '#ef4444', dir: 0, speed: 1.5 },
+        { x: 280, y: 140, color: '#ec4899', dir: 2, speed: 1.2 }
+    ];
+}
+
+function canMove(x, y, dir) {
+    // We checken de hoekpunten van de collision box
+    let nx = x, ny = y;
+    const margin = 7; // Iets kleiner dan 10 om soepel te draaien
+    
+    if(dir === 0) nx += margin; 
+    if(dir === 1) ny += margin;
+    if(dir === 2) nx -= margin; 
+    if(dir === 3) ny -= margin;
+    
+    const col = Math.floor(nx / tileSize);
+    const row = Math.floor(ny / tileSize);
+    return currentMaze[row] && currentMaze[row][col] !== 1;
+}
+
+function gameLoop() {
+    if(!gameRunning) return;
+
+    // Movement: Alleen draaien als we bijna exact in het midden van een tile zijn
+    const centerDistX = Math.abs((pacman.x + 10) % tileSize - 10);
+    const centerDistY = Math.abs((pacman.y + 10) % tileSize - 10);
+
+    if (pacman.dir !== pacman.nextDir) {
+        if (centerDistX < 3 && centerDistY < 3) {
+            const gridX = Math.round(pacman.x / tileSize) * tileSize;
+            const gridY = Math.round(pacman.y / tileSize) * tileSize;
+            
+            if (canMove(gridX + 10, gridY + 10, pacman.nextDir)) {
+                pacman.x = gridX;
+                pacman.y = gridY;
+                pacman.dir = pacman.nextDir;
+            }
+        }
+    }
+
+    let dx=0, dy=0;
+    if(pacman.dir===0) dx=pacman.speed; 
+    if(pacman.dir===1) dy=pacman.speed;
+    if(pacman.dir===2) dx=-pacman.speed; 
+    if(pacman.dir===3) dy=-pacman.speed;
+    
+    // Bewegen als het pad vrij is
+    if(canMove(pacman.x + 10 + dx, pacman.y + 10 + dy, pacman.dir)) {
+        pacman.x += dx; 
+        pacman.y += dy;
+    }
+
+    // Eten: Check het middelpunt van pacman
+    const pr = Math.floor((pacman.y + 10) / tileSize);
+    const pc = Math.floor((pacman.x + 10) / tileSize);
+    
+    if(currentMaze[pr] && currentMaze[pr][pc] > 1) { 
+        if(currentMaze[pr][pc] === 2) gameScore += 10;
+        if(currentMaze[pr][pc] === 3) { gameScore += 50; powerTimer = 400; }
+        currentMaze[pr][pc] = 0; 
+    }
+
+    if(powerTimer > 0) powerTimer--;
+
+    // Ghost Logic
+    ghosts.forEach(g => {
+        const gx = g.x + 10, gy = g.y + 10;
+        if(Math.random() < 0.05 || !canMove(gx, gy, g.dir)) {
+            g.dir = Math.floor(Math.random()*4);
+        }
+        let gdx=0, gdy=0;
+        if(g.dir===0) gdx=g.speed; if(g.dir===1) gdy=g.speed;
+        if(g.dir===2) gdx=-g.speed; if(g.dir===3) gdy=-g.speed;
+        if(canMove(gx+gdx, gy+gdy, g.dir)) { g.x += gdx; g.y += gdy; }
+
+        if(Math.hypot(pacman.x - g.x, pacman.y - g.y) < 15) {
+            if(powerTimer > 0) {
+                g.x = 240; g.y = 140; gameScore += 200;
+            } else {
+                gameLives--;
+                if(gameLives <= 0) {
+                    gameRunning = false;
+                    alert("GAME OVER! Je eindscore: " + gameScore);
+                } else {
+                    initEntities();
+                }
+            }
+        }
+    });
+
+    document.getElementById('game-score').innerText = gameScore;
+    document.getElementById('game-lives').innerText = gameLives;
+    
+    drawMaze();
+    
+    // Render Pacman (exact gecentreerd tekenen)
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    const mouthOpen = Math.sin(Date.now() / 100) * 0.2 + 0.2;
+    ctx.arc(pacman.x+10, pacman.y+10, 8, (mouthOpen + pacman.dir*0.5)*Math.PI, (2 - mouthOpen + pacman.dir*0.5)*Math.PI);
+    ctx.lineTo(pacman.x+10, pacman.y+10); 
+    ctx.fill();
+
+    // Render Ghosts
+    ghosts.forEach(g => {
+        ctx.fillStyle = powerTimer > 0 ? "#2563eb" : g.color;
+        ctx.beginPath(); ctx.arc(g.x+10, g.y+10, 8, Math.PI, 0);
+        ctx.lineTo(g.x+18, g.y+18); ctx.lineTo(g.x+2, g.y+18); ctx.fill();
+    });
+
+    requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+    if(!gameUnlocked || gameRunning) return;
+    currentMaze = mazeMap.map(row => [...row]);
+    gameScore = 0; gameLives = 3; gameRunning = true;
+    initEntities();
+    gameLoop();
+}
+
+window.addEventListener("keydown", e => {
+    if(e.key === 'ArrowRight') pacman.nextDir = 0;
+    if(e.key === 'ArrowDown') pacman.nextDir = 1;
+    if(e.key === 'ArrowLeft') pacman.nextDir = 2;
+    if(e.key === 'ArrowUp') pacman.nextDir = 3;
+    if(e.key.includes("Arrow")) e.preventDefault();
+});
+
+drawMaze();
+</script>
+</body>
+</html>

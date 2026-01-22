@@ -1,117 +1,94 @@
-// ==================== QUIZ LOGICA ====================
-        function loadQuestion() {
-            if (vocabularyQuestions.length === 0) {
-                questionBox.textContent = "Klik op 'Vragen Genereren' om te beginnen";
-                optionsContainer.innerHTML = '';
-                return;
-            }
-            
-            const question = vocabularyQuestions[currentQuestionIndex];
-            questionBox.textContent = `${currentQuestionIndex + 1}. ${question.question}`;
-            
-            optionsContainer.innerHTML = '';
-            const letters = ['A', 'B', 'C', 'D'];
-            
-            question.options.forEach((option, index) => {
-                const optionBtn = document.createElement('button');
-                optionBtn.className = 'option-btn';
-                optionBtn.innerHTML = `
-                    <div class="option-letter">${letters[index]}</div>
-                    <div class="option-text">${option}</div>
-                `;
-                optionBtn.dataset.index = index;
-                optionBtn.addEventListener('click', () => selectAnswer(index));
-                optionsContainer.appendChild(optionBtn);
-            });
-            
-            currentQuestionElement.textContent = currentQuestionIndex + 1;
-            feedbackElement.style.display = 'none';
-            nextBtn.disabled = true;
-            updateStartGameButton();
-        }
-
-        function selectAnswer(selectedIndex) {
-            const question = vocabularyQuestions[currentQuestionIndex];
-            const optionButtons = document.querySelectorAll('.option-btn');
-            
-            // Voorkom dubbel klikken
-            optionButtons.forEach(btn => btn.style.pointerEvents = 'none');
-
-            // Toon feedback
-            if (selectedIndex === question.correct) {
-                correctAnswers++;
-                correctCountElement.textContent = correctAnswers;
-                optionButtons[selectedIndex].classList.add('correct');
-                feedbackElement.textContent = "Correct! " + question.explanation;
-                feedbackElement.className = 'feedback correct';
-            } else {
-                optionButtons[selectedIndex].classList.add('incorrect');
-                optionButtons[question.correct].classList.add('correct');
-                feedbackElement.textContent = "Helaas, dat is niet juist.";
-                feedbackElement.className = 'feedback incorrect';
-            }
-
-            feedbackElement.style.display = 'block';
-            nextBtn.disabled = false;
-
-            // CHECK: Is het spel nu ontgrendeld?
-            if (correctAnswers >= 5) {
-                gameUnlocked = true;
-                startGameBtn.classList.add('unlocked-glow'); // Optionele visuele hint
-            }
-            updateStartGameButton();
-        }
-
-        // ==================== EVENT LISTENERS ====================
-        addWordBtn.addEventListener('click', addWord);
-        generateQuestionsBtn.addEventListener('click', generateQuestions);
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacman Woordenschat Avontuur</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+        body { background: #0f172a; color: #fff; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        header { grid-column: span 2; text-align: center; padding: 20px; background: #1e293b; border: 3px solid #3b82f6; border-radius: 15px; }
+        h1 { color: #fbbf24; }
         
-        nextBtn.addEventListener('click', () => {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < vocabularyQuestions.length) {
-                loadQuestion();
-            } else {
-                questionBox.textContent = "Quiz voltooid! Je hebt " + correctAnswers + " vragen goed beantwoord.";
-                optionsContainer.innerHTML = '';
-                nextBtn.disabled = true;
-            }
-        });
-
-        startGameBtn.addEventListener('click', () => {
-            if (gameUnlocked) {
-                alert("Game Start! Gebruik de pijltjestoetsen.");
-                initGame(); // Start de Pacman engine
-                document.getElementById('gameCanvas').focus();
-            }
-        });
-
-        // Initialiseer de lijst bij opstarten
-        updateWordList();
-
-        // ==================== PACMAN MINI-ENGINE (BASIC) ====================
-        function initGame() {
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
-            let score = 0;
-            
-            // Simpele placeholder voor de game loop
-            function draw() {
-                ctx.fillStyle = "black";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Pacman tekenen
-                ctx.fillStyle = "yellow";
-                ctx.beginPath();
-                ctx.arc(300, 330, 20, 0.2 * Math.PI, 1.8 * Math.PI);
-                ctx.lineTo(300, 330);
-                ctx.fill();
-                
-                ctx.fillStyle = "white";
-                ctx.font = "20px Arial";
-                ctx.fillText("PACMAN IS NU ACTIEF!", 200, 200);
-            }
-            setInterval(draw, 100);
+        /* Quiz & Woorden Sectie */
+        .section { background: rgba(30, 41, 59, 0.9); padding: 20px; border-radius: 15px; border: 2px solid #3b82f6; }
+        .word-list { max-height: 150px; overflow-y: auto; background: #0f172a; padding: 10px; margin: 10px 0; border-radius: 8px; }
+        .word-item { font-size: 0.8em; padding: 5px; border-bottom: 1px solid #334155; }
+        
+        /* Quiz Styling */
+        .question-box { background: #334155; padding: 15px; border-radius: 10px; margin: 15px 0; min-height: 60px; border-left: 5px solid #fbbf24; }
+        .option-btn { width: 100%; text-align: left; padding: 10px; margin-bottom: 5px; background: #1e293b; color: white; border: 1px solid #3b82f6; cursor: pointer; border-radius: 5px; }
+        .option-btn:hover { background: #3b82f6; }
+        .correct { background: #15803d !important; }
+        .incorrect { background: #b91c1c !important; }
+        
+        /* Pacman Canvas */
+        .game-section { text-align: center; }
+        canvas { background: black; border: 4px solid #3b82f6; border-radius: 10px; display: block; margin: 0 auto; }
+        .start-game-btn { 
+            width: 100%; padding: 15px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; border: none; 
+            background: #4b5563; color: #9ca3af; cursor: not-allowed; transition: 0.3s;
         }
-    </script>
-</body>
-</html>
+        .unlocked { background: #f59e0b !important; color: white !important; cursor: pointer !important; box-shadow: 0 0 20px #f59e0b; }
+        
+        .feedback { padding: 10px; margin: 10px 0; border-radius: 5px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Pacman Woordenschat</h1>
+        <p>Scoor 5 punten in de quiz om Pacman te ontgrendelen!</p>
+    </header>
+
+    <div class="section">
+        <h3>1. Woordenlijst</h3>
+        <div class="word-list" id="word-list"></div>
+        
+        <button class="option-btn" style="background: #10b981;" onclick="generateQuestions()">Vragen Genereren</button>
+        
+        <div id="quiz-area">
+            <h3 id="q-title">Beantwoord 5 vragen:</h3>
+            <div class="question-box" id="question-box">Klik op 'Vragen Genereren'</div>
+            <div id="options-container"></div>
+            <div id="feedback" class="feedback"></div>
+            <button id="next-btn" class="option-btn" style="display:none; background:#fbbf24; color:black;" onclick="loadQuestion()">Volgende Vraag</button>
+        </div>
+        
+        <div style="margin-top:20px; font-size: 1.2em;">
+            Voortgang: <span id="correct-count" style="color:#fbbf24; font-weight:bold;">0</span> / 5
+        </div>
+    </div>
+
+    <div class="game-section section">
+        <h3>2. Pacman Doolhof</h3>
+        <div id="game-status" style="margin-bottom:10px;">Status: <span id="unlock-msg" style="color:red;">GEBLOKKEERD</span></div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div style="margin-top:10px;">Score: <span id="game-score">0</span></div>
+        <button id="start-game-btn" class="start-game-btn" disabled onclick="startGame()">START PACMAN</button>
+    </div>
+</div>
+
+<script>
+// ================= CONFIG & DATA =================
+let vocabularyWords = [
+    { word: "hypocrisie", meaning: "het veinzen van goede bedoelingen" },
+    { word: "reprimande", meaning: "een strenge berisping" },
+    { word: "annexeren", meaning: "het inlijven van een gebied" },
+    { word: "futiel", meaning: "zinloos of onbeduidend" },
+    { word: "veinzen", meaning: "doen alsof" },
+    { word: "fascinerend", meaning: "interessant en boeiend" },
+    { word: "decadentie", meaning: "cultureel verval" }
+];
+
+let questions = [];
+let currentQIndex = 0;
+let correctScore = 0;
+const goal = 5;
+
+// ================= QUIZ LOGICA =================
+function updateWordList() {
+    const list = document.getElementById('word-list');
+    list.innerHTML = vocabularyWords.map(w => `<div class="word-item"><b>${w.word}</b>: ${w.meaning}</div>`).join('');

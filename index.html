@@ -3,70 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocab Surveillance - Unit 1</title>
+    <title>Vocab Surveillance - Multi-Level</title>
     <style>
-        :root { 
-            --politie-blauw: #1c2b4a; 
-            --striping-rood: #e30613;
-            --striping-blauw: #005ca9;
-            --licht-grijs: #f2f2f2;
-        }
-        body { 
-            font-family: 'Arial Black', sans-serif; 
-            background-color: #d1d1d1; 
-            margin: 0; padding: 20px; display: flex; justify-content: center;
-        }
-        .container { 
-            width: 100%; max-width: 650px; background: white; 
-            border-radius: 5px; overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            border-top: 15px solid var(--politie-blauw);
-        }
-        /* De iconische politie-striping */
-        .striping {
-            height: 40px;
-            background: repeating-linear-gradient(
-                -45deg,
-                var(--striping-blauw),
-                var(--striping-blauw) 20px,
-                white 20px,
-                white 40px,
-                var(--striping-rood) 40px,
-                var(--striping-rood) 60px,
-                white 60px,
-                white 80px
-            );
-        }
-        .content { padding: 30px; }
-        h1 { color: var(--politie-blauw); text-align: center; margin: 10px 0; font-size: 24px; border-bottom: 3px solid var(--politie-blauw); display: inline-block; width: 100%; }
+        :root { --p-blauw: #1c2b4a; --s-rood: #e30613; --s-blauw: #005ca9; }
+        body { font-family: 'Arial', sans-serif; background-color: #e0e0e0; margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-top: 10px solid var(--p-blauw); }
+        .striping { height: 30px; background: repeating-linear-gradient(-45deg, var(--s-blauw), var(--s-blauw) 20px, white 20px, white 40px, var(--s-rood) 40px, var(--s-rood) 60px, white 60px, white 80px); }
+        .content { padding: 25px; }
+        h1 { color: var(--p-blauw); text-align: center; font-size: 22px; text-transform: uppercase; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
         
-        textarea { width: 100%; height: 100px; border: 2px solid #ccc; padding: 10px; box-sizing: border-box; font-family: sans-serif; }
-        input[type="text"] { width: 100%; padding: 15px; border: 2px solid var(--politie-blauw); font-size: 1.2em; box-sizing: border-box; margin: 15px 0; }
+        textarea { width: 100%; height: 80px; border: 2px solid #ccc; padding: 10px; box-sizing: border-box; margin-bottom: 10px; }
         
-        button { 
-            width: 100%; padding: 15px; background: var(--politie-blauw); color: white; 
-            border: none; font-weight: bold; cursor: pointer; text-transform: uppercase;
-        }
-        button:hover { background: #111a2d; }
+        /* Multiple Choice Buttons */
+        .mc-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .mc-btn { background: #f0f0f0; border: 2px solid var(--p-blauw); color: var(--p-blauw); padding: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; transition: 0.2s; }
+        .mc-btn:hover { background: var(--p-blauw); color: white; }
 
-        #quiz-section, #game-section { display: none; }
+        input[type="text"] { width: 100%; padding: 15px; border: 2px solid var(--p-blauw); font-size: 1.1em; box-sizing: border-box; margin: 15px 0; border-radius: 5px; }
+        
+        button.main-btn { width: 100%; padding: 15px; background: var(--p-blauw); color: white; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 5px; }
+        
+        #quiz-section, #game-section, #input-area { display: none; }
         .active { display: block !important; }
 
-        /* PACMAN SURVEILLANCE */
-        #pacman-canvas { 
-            width: 100%; height: 300px; background: #222; border: 5px solid var(--politie-blauw); 
-            position: relative; overflow: hidden; border-radius: 10px;
-        }
-        .pacman-unit { position: absolute; transition: all 0.15s linear; text-align: center; }
-        .siren { 
-            width: 15px; height: 6px; margin: 0 auto;
-            animation: police-flash 0.2s infinite; border-radius: 2px;
-        }
-        @keyframes police-flash {
-            0% { background: red; box-shadow: -10px 0 15px red; }
-            100% { background: blue; box-shadow: 10px 0 15px blue; }
-        }
-        .pacman-sprite { font-size: 50px; color: yellow; line-height: 1; }
+        /* Pacman Styling */
+        #pacman-canvas { width: 100%; height: 250px; background: #111; border: 4px solid var(--p-blauw); position: relative; overflow: hidden; border-radius: 10px; }
+        .pacman-unit { position: absolute; transition: all 0.1s linear; text-align: center; left: 50px; top: 100px; }
+        .siren { width: 16px; height: 6px; margin: 0 auto; animation: flash 0.3s infinite; border-radius: 2px; }
+        @keyframes flash { 0% { background: red; box-shadow: -8px 0 10px red; } 100% { background: blue; box-shadow: 8px 0 10px blue; } }
+        .pac-sprite { font-size: 45px; color: yellow; line-height: 1; }
+        .badge { background: var(--p-blauw); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; display: inline-block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -74,82 +40,126 @@
 <div class="container">
     <div class="striping"></div>
     <div class="content">
-        <h1>🚨 SURVEILLANCE TRAINING</h1>
+        <h1>🚨 Politieschool: Vocab</h1>
         
-        <div id="import-section">
-            <p>IMPORT DATA UNIT (Keep-notities):</p>
-            <textarea id="bulkInput" placeholder="Woord - Betekenis..."></textarea>
-            <button onclick="importData()">START SURVEILLANCE</button>
+        <div id="import-area" class="active">
+            <p style="font-size: 0.9em; color: #666;">Plak woorden uit Keep (Vorm: Woord - Betekenis)</p>
+            <textarea id="bulkInput" placeholder="Apert - Duidelijk&#10;Consensus - Overeenstemming"></textarea>
+            <button class="main-btn" onclick="startApp()">START TRAINING</button>
         </div>
 
         <div id="quiz-section">
-            <p id="question-box" style="text-align:center; font-size: 1.3em;"></p>
-            <input type="text" id="userAnswer" placeholder="Antwoord invoeren..." onkeypress="if(event.key==='Enter') check()">
-            <button onclick="check()">CONTROLEREN</button>
-            <p id="progress" style="text-align:center; color: var(--politie-blauw);">RAPPORT: 0 / 5</p>
+            <div class="badge" id="level-badge">Level 1: Herkenning (MC)</div>
+            <div id="q-box" style="text-align:center; font-size: 1.4em; margin: 15px 0; font-weight: bold;"></div>
+            
+            <div id="mc-options" class="mc-container"></div>
+
+            <div id="input-area">
+                <input type="text" id="openAnswer" placeholder="Typ de betekenis..." onkeypress="if(event.key==='Enter') checkOpen()">
+                <button class="main-btn" onclick="checkOpen()">BEVESTIG</button>
+            </div>
+
+            <p id="progress-text" style="text-align:center; font-weight: bold; color: var(--p-blauw);">Voortgang: 0 / 10</p>
         </div>
 
         <div id="game-section">
-            <h3 style="text-align:center;">UNIT IN ACTIE</h3>
+            <h3 style="text-align:center;">SURVEILLANCE UNIT ACTIEF</h3>
             <div id="pacman-canvas">
-                <div id="player-unit" class="pacman-unit">
-                    <div class="siren"></div>
-                    <div class="pacman-sprite">ᗧ</div>
+                <div id="player" class="pacman-unit">
+                    <div class="siren"></div><div class="pac-sprite">ᗧ</div>
                 </div>
             </div>
-            <p style="text-align:center; font-size: 12px;">GEBRUIK PIJLTOETSEN VOOR ACHTERVOLGING</p>
-            <button onclick="location.reload()" style="background: #666;">HERSTARTEN</button>
+            <p style="text-align:center; font-size: 12px; color: #666; margin-top: 10px;">GEBRUIK PIJLTOETSEN OM TE BESTUREN</p>
+            <button class="main-btn" onclick="location.reload()" style="background: #666; margin-top: 10px;">NIEUWE SESSIE</button>
         </div>
     </div>
     <div class="striping"></div>
 </div>
 
 <script>
-    let db = []; let score = 0; let target = {};
-    const player = document.getElementById('player-unit');
+    let db = []; let score = 0; let target = {}; let level = 1;
 
-    function importData() {
+    function startApp() {
         const val = document.getElementById('bulkInput').value;
         db = val.split('\n').filter(l => l.includes('-')).map(l => {
             const p = l.split('-');
-            return { w: p[0].trim(), b: p[1].trim().toLowerCase() };
+            return { w: p[0].trim(), b: p[1].trim() };
         });
-        if(db.length < 5) alert("Onvoldoende data voor surveillance.");
-        else {
-            document.getElementById('import-section').style.display = 'none';
-            document.getElementById('quiz-section').classList.add('active');
-            next();
-        }
+        if(db.length < 4) return alert("Minimaal 4 woorden nodig.");
+        document.getElementById('import-area').style.display = 'none';
+        document.getElementById('quiz-section').classList.add('active');
+        loadQuestion();
     }
 
-    function next() {
+    function loadQuestion() {
         target = db[Math.floor(Math.random() * db.length)];
-        document.getElementById('question-box').innerHTML = `BETEKENIS VAN: <br><strong>${target.w.toUpperCase()}</strong>`;
-        document.getElementById('userAnswer').value = "";
-        document.getElementById('userAnswer').focus();
-    }
-
-    function check() {
-        const ans = document.getElementById('userAnswer').value.toLowerCase();
-        if(ans.includes(target.b) || target.b.includes(ans)) {
-            score++;
-            document.getElementById('progress').innerText = `RAPPORT: ${score} / 5`;
-            if(score >= 5) {
-                document.getElementById('quiz-section').classList.remove('active');
-                document.getElementById('game-section').classList.add('active');
-            } else next();
-        } else {
-            alert(`FOUTIEVE MELDING. CORRECT: ${target.b}`);
-            next();
+        document.getElementById('q-box').innerText = target.w.toUpperCase();
+        
+        if(score < 4) { // Level 1 & 2: Multiple Choice
+            level = 1;
+            document.getElementById('level-badge').innerText = "Level 1: Herkenning (MC)";
+            document.getElementById('mc-options').style.display = 'grid';
+            document.getElementById('input-area').style.display = 'none';
+            generateMC();
+        } else { // Level 3 & 4: Open Vragen
+            level = 2;
+            document.getElementById('level-badge').innerText = "Level 2: Reproductie (Typen)";
+            document.getElementById('mc-options').style.display = 'none';
+            document.getElementById('input-area').style.display = 'block';
+            document.getElementById('openAnswer').focus();
         }
     }
 
+    function generateMC() {
+        let options = [target.b];
+        while(options.length < 4) {
+            let r = db[Math.floor(Math.random() * db.length)].b;
+            if(!options.includes(r)) options.push(r);
+        }
+        options.sort(() => Math.random() - 0.5);
+        
+        const container = document.getElementById('mc-options');
+        container.innerHTML = '';
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'mc-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkMC(opt);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkMC(picked) {
+        if(picked === target.b) { score++; finalizeStep(); } 
+        else { alert(`Onjuist! Het was: ${target.b}`); score = Math.max(0, score-1); loadQuestion(); }
+    }
+
+    function checkOpen() {
+        const ans = document.getElementById('openAnswer').value.toLowerCase();
+        if(ans.includes(target.b.toLowerCase()) || target.b.toLowerCase().includes(ans)) {
+            score++; finalizeStep();
+        } else {
+            alert(`Fout! Correct was: ${target.b}`);
+            loadQuestion();
+        }
+    }
+
+    function finalizeStep() {
+        document.getElementById('progress-text').innerText = `Voortgang: ${score} / 10`;
+        if(score >= 10) {
+            document.getElementById('quiz-section').classList.remove('active');
+            document.getElementById('game-section').classList.add('active');
+        } else loadQuestion();
+    }
+
+    // PACMAN CONTROLS
     document.addEventListener('keydown', (e) => {
-        let t = player.offsetTop; let l = player.offsetLeft;
-        if(e.key === "ArrowUp") player.style.top = Math.max(0, t - 20) + "px";
-        if(e.key === "ArrowDown") player.style.top = Math.min(240, t + 20) + "px";
-        if(e.key === "ArrowLeft") { player.style.left = Math.max(0, l - 20) + "px"; player.style.transform = "scaleX(-1)"; }
-        if(e.key === "ArrowRight") { player.style.left = Math.min(580, l + 20) + "px"; player.style.transform = "scaleX(1)"; }
+        const p = document.getElementById('player');
+        let t = p.offsetTop; let l = p.offsetLeft;
+        if(e.key === "ArrowUp") p.style.top = Math.max(0, t - 20) + "px";
+        if(e.key === "ArrowDown") p.style.top = Math.min(200, t + 20) + "px";
+        if(e.key === "ArrowLeft") { p.style.left = Math.max(0, l - 20) + "px"; p.style.transform = "scaleX(-1)"; }
+        if(e.key === "ArrowRight") { p.style.left = Math.min(530, l + 20) + "px"; p.style.transform = "scaleX(1)"; }
     });
 </script>
 </body>

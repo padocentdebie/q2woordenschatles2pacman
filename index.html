@@ -3,34 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unit Vocab Training</title>
+    <title>Unit Vocab - Smart Import</title>
     <style>
-        :root { --p-blauw: #1c2b4a; --s-rood: #e30613; --s-blauw: #005ca9; --bg: #e5e7eb; }
-        body { font-family: 'Arial', sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; background: white; border-radius: 4px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 12px solid var(--p-blauw); }
+        :root { --p-blauw: #1c2b4a; --s-rood: #e30613; --s-blauw: #005ca9; --bg: #f3f4f6; }
+        body { font-family: 'Arial', sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 12px solid var(--p-blauw); }
         .striping { height: 25px; background: repeating-linear-gradient(-45deg, var(--s-blauw), var(--s-blauw) 20px, #fff 20px, #fff 40px, var(--s-rood) 40px, var(--s-rood) 60px, #fff 60px, #fff 80px); }
         .page { display: none; padding: 30px; }
         .active { display: block; }
+        h1 { color: var(--p-blauw); text-align: center; text-transform: uppercase; font-size: 22px; border-bottom: 2px solid var(--p-blauw); padding-bottom: 10px; }
         
-        h1 { color: var(--p-blauw); text-align: center; font-size: 20px; text-transform: uppercase; border-bottom: 2px solid var(--p-blauw); padding-bottom: 10px; }
-        textarea { width: 100%; height: 150px; border: 1px solid #ccc; padding: 10px; border-radius: 4px; font-family: sans-serif; resize: none; }
+        /* Pagina 1 Specifiek */
+        textarea { width: 100%; height: 180px; border: 2px solid #ddd; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5; box-sizing: border-box; }
+        .hint { font-size: 0.85em; color: #666; background: #fff9c4; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 5px solid #fbc02d; }
         
-        /* Multiple Choice Grid */
+        /* Knoppen & Quiz */
         .mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .mc-btn { background: #f9fafb; border: 2px solid var(--p-blauw); padding: 15px; cursor: pointer; font-weight: bold; color: var(--p-blauw); border-radius: 4px; }
+        .mc-btn { background: #fdfdfd; border: 2px solid var(--p-blauw); padding: 15px; cursor: pointer; font-weight: bold; color: var(--p-blauw); border-radius: 6px; }
         .mc-btn:hover { background: var(--p-blauw); color: white; }
+        input[type="text"] { width: 100%; padding: 15px; border: 2px solid var(--p-blauw); font-size: 1.1em; border-radius: 6px; box-sizing: border-box; }
+        button.action-btn { width: 100%; padding: 18px; background: var(--p-blauw); color: white; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; border-radius: 6px; font-size: 16px; }
         
-        input[type="text"] { width: 100%; padding: 15px; border: 2px solid var(--p-blauw); font-size: 1.1em; border-radius: 4px; box-sizing: border-box; }
-        button.action-btn { width: 100%; padding: 15px; background: var(--p-blauw); color: white; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
-        
-        .badge { background: var(--p-blauw); color: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
-        
-        /* Pacman Area */
-        #canvas { width: 100%; height: 280px; background: #111; border: 4px solid var(--p-blauw); position: relative; overflow: hidden; border-radius: 8px; }
-        .pac-unit { position: absolute; text-align: center; left: 50px; top: 100px; transition: all 0.1s linear; }
-        .siren { width: 16px; height: 6px; margin: 0 auto; animation: flash 0.3s infinite; border-radius: 2px; }
-        @keyframes flash { 0% { background: red; box-shadow: -6px 0 10px red; } 100% { background: blue; box-shadow: 6px 0 10px blue; } }
-        .sprite { font-size: 45px; line-height: 1; }
+        /* Pacman */
+        #canvas { width: 100%; height: 300px; background: #000; border: 4px solid var(--p-blauw); position: relative; overflow: hidden; border-radius: 10px; }
+        .pac-unit { position: absolute; text-align: center; left: 50%; top: 50%; transition: all 0.1s linear; }
+        .siren { width: 18px; height: 7px; margin: 0 auto; animation: flash 0.3s infinite; border-radius: 2px; }
+        @keyframes flash { 0% { background: red; box-shadow: -8px 0 12px red; } 100% { background: blue; box-shadow: 8px 0 12px blue; } }
+        .sprite { font-size: 50px; line-height: 1; color: yellow; }
     </style>
 </head>
 <body>
@@ -39,37 +38,39 @@
     <div class="striping"></div>
 
     <div id="page1" class="page active">
-        <h1>🚨 Pagina 1: Briefing</h1>
-        <p>Plak de woordenlijst uit Google Keep (Formaat: Woord - Betekenis)</p>
-        <textarea id="bulkInput" placeholder="Apert - Duidelijk&#10;Consensus - Overeenstemming&#10;Rancuneus - Haatdragend"></textarea>
-        <button class="action-btn" onclick="goToPage2()">Start Training</button>
+        <h1>🚨 Briefing: Data Import</h1>
+        <div class="hint">
+            <b>Hoe te kopiëren uit Keep:</b><br>
+            Plak de lijst gewoon hieronder. De app herkent het eerste woord als de term en de rest als de betekenis.
+        </div>
+        <textarea id="bulkInput" placeholder="Apert duidelijk&#10;Consensus overeenstemming&#10;Debacle grote mislukking"></textarea>
+        <button class="action-btn" onclick="processKeepData()">Verwerk Woordenlijst</button>
     </div>
 
     <div id="page2" class="page">
-        <h1>🚨 Pagina 2: Training</h1>
-        <div class="badge" id="lvlBadge">Level 1: Herkenning (MC)</div>
-        <div id="wordTarget" style="text-align:center; font-size: 1.8em; margin: 20px 0; font-weight: bold; color: var(--p-blauw);"></div>
+        <div id="levelTag" style="background: var(--p-blauw); color: white; display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; margin-bottom: 10px;">LEVEL 1: MC</div>
+        <div id="wordTarget" style="text-align:center; font-size: 2em; margin: 20px 0; font-weight: 900; color: var(--p-blauw);"></div>
         
         <div id="mcContainer" class="mc-grid"></div>
 
         <div id="openContainer" style="display:none;">
             <input type="text" id="openInput" placeholder="Typ de betekenis..." onkeypress="if(event.key==='Enter') checkOpen()">
-            <button class="action-btn" onclick="checkOpen()">Verifieer</button>
+            <button class="action-btn" onclick="checkOpen()">Rapport Bevestigen</button>
         </div>
         
-        <p id="progress" style="text-align:center; font-weight: bold; margin-top: 20px;">Score: 0 / 10</p>
+        <p id="progress" style="text-align:center; font-weight: bold; margin-top: 25px; color: #555;">Score Unit: 0 / 10</p>
     </div>
 
     <div id="page3" class="page">
-        <h1>🚨 Pagina 3: Surveillance</h1>
+        <h1>🚨 Surveillance Unit</h1>
         <div id="canvas">
             <div id="player" class="pac-unit">
                 <div class="siren"></div>
                 <div class="sprite">ᗧ</div>
             </div>
         </div>
-        <p style="text-align:center; font-size: 13px; color: #555;">Bestuur de unit met de pijltoetsen.</p>
-        <button class="action-btn" onclick="location.reload()" style="background: #555;">Nieuwe Briefing</button>
+        <p style="text-align:center; margin-top: 15px;">Gebruik de <b>pijltjestoetsen</b> voor de achtervolging.</p>
+        <button class="action-btn" onclick="location.reload()" style="background: #444;">Nieuwe Missie</button>
     </div>
 
     <div class="striping" style="margin-top: 20px;"></div>
@@ -78,66 +79,77 @@
 <script>
     let db = []; let score = 0; let current = {};
 
-    function goToPage2() {
-        const input = document.getElementById('bulkInput').value;
-        db = input.split('\n').filter(l => l.includes('-')).map(l => {
-            const [w, b] = l.split('-');
-            return { w: w.trim(), b: b.trim() };
-        });
-        if(db.length < 4) return alert("Systeemmelding: Te weinig data (min. 4 regels).");
+    function processKeepData() {
+        const rawText = document.getElementById('bulkInput').value;
+        const lines = rawText.split('\n').filter(line => line.trim().length > 0);
         
+        db = lines.map(line => {
+            const trimmedLine = line.trim();
+            const firstSpaceIndex = trimmedLine.indexOf(' ');
+            
+            if (firstSpaceIndex !== -1) {
+                return {
+                    w: trimmedLine.substring(0, firstSpaceIndex).trim(),
+                    b: trimmedLine.substring(firstSpaceIndex).trim()
+                };
+            } else {
+                return { w: trimmedLine, b: "geen betekenis gevonden" };
+            }
+        });
+
+        if(db.length < 4) return alert("Fout: Voer minimaal 4 regels in.");
         showPage('page2');
-        loadQuestion();
+        loadChallenge();
     }
 
-    function loadQuestion() {
+    function loadChallenge() {
         current = db[Math.floor(Math.random() * db.length)];
         document.getElementById('wordTarget').innerText = current.w.toUpperCase();
         
-        if(score < 5) { // LEVEL 1: MC
-            document.getElementById('lvlBadge').innerText = "Level 1: Herkenning (MC)";
+        if(score < 5) {
+            document.getElementById('levelTag').innerText = "LEVEL 1: HERKENNING (MC)";
             document.getElementById('mcContainer').style.display = 'grid';
             document.getElementById('openContainer').style.display = 'none';
-            buildMC();
-        } else { // LEVEL 2: OPEN
-            document.getElementById('lvlBadge').innerText = "Level 2: Reproductie (Typen)";
+            setupMC();
+        } else {
+            document.getElementById('levelTag').innerText = "LEVEL 2: REPRODUCTIE (TYPEN)";
             document.getElementById('mcContainer').style.display = 'none';
             document.getElementById('openContainer').style.display = 'block';
             document.getElementById('openInput').focus();
         }
     }
 
-    function buildMC() {
-        let opts = [current.b];
-        while(opts.length < 4) {
-            let r = db[Math.floor(Math.random() * db.length)].b;
-            if(!opts.includes(r)) opts.push(r);
+    function setupMC() {
+        let options = [current.b];
+        while(options.length < 4) {
+            let randomB = db[Math.floor(Math.random() * db.length)].b;
+            if(!options.includes(randomB)) options.push(randomB);
         }
-        opts.sort(() => Math.random() - 0.5);
+        options.sort(() => Math.random() - 0.5);
         const container = document.getElementById('mcContainer');
         container.innerHTML = '';
-        opts.forEach(o => {
-            const b = document.createElement('button');
-            b.className = 'mc-btn';
-            b.innerText = o;
-            b.onclick = () => { if(o === current.b) { score++; win(); } else { alert("Fout!"); score = Math.max(0, score-1); loadQuestion(); } };
-            container.appendChild(b);
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'mc-btn';
+            btn.innerText = opt;
+            btn.onclick = () => { if(opt === current.b) { score++; finalize(); } else { alert("Foutieve identificatie!"); score = Math.max(0, score-1); loadChallenge(); } };
+            container.appendChild(btn);
         });
     }
 
     function checkOpen() {
-        const val = document.getElementById('openInput').value.toLowerCase();
-        if(val.includes(current.b.toLowerCase()) || current.b.toLowerCase().includes(val)) {
-            score++; win();
+        const inputVal = document.getElementById('openInput').value.toLowerCase();
+        if(inputVal.length > 2 && (current.b.toLowerCase().includes(inputVal) || inputVal.includes(current.b.toLowerCase()))) {
+            score++; finalize();
         } else {
-            alert("Onjuist! Het was: " + current.b);
-            loadQuestion();
+            alert("Onjuist rapport. Correcte betekenis: " + current.b);
+            loadChallenge();
         }
     }
 
-    function win() {
-        document.getElementById('progress').innerText = `Score: ${score} / 10`;
-        if(score >= 10) showPage('page3'); else loadQuestion();
+    function finalize() {
+        document.getElementById('progress').innerText = `Score Unit: ${score} / 10`;
+        if(score >= 10) showPage('page3'); else loadChallenge();
     }
 
     function showPage(id) {
@@ -145,14 +157,13 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // PACMAN BESTURING
     document.addEventListener('keydown', (e) => {
         const p = document.getElementById('player');
-        let top = p.offsetTop; let left = p.offsetLeft;
-        if(e.key === "ArrowUp") p.style.top = (top - 20) + "px";
-        if(e.key === "ArrowDown") p.style.top = (top + 20) + "px";
-        if(e.key === "ArrowLeft") { p.style.left = (left - 20) + "px"; p.style.transform = "scaleX(-1)"; }
-        if(e.key === "ArrowRight") { p.style.left = (left + 20) + "px"; p.style.transform = "scaleX(1)"; }
+        let t = p.offsetTop; let l = p.offsetLeft;
+        if(e.key === "ArrowUp") p.style.top = (t - 20) + "px";
+        if(e.key === "ArrowDown") p.style.top = (t + 20) + "px";
+        if(e.key === "ArrowLeft") { p.style.left = (l - 20) + "px"; p.style.transform = "scaleX(-1)"; }
+        if(e.key === "ArrowRight") { p.style.left = (l + 20) + "px"; p.style.transform = "scaleX(1)"; }
     });
 </script>
 </body>

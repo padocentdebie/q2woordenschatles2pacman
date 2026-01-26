@@ -1,199 +1,280 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Woordenschat - Ghost Edition</title>
+    <title>Pacman Woordenschat - Pro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #020617; color: #fff; padding: 20px; font-family: sans-serif; overflow: hidden; }
-        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
-        .section { background: #1e293b; padding: 20px; border-radius: 15px; border: 2px solid #334155; }
-        .question-box { background: #0f172a; padding: 20px; border-radius: 10px; margin: 10px 0; min-height: 120px; border-left: 5px solid #fbbf24; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 1.1rem; }
-        .timer-bar { width: 100%; height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
-        .timer-fill { width: 100%; height: 100%; background: #ef4444; }
-        .option-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border: 1px solid #475569; cursor: pointer; border-radius: 8px; }
-        .correct { background: #15803d !important; }
-        .incorrect { background: #b91c1c !important; }
-        canvas { background: #000; border: 4px solid #3b82f6; border-radius: 10px; display: block; margin: 0 auto; outline: none; }
+        body { background: #020617; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; }
+        .hidden { display: none !important; }
+        
+        /* Quiz Scherm */
+        #screen-quiz { height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #1e293b 0%, #020617 100%); }
+        .quiz-card { background: #1e293b; padding: 40px; border-radius: 20px; border: 4px solid #3b82f6; width: 500px; box-shadow: 0 0 50px rgba(59, 130, 246, 0.5); }
+        
+        /* Game Scherm */
+        #screen-game { height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; }
+        canvas { border: 5px solid #1e40af; box-shadow: 0 0 20px #1e40af; background: #000; }
+        
+        .option-btn { width: 100%; text-align: left; padding: 15px; margin-bottom: 10px; background: #334155; border-radius: 10px; transition: 0.3s; border: 1px solid #475569; }
+        .option-btn:hover { background: #475569; transform: scale(1.02); }
+        .correct { background: #15803d !important; border-color: #22c55e !important; }
+        .incorrect { background: #b91c1c !important; border-color: #ef4444 !important; }
+        
+        .hud { width: 900px; display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="section">
-        <h2 class="text-xl font-bold text-yellow-400 mb-4 text-center">TAAL QUIZ</h2>
-        <div class="flex justify-between text-sm mb-1"><span>Punten:</span><span id="pts-display" class="font-bold text-green-400">0 / 5</span></div>
-        <div class="timer-bar mb-4"><div id="t-fill" class="timer-fill" style="width:100%"></div></div>
-        <div id="q-text" class="question-box">Beantwoord 5 vragen voor toegang!</div>
-        <div id="ans-zone">
-            <button class="option-btn w-full bg-green-600 text-center font-bold" onclick="startQuiz()">START QUIZ</button>
+<div id="screen-quiz">
+    <div class="quiz-card">
+        <h2 class="text-3xl font-black text-yellow-400 mb-6 text-center italic">WOORDEN QUIZ</h2>
+        <div id="q-container">
+            <p id="q-text" class="text-lg mb-6 text-center min-h-[60px] flex align-center justify-center">Klik op start om te beginnen!</p>
+            <div id="ans-zone" class="space-y-3">
+                <button class="option-btn bg-yellow-500 !text-black font-black text-center" onclick="startQuiz()">START DE QUIZ</button>
+            </div>
         </div>
-        <button id="v-knop" class="option-btn mt-4 hidden bg-blue-500 text-white font-bold w-full text-center" onclick="goNext()">VOLGENDE ➔</button>
-    </div>
-
-    <div class="section">
-        <div class="flex justify-between items-center mb-4 px-4">
-            <div class="text-2xl font-black">SCORE: <span id="g-score" class="text-yellow-400">0</span></div>
-            <div id="status-msg" class="text-blue-400 font-bold animate-pulse invisible">SUPER POWER!</div>
-            <div class="text-2xl font-black">LEVENS: <span id="g-lives" class="text-red-500">3</span></div>
+        <div id="quiz-progress" class="mt-6 text-center text-sm text-slate-400">
+            Behaal 3 punten om het doolhof te openen.
         </div>
-        <canvas id="gameCanvas" width="800" height="400" tabindex="0"></canvas>
-        <button id="game-btn" class="w-full p-5 mt-4 rounded-xl font-black text-xl bg-slate-800 text-slate-600" disabled onclick="playGame()">
-            WIN DE QUIZ OM TE SPELEN
-        </button>
     </div>
 </div>
 
+<div id="screen-game" class="hidden">
+    <div class="hud">
+        <div class="text-yellow-400">SCORE: <span id="g-score">0</span></div>
+        <div id="level-msg" class="text-blue-400">LEVEL: <span id="g-level">1</span></div>
+        <div class="text-red-500">LEVENS: <span id="g-lives">3</span></div>
+    </div>
+    <canvas id="gameCanvas" width="900" height="500"></canvas>
+    <div class="mt-4 text-slate-500 text-sm">GEBRUIK PIJLTJESTOETSEN • EET KRACHT-BOLLEN OM SPOKEN TE ETEN</div>
+</div>
+
 <script>
-const woordenLijst = [
-    { w: "hypocriet", b: "schijnheilig", z: "Het is nogal ____ om te zeggen dat je van dieren houdt, terwijl je ze slecht behandelt." },
-    { w: "ambitieus", b: "eerzuchtig", z: "Zij is erg ____ en wil binnen twee jaar directeur worden." },
-    { w: "improviseren", b: "onvoorbereid iets doen", z: "Toen de microfoon uitviel, moest de zanger de rest van de show ____." },
-    { w: "loyaal", b: "trouw", z: "Een goede vriend blijft je altijd ____." },
-    { w: "obstakel", b: "hindernis", z: "De boom was een groot ____ op de weg." },
-    { w: "cruciaal", b: "beslissend", z: "Goede voorbereiding is ____ voor het slagen." },
-    { w: "incognito", b: "onherkenbaar", z: "De koning reisde ____ door het land." },
-    { w: "skeptisch", b: "twijfelachtig", z: "Ik ben ____ over dat mooie verhaal." },
-    { w: "efficient", b: "doelmatig", z: "Laten we onze tijd ____ gebruiken." },
-    { w: "nuanceren", b: "details aanbrengen", z: "Je moet je mening een beetje ____." }
+// --- QUIZ LOGICA ---
+const woorden = [
+    { w: "Legitiem", b: "Wettelijk gerechtvaardigd" },
+    { w: "Interventie", b: "Actieve bemoeienis" },
+    { w: "Paradox", b: "Tegenstelling die toch klopt" },
+    { w: "Sceptisch", b: "Niet gauw gelovend" }
 ];
 
-let qIdx = 0, correctCount = 0, activeQ = [], timer, timeRemaining;
+let scoreQuiz = 0;
 
-function startQuiz() { correctCount = 0; qIdx = 0; activeQ = woordenLijst.sort(()=>0.5-Math.random()).map(item=>{
-    const distractors = woordenLijst.filter(x=>x.w!==item.w).sort(()=>0.5-Math.random()).slice(0,2).map(x=>x.b);
-    return {q:`Wat is de betekenis van "${item.w}"?`, a:item.b, o:distractors};
-}); showQ(); }
+function startQuiz() {
+    scoreQuiz = 0;
+    askQuestion();
+}
 
-function showQ() {
-    clearInterval(timer); timeRemaining = 100; const v = activeQ[qIdx];
-    document.getElementById('q-text').innerText = v.q;
-    document.getElementById('v-knop').classList.add('hidden');
-    const zone = document.getElementById('ans-zone'); zone.innerHTML = "";
-    timer = setInterval(() => { timeRemaining--; document.getElementById('t-fill').style.width = timeRemaining + "%"; if(timeRemaining<=0) checkAnswer(null, v.a); }, 100);
-    [v.a, ...v.o].sort(()=>0.5-Math.random()).forEach(opt => {
-        const b = document.createElement('button'); b.className="option-btn"; b.innerText=opt; b.onclick=()=>checkAnswer(opt, v.a, b); zone.appendChild(b);
+function askQuestion() {
+    if(scoreQuiz >= 3) {
+        unlockGame();
+        return;
+    }
+    const item = woorden[Math.floor(Math.random()*woorden.length)];
+    const distractors = woorden.filter(x => x.b !== item.b).map(x => x.b);
+    const opties = [item.b, ...distractors].sort(() => 0.5 - Math.random());
+    
+    document.getElementById('q-text').innerText = `Wat is de betekenis van: "${item.w}"?`;
+    const zone = document.getElementById('ans-zone');
+    zone.innerHTML = "";
+    
+    opties.forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = "option-btn";
+        btn.innerText = o;
+        btn.onclick = () => {
+            if(o === item.b) {
+                btn.classList.add('correct');
+                scoreQuiz++;
+                setTimeout(askQuestion, 800);
+            } else {
+                btn.classList.add('incorrect');
+                setTimeout(askQuestion, 800);
+            }
+        };
+        zone.appendChild(btn);
     });
 }
 
-function checkAnswer(chosen, correct, btn) {
-    clearInterval(timer); document.querySelectorAll('#ans-zone button').forEach(k=>k.disabled=true);
-    if(chosen===correct) { if(btn) btn.classList.add('correct'); correctCount++; } else if(btn) btn.classList.add('incorrect');
-    document.getElementById('pts-display').innerText = `${correctCount} / 5`;
-    if(correctCount>=5) { 
-        const gb = document.getElementById('game-btn'); gb.disabled=false; gb.className="w-full p-5 mt-4 rounded-xl font-black text-xl bg-yellow-500 text-black";
-        gb.innerText = "START PACMAN (GEBRUIK PIJLTJES)";
-    }
-    document.getElementById('v-knop').classList.remove('hidden');
+function unlockGame() {
+    document.getElementById('screen-quiz').classList.add('hidden');
+    document.getElementById('screen-game').classList.remove('hidden');
+    initGame();
 }
 
-function goNext() { qIdx++; showQ(); }
+// --- GAME LOGICA ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const TILE = 25;
+let gameRunning = false;
+let pacman, ghosts, dots, level = 1, gameScore = 0, gameLives = 3, powerMode = 0;
 
-// GAME ENGINE
-const cvs = document.getElementById('gameCanvas'), ctx = cvs.getContext('2d');
-const T = 20; 
-let running = false, score = 0, lives = 3, powerMode = 0;
-let p = { x: T, y: T, d: 0, n: 0, s: 2 };
-let ghosts = [];
-const maze = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,3,2,2,2,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,3,2,1],
-    [1,2,1,1,2,1,2,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1],
-    [1,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,1,1,1,1,2,1,1,2,1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,1,2,1,1,2,1,1,1,1,1,2,1,1,1,0,0,0,0,1,1,1,2,1,1,2,1,2,2,2,2,2,2,2,2,2,1],
-    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+// Eenvoudige Maze Layout (1 = Muur, 0 = Pad, 3 = PowerPellet)
+const layout = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,3,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,3,1],
+    [1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,0,0,0,0,1,0,1,0,1,1,1,1,0,1,0,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,1,1,1,0,1,1],
+    [1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,1,2,2,1,1,0,1,0,0,0,0,1,0,0,0,0,0,0,1],
+    [1,0,1,1,1,0,1,0,1,1,1,1,0,1,0,1,2,2,2,2,1,0,1,0,1,1,1,1,0,1,0,1,1,1,0,1],
+    [1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,1],
+    [1,1,1,0,1,0,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,0,1,1,1,0,1,0,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
-let curM = maze.map(r => [...r]);
 
-function drawGhost(g) {
-    const x = g.x + T/2, y = g.y + T/2, r = 8;
-    ctx.fillStyle = powerMode > 0 ? (powerMode < 100 && powerMode%20<10 ? "#fff" : "#2222ff") : g.c;
+function initGame() {
+    pacman = { x: TILE, y: TILE, dir: 0, nextDir: 0, speed: 2.5 };
+    dots = [];
+    ghosts = [
+        { x: TILE*17, y: TILE*6, color: 'red', dir: 0 },
+        { x: TILE*18, y: TILE*6, color: 'pink', dir: 0 },
+        { x: TILE*19, y: TILE*6, color: 'cyan', dir: 0 }
+    ];
     
-    // Lichaam (Hoofd + Rechte zijkanten)
-    ctx.beginPath();
-    ctx.arc(x, y-2, r, Math.PI, 0);
-    ctx.lineTo(x + r, y + r);
-    // Golvende onderkant
-    for (let i = 0; i < 3; i++) {
-        ctx.arc(x + r - (i * 2 + 1) * (r/3), y + r, r/3, 0, Math.PI, false);
+    // Vul de maze met bolletjes
+    for(let r=0; r<layout.length; r++) {
+        for(let c=0; c<layout[r].length; c++) {
+            if(layout[r][c] === 0 || layout[r][c] === 3) dots.push({r, c, type: layout[r][c]});
+        }
     }
-    ctx.lineTo(x - r, y - 2);
-    ctx.fill();
-
-    // Oogjes
-    ctx.fillStyle = "white";
-    ctx.beginPath(); ctx.arc(x-3, y-3, 3, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x+3, y-3, 3, 0, Math.PI*2); ctx.fill();
-    
-    // Pupillen (kijken in richting g.d)
-    ctx.fillStyle = powerMode > 0 ? "white" : "blue";
-    let px = 0, py = 0;
-    if(g.d===0) px=1; if(g.d===1) py=1; if(g.d===2) px=-1; if(g.d===3) py=-1;
-    ctx.beginPath(); ctx.arc(x-3+px, y-3+py, 1.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x+3+px, y-3+py, 1.5, 0, Math.PI*2); ctx.fill();
+    gameRunning = true;
+    requestAnimationFrame(gameLoop);
 }
 
-function playGame() {
-    running = true; score = 0; lives = 3; powerMode = 0; curM = maze.map(r => [...r]); p.x = T; p.y = T;
-    ghosts = [{x:T*18, y:T*5, c:'#ff0000', d:0, s:2}, {x:T*25, y:T*5, c:'#00ffff', d:2, s:2}, {x:T*10, y:T*3, c:'#ffb8ff', d:1, s:2}];
-    cvs.focus(); requestAnimationFrame(loop);
+function gameLoop() {
+    if(!gameRunning) return;
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
 }
 
-function loop() {
-    if(!running) return;
+function update() {
     if(powerMode > 0) powerMode--;
-    document.getElementById('status-msg').style.visibility = powerMode > 0 ? "visible" : "hidden";
 
-    if(p.x%T===0 && p.y%T===0) {
-        let nx=0, ny=0; if(p.n===0) nx=T; if(p.n===1) ny=T; if(p.n===2) nx=-T; if(p.n===3) ny=-T;
-        if(curM[Math.round((p.y+ny)/T)]?.[Math.round((p.x+nx)/T)] !== 1) p.d = p.n;
+    // Pacman Beweging
+    let movePac = true;
+    let nextX = pacman.x, nextY = pacman.y;
+    
+    // Probeer van richting te veranderen op grid-punten
+    if(pacman.x % TILE === 0 && pacman.y % TILE === 0) {
+        // Check of nextDir kan
+        if(canMove(pacman.x, pacman.y, pacman.nextDir)) pacman.dir = pacman.nextDir;
+        if(!canMove(pacman.x, pacman.y, pacman.dir)) movePac = false;
     }
-    let dx=0, dy=0; if(p.d===0) dx=p.s; if(p.d===1) dy=p.s; if(p.d===2) dx=-p.s; if(p.d===3) dy=-p.s;
-    if(curM[Math.round((p.y+dy+(dy>0?9:-9))/T)]?.[Math.round((p.x+dx+(dx>0?9:-9))/T)] !== 1) { p.x += dx; p.y += dy; }
 
-    let r = Math.round(p.y/T), c = Math.round(p.x/T);
-    if(curM[r][c] === 2) { score += 10; curM[r][c]=0; }
-    if(curM[r][c] === 3) { score += 50; curM[r][c]=0; powerMode = 400; }
+    if(movePac) {
+        if(pacman.dir === 0) pacman.x += pacman.speed;
+        if(pacman.dir === 1) pacman.y += pacman.speed;
+        if(pacman.dir === 2) pacman.x -= pacman.speed;
+        if(pacman.dir === 3) pacman.y -= pacman.speed;
+    }
 
-    ctx.fillStyle = "black"; ctx.fillRect(0,0,cvs.width,cvs.height);
-    for(let ri=0; ri<curM.length; ri++) { for(let ci=0; ci<curM[ri].length; ci++) {
-        let x=ci*T, y=ri*T;
-        if(curM[ri][ci]===1) { ctx.fillStyle="#3b82f6"; ctx.fillRect(x+1,y+1,T-2,T-2); }
-        else if(curM[ri][ci]===2) { ctx.fillStyle="#fbbf24"; ctx.beginPath(); ctx.arc(x+T/2,y+T/2,2,0,7); ctx.fill(); }
-        else if(curM[ri][ci]===3) { ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(x+T/2,y+T/2,6,0,7); ctx.fill(); }
-    }}
+    // Dots eten
+    let pr = Math.floor((pacman.y + TILE/2) / TILE);
+    let pc = Math.floor((pacman.x + TILE/2) / TILE);
+    dots = dots.filter(d => {
+        if(d.r === pr && d.c === pc) {
+            gameScore += (d.type === 3 ? 50 : 10);
+            if(d.type === 3) powerMode = 400;
+            return false;
+        }
+        return true;
+    });
 
-    // Pacman
-    ctx.fillStyle = "yellow"; ctx.beginPath(); ctx.arc(p.x+T/2, p.y+T/2, 9, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(p.x+T/2, p.y+T/2); ctx.fill();
+    if(dots.length === 0) {
+        level++;
+        document.getElementById('g-level').innerText = level;
+        initGame();
+    }
 
+    // Ghost AI
     ghosts.forEach(g => {
-        if(g.x%T===0 && g.y%T===0) g.d = Math.floor(Math.random()*4);
-        let gdx=0, gdy=0; if(g.d===0) gdx=g.s; if(g.d===1) gdy=g.s; if(g.d===2) gdx=-g.s; if(g.d===3) gdy=-g.s;
-        if(curM[Math.round((g.y+gdy)/T)]?.[Math.round((g.x+gdx)/T)] !== 1) { g.x+=gdx; g.y+=gdy; }
-        drawGhost(g);
-        if(Math.hypot(p.x-g.x, p.y-g.y) < 15) {
-            if(powerMode > 0) { score+=200; g.x=T*18; g.y=T*5; }
-            else { lives--; if(lives<=0) { alert("Game Over!"); location.reload(); } else { p.x=T; p.y=T; } }
+        if(g.x % TILE === 0 && g.y % TILE === 0) {
+            // Als powerMode: vlucht naar 17, 6. Anders: random.
+            g.dir = Math.floor(Math.random()*4);
+        }
+        
+        let gs = (powerMode > 0) ? 1 : 2;
+        if(g.dir === 0) g.x += gs;
+        if(g.dir === 1) g.y += gs;
+        if(g.dir === 2) g.x -= gs;
+        if(g.dir === 3) g.y -= gs;
+
+        // Collision
+        if(Math.hypot(pacman.x - g.x, pacman.y - g.y) < 20) {
+            if(powerMode > 0) {
+                g.x = TILE*17; g.y = TILE*6;
+                gameScore += 200;
+            } else {
+                gameLives--;
+                pacman.x = TILE; pacman.y = TILE;
+                if(gameLives <= 0) { alert("Game Over!"); location.reload(); }
+            }
         }
     });
-    document.getElementById('g-score').innerText = score; document.getElementById('g-lives').innerText = lives;
-    requestAnimationFrame(loop);
+
+    document.getElementById('g-score').innerText = gameScore;
+    document.getElementById('g-lives').innerText = gameLives;
+}
+
+function canMove(x, y, dir) {
+    let r = Math.round(y/TILE), c = Math.round(x/TILE);
+    if(dir === 0) c++; if(dir === 1) r++; if(dir === 2) c--; if(dir === 3) r--;
+    return layout[r] && layout[r][c] !== 1;
+}
+
+function draw() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+
+    // Maze
+    for(let r=0; r<layout.length; r++) {
+        for(let c=0; c<layout[r].length; c++) {
+            if(layout[r][c] === 1) {
+                ctx.fillStyle = "#1e40af";
+                ctx.fillRect(c*TILE + 2, r*TILE + 2, TILE-4, TILE-4);
+            }
+        }
+    }
+
+    // Dots
+    dots.forEach(d => {
+        ctx.fillStyle = d.type === 3 ? "white" : "#fbbf24";
+        ctx.beginPath();
+        ctx.arc(d.c*TILE + TILE/2, d.r*TILE + TILE/2, d.type === 3 ? 6 : 2, 0, Math.PI*2);
+        ctx.fill();
+    });
+
+    // Pacman
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    let mouth = Math.sin(Date.now()/100) * 0.2;
+    ctx.arc(pacman.x + TILE/2, pacman.y + TILE/2, 10, (0.2 - mouth)*Math.PI, (1.8 + mouth)*Math.PI);
+    ctx.lineTo(pacman.x + TILE/2, pacman.y + TILE/2);
+    ctx.fill();
+
+    // Spookjes
+    ghosts.forEach(g => {
+        ctx.fillStyle = powerMode > 0 ? "#1e40af" : g.color;
+        ctx.beginPath();
+        ctx.arc(g.x + TILE/2, g.y + TILE/2, 10, Math.PI, 0);
+        ctx.lineTo(g.x + TILE/2 + 10, g.y + TILE/2 + 10);
+        ctx.lineTo(g.x + TILE/2 - 10, g.y + TILE/2 + 10);
+        ctx.fill();
+    });
 }
 
 window.addEventListener("keydown", (e) => {
-    const k = { ArrowRight:0, ArrowDown:1, ArrowLeft:2, ArrowUp:3 };
-    if(k[e.key] !== undefined) { e.preventDefault(); p.n = k[e.key]; }
-    
+    const keys = { ArrowRight: 0, ArrowDown: 1, ArrowLeft: 2, ArrowUp: 3 };
+    if(keys[e.key] !== undefined) pacman.nextDir = keys[e.key];
 });
 
-// Eerste tekening van doolhof
-ctx.fillStyle = "black"; ctx.fillRect(0,0,cvs.width,cvs.height);
-for(let ri=0; ri<maze.length; ri++) { for(let ci=0; ci<maze[ri].length; ci++) {
-    if(maze[ri][ci]===1) { ctx.fillStyle="#1e40af"; ctx.fillRect(ci*T+1, ri*T+1, T-2, T-2); }
-}}
 </script>
 </body>
+</html>

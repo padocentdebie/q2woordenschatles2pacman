@@ -3,110 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacman Vocab Trainer</title>
+    <title>Vocab Surveillance - Unit 1</title>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: #2a2a2a; padding: 20px; border-radius: 10px; border: 2px solid #ffd700; }
-        h1 { color: #ffd700; text-align: center; }
-        .input-group { margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #444; }
-        input, select, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: none; }
-        button { background: #ffd700; font-weight: bold; cursor: pointer; }
-        #game-area { display: none; text-align: center; margin-top: 20px; }
-        #canvas-placeholder { width: 300px; height: 300px; background: black; margin: auto; border: 2px solid blue; display: flex; align-items: center; justify-content: center; }
+        :root { 
+            --politie-blauw: #1c2b4a; 
+            --striping-rood: #e30613;
+            --striping-blauw: #005ca9;
+            --licht-grijs: #f2f2f2;
+        }
+        body { 
+            font-family: 'Arial Black', sans-serif; 
+            background-color: #d1d1d1; 
+            margin: 0; padding: 20px; display: flex; justify-content: center;
+        }
+        .container { 
+            width: 100%; max-width: 650px; background: white; 
+            border-radius: 5px; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border-top: 15px solid var(--politie-blauw);
+        }
+        /* De iconische politie-striping */
+        .striping {
+            height: 40px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--striping-blauw),
+                var(--striping-blauw) 20px,
+                white 20px,
+                white 40px,
+                var(--striping-rood) 40px,
+                var(--striping-rood) 60px,
+                white 60px,
+                white 80px
+            );
+        }
+        .content { padding: 30px; }
+        h1 { color: var(--politie-blauw); text-align: center; margin: 10px 0; font-size: 24px; border-bottom: 3px solid var(--politie-blauw); display: inline-block; width: 100%; }
+        
+        textarea { width: 100%; height: 100px; border: 2px solid #ccc; padding: 10px; box-sizing: border-box; font-family: sans-serif; }
+        input[type="text"] { width: 100%; padding: 15px; border: 2px solid var(--politie-blauw); font-size: 1.2em; box-sizing: border-box; margin: 15px 0; }
+        
+        button { 
+            width: 100%; padding: 15px; background: var(--politie-blauw); color: white; 
+            border: none; font-weight: bold; cursor: pointer; text-transform: uppercase;
+        }
+        button:hover { background: #111a2d; }
+
+        #quiz-section, #game-section { display: none; }
+        .active { display: block !important; }
+
+        /* PACMAN SURVEILLANCE */
+        #pacman-canvas { 
+            width: 100%; height: 300px; background: #222; border: 5px solid var(--politie-blauw); 
+            position: relative; overflow: hidden; border-radius: 10px;
+        }
+        .pacman-unit { position: absolute; transition: all 0.15s linear; text-align: center; }
+        .siren { 
+            width: 15px; height: 6px; margin: 0 auto;
+            animation: police-flash 0.2s infinite; border-radius: 2px;
+        }
+        @keyframes police-flash {
+            0% { background: red; box-shadow: -10px 0 15px red; }
+            100% { background: blue; box-shadow: 10px 0 15px blue; }
+        }
+        .pacman-sprite { font-size: 50px; color: yellow; line-height: 1; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🕹️ Pacman Vocab</h1>
-
-    <div class="input-group">
-        <h3>Nieuw Woord Toevoegen</h3>
-        <input type="text" id="newWord" placeholder="Woord (bijv. Apert)">
-        <input type="text" id="newDef" placeholder="Betekenis">
-        <button onclick="addWord()">Voeg toe aan Database</button>
-    </div>
-
-    <div id="quiz-area">
-        <h3>Level 1: De Overhoring</h3>
-        <p id="question">Laden...</p>
-        <input type="text" id="answer" placeholder="Typ je antwoord hier">
-        <button onclick="checkAnswer()">Controleer Antwoord</button>
-        <p id="score">Goed beantwoord: 0/5</p>
-    </div>
-
-    <div id="game-area">
-        <h2 style="color: #00FF00;">Level Vrijgespeeld!</h2>
-        <p>Gebruik pijltoetsen of swipe om Pacman te besturen.</p>
-        <div id="canvas-placeholder">
-            <span style="color: yellow; font-size: 50px;">ᗧ • • •</span>
+    <div class="striping"></div>
+    <div class="content">
+        <h1>🚨 SURVEILLANCE TRAINING</h1>
+        
+        <div id="import-section">
+            <p>IMPORT DATA UNIT (Keep-notities):</p>
+            <textarea id="bulkInput" placeholder="Woord - Betekenis..."></textarea>
+            <button onclick="importData()">START SURVEILLANCE</button>
         </div>
-        <button onclick="resetGame()">Nieuwe Ronde</button>
+
+        <div id="quiz-section">
+            <p id="question-box" style="text-align:center; font-size: 1.3em;"></p>
+            <input type="text" id="userAnswer" placeholder="Antwoord invoeren..." onkeypress="if(event.key==='Enter') check()">
+            <button onclick="check()">CONTROLEREN</button>
+            <p id="progress" style="text-align:center; color: var(--politie-blauw);">RAPPORT: 0 / 5</p>
+        </div>
+
+        <div id="game-section">
+            <h3 style="text-align:center;">UNIT IN ACTIE</h3>
+            <div id="pacman-canvas">
+                <div id="player-unit" class="pacman-unit">
+                    <div class="siren"></div>
+                    <div class="pacman-sprite">ᗧ</div>
+                </div>
+            </div>
+            <p style="text-align:center; font-size: 12px;">GEBRUIK PIJLTOETSEN VOOR ACHTERVOLGING</p>
+            <button onclick="location.reload()" style="background: #666;">HERSTARTEN</button>
+        </div>
     </div>
+    <div class="striping"></div>
 </div>
 
 <script>
-    // DE DATABASE (OPTIE 1: LOKAAL)
-    let woordenlijst = [
-        {w: "Apert", b: "duidelijk"},
-        {w: "Consensus", b: "overeenstemming"},
-        {w: "Geriater", b: "ouderdomsarts"},
-        {w: "Insinueren", b: "verdacht maken"},
-        {w: "Rancuneus", b: "haatdragend"},
-        {w: "Debacle", b: "mislukking"},
-        {w: "Clandestien", b: "geheim"}
-    ];
+    let db = []; let score = 0; let target = {};
+    const player = document.getElementById('player-unit');
 
-    let score = 0;
-    let currentWord = {};
-
-    function nextQuestion() {
-        currentWord = woordenlijst[Math.floor(Math.random() * woordenlijst.length)];
-        document.getElementById('question').innerText = `Wat is de betekenis van: ${currentWord.w}?`;
-        document.getElementById('answer').value = "";
-    }
-
-    function addWord() {
-        let w = document.getElementById('newWord').value;
-        let b = document.getElementById('newDef').value;
-        if(w && b) {
-            woordenlijst.push({w: w, b: b});
-            alert("Woord toegevoegd!");
-            document.getElementById('newWord').value = "";
-            document.getElementById('newDef').value = "";
+    function importData() {
+        const val = document.getElementById('bulkInput').value;
+        db = val.split('\n').filter(l => l.includes('-')).map(l => {
+            const p = l.split('-');
+            return { w: p[0].trim(), b: p[1].trim().toLowerCase() };
+        });
+        if(db.length < 5) alert("Onvoldoende data voor surveillance.");
+        else {
+            document.getElementById('import-section').style.display = 'none';
+            document.getElementById('quiz-section').classList.add('active');
+            next();
         }
     }
 
-    function checkAnswer() {
-        let userAns = document.getElementById('answer').value.toLowerCase();
-        if(userAns.includes(currentWord.b.toLowerCase())) {
+    function next() {
+        target = db[Math.floor(Math.random() * db.length)];
+        document.getElementById('question-box').innerHTML = `BETEKENIS VAN: <br><strong>${target.w.toUpperCase()}</strong>`;
+        document.getElementById('userAnswer').value = "";
+        document.getElementById('userAnswer').focus();
+    }
+
+    function check() {
+        const ans = document.getElementById('userAnswer').value.toLowerCase();
+        if(ans.includes(target.b) || target.b.includes(ans)) {
             score++;
-            document.getElementById('score').innerText = `Goed beantwoord: ${score}/5`;
+            document.getElementById('progress').innerText = `RAPPORT: ${score} / 5`;
             if(score >= 5) {
-                unlockPacman();
-            } else {
-                nextQuestion();
-            }
+                document.getElementById('quiz-section').classList.remove('active');
+                document.getElementById('game-section').classList.add('active');
+            } else next();
         } else {
-            alert("Helaas, probeer het nog eens!");
+            alert(`FOUTIEVE MELDING. CORRECT: ${target.b}`);
+            next();
         }
     }
 
-    function unlockPacman() {
-        document.getElementById('quiz-area').style.display = 'none';
-        document.getElementById('game-area').style.display = 'block';
-    }
-
-    function resetGame() {
-        score = 0;
-        document.getElementById('quiz-area').style.display = 'block';
-        document.getElementById('game-area').style.display = 'none';
-        document.getElementById('score').innerText = `Goed beantwoord: 0/5`;
-        nextQuestion();
-    }
-
-    nextQuestion(); // Start eerste vraag
+    document.addEventListener('keydown', (e) => {
+        let t = player.offsetTop; let l = player.offsetLeft;
+        if(e.key === "ArrowUp") player.style.top = Math.max(0, t - 20) + "px";
+        if(e.key === "ArrowDown") player.style.top = Math.min(240, t + 20) + "px";
+        if(e.key === "ArrowLeft") { player.style.left = Math.max(0, l - 20) + "px"; player.style.transform = "scaleX(-1)"; }
+        if(e.key === "ArrowRight") { player.style.left = Math.min(580, l + 20) + "px"; player.style.transform = "scaleX(1)"; }
+    });
 </script>
-
 </body>
 </html>

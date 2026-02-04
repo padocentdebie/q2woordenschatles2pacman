@@ -13,28 +13,32 @@
         #game-container { position: relative; border: 3px solid var(--p-blauw); }
         .hud { padding: 10px; color: var(--geel); font-weight: bold; display: flex; gap: 20px; font-family: 'Courier New', monospace; }
         
-        /* Verbeterde leesbaarheid Quiz */
+        /* Quiz Box - Maximale Leesbaarheid */
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             width: 90%; background: #ffffff; border: 4px solid var(--p-blauw); 
             padding: 20px; text-align: center; display: none; z-index: 100; border-radius: 12px;
-            color: #000; /* Zwarte tekst op witte achtergrond voor maximaal contrast */
+            color: #000; box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
-        #vraag { font-size: 1.2rem; margin-bottom: 20px; line-height: 1.4; color: #000; }
+        #vraag { font-size: 1.1rem; margin-bottom: 20px; line-height: 1.4; color: #000; font-weight: bold; }
         .optie { 
             display: block; width: 100%; padding: 15px; margin: 8px 0; 
-            background: #f0f0f0; color: #000; border: 2px solid #ccc; 
-            cursor: pointer; border-radius: 8px; font-size: 1rem; font-weight: bold;
+            background: #f9f9f9; color: #000; border: 2px solid #ddd; 
+            cursor: pointer; border-radius: 8px; font-size: 0.95rem; font-weight: 500;
+            line-height: 1.2;
         }
-        .optie:hover { background: #e0e0e0; border-color: var(--p-blauw); }
+        .optie:hover { background: #eee; border-color: var(--p-blauw); }
         
-        /* Panelen */
+        /* UI Panelen */
         #scoreboard, #teacher-panel { width: 360px; margin-top: 20px; background: #111; border: 2px solid var(--p-blauw); border-radius: 15px; padding: 15px; }
         #teacher-panel { border-color: #ff4444; margin-bottom: 50px; }
         
         textarea { width: 94%; height: 100px; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #222; color: #fff; border: 1px solid #444; }
+        textarea::placeholder { color: #777; }
+        
         .btn { background: var(--geel); color: #000; font-weight: bold; width: 100%; padding: 12px; cursor: pointer; border: none; border-radius: 8px; margin-bottom: 5px; }
-        .btn-reset { background: #ff4444; color: white; font-size: 0.8rem; }
+        .btn-reset { background: #330000; color: #ff4444; border: 1px solid #ff4444; font-size: 0.8rem; margin-top: 10px; }
+        .btn-reset:hover { background: #ff4444; color: #fff; }
         
         .score-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
         .gold { color: var(--geel); font-weight: bold; }
@@ -54,7 +58,7 @@
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
-            <h3 style="color: var(--p-blauw); margin-top:0;">POLITIE ACADEMIE CHECK</h3>
+            <h3 style="color: var(--p-blauw); margin-top:0;">KENNIS-CHECK</h3>
             <p id="vraag"></p>
             <div id="optie-container"></div>
             <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">OPNIEUW PROBEREN</button>
@@ -62,14 +66,13 @@
     </div>
 
     <div id="scoreboard">
-        <h3 style="text-align:center; color: var(--geel); margin-top:0;">🏆 HALL OF FAME</h3>
+        <h3 style="text-align:center; color: var(--geel); margin-top:0;">🏆 TOP SCORES</h3>
         <div id="score-list">Laden...</div>
-        <button class="btn btn-reset" style="margin-top:15px;" onclick="resetScores()">RESET SCORES</button>
+        <button class="btn btn-reset" onclick="resetScores()">RESET HALL OF FAME</button>
     </div>
 
     <div id="teacher-panel">
-        <h3 style="text-align:center; color: #ff4444; margin:0;">🛠 DATABASE BEHEER</h3>
-        <p style="font-size: 0.7rem; text-align: center; color: #aaa;">Plak lijst (woord + spatie + betekenis)</p>
+        <h3 style="text-align:center; color: #ff4444; margin:0;">🛠 BEHEER</h3>
         <textarea id="bulk-text" placeholder="plak hier woorden en hun betekenis"></textarea>
         <button class="btn" onclick="bulkAddWords()">IMPORTLIJST OPSLAAN</button>
         <button class="btn btn-reset" onclick="clearWords()">WIS ALLE WOORDEN</button>
@@ -78,6 +81,7 @@
 </div>
 
 <script>
+    // Firebase Setup
     const firebaseConfig = {
         apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY",
         databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app",
@@ -86,7 +90,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let dynamicWords = [{v:"Halteren", o:["Stoppen voor controle", "Vluchten", "Snelheid"], c:0}];
+    let dynamicWords = [];
     let vnaam, sRef, score = 0, level = 1, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 5;
     let canvas, ctx, tileSize, pacman = { x: 9, y: 15, dir: {x:0, y:0}, nextDir: {x:0, y:0} }, dots = [], walls = [], ghosts = [];
 
@@ -112,8 +116,8 @@
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    function resetScores() { if(confirm("Hall of Fame wissen?")) db.ref('ranking').remove(); }
-    function clearWords() { if(confirm("Alle woorden uit de database wissen?")) db.ref('woorden').remove(); }
+    function resetScores() { if(confirm("Top scores wissen?")) db.ref('ranking').remove(); }
+    function clearWords() { if(confirm("Alle woorden wissen?")) db.ref('woorden').remove(); }
 
     function bulkAddWords() {
         const lines = document.getElementById('bulk-text').value.split('\n');
@@ -123,40 +127,61 @@
             if (trimmed.includes(" ")) {
                 const word = trimmed.split(' ')[0];
                 const meaning = trimmed.substring(word.length + 1);
-                db.ref('woorden').push({ v: word, o: [meaning, "Foutief antwoord A", "Foutief antwoord B"], c: 0 });
+                db.ref('woorden').push({ v: word, m: meaning });
                 count++;
             }
         });
         document.getElementById('bulk-text').value = "";
-        document.getElementById('fb').innerText = `✅ ${count} woorden toegevoegd!`;
+        document.getElementById('fb').innerText = `✅ ${count} woorden geladen!`;
         setTimeout(() => document.getElementById('fb').innerText = "", 3000);
     }
 
     function initSessie() {
         vnaam = document.getElementById('vnaam').value;
-        if(!vnaam) return alert("Meld je met je naam!");
+        if(!vnaam) return alert("Agent, voer je naam in!");
         sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
         document.getElementById('login').style.display = 'none';
         document.getElementById('main-game').style.display = 'block';
-        db.ref('woorden').on('value', snap => { if(snap.exists()) dynamicWords = Object.values(snap.val()); });
+        db.ref('woorden').on('value', snap => { 
+            dynamicWords = snap.exists() ? Object.values(snap.val()) : [{v:"Geen woorden", m:"Voeg woorden toe in het paneel!"}];
+        });
         updateScoreboard(); setupCanvas();
-        startQuiz(5, "STATION: Eerst 5 vragen!");
+        startQuiz(5);
     }
 
-    function startQuiz(num, msg) {
+    function startQuiz(num) {
         inGame = false; quizCount = 0; quizTarget = num;
         document.getElementById('quiz-box').style.display = 'block';
         nextQ();
     }
 
     function nextQ() {
-        if(quizCount >= quizTarget) { document.getElementById('quiz-box').style.display='none'; inGame=true; initLevel(); requestAnimationFrame(gameLoop); return; }
-        const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
-        document.getElementById('vraag').innerText = `Vraag ${quizCount+1}/${quizTarget}: Wat is de betekenis van "${q.v}"?`;
+        if(quizCount >= quizTarget) { 
+            document.getElementById('quiz-box').style.display='none'; 
+            inGame=true; initLevel(); requestAnimationFrame(gameLoop); 
+            return; 
+        }
+
+        const correctObj = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
+        const correctMeaning = correctObj.m || "Geen betekenis";
+        
+        // Haal willekeurige betekenissen van andere woorden als afleiders
+        let distractors = dynamicWords
+            .filter(w => w.m !== correctMeaning)
+            .map(w => w.m);
+        
+        distractors = distractors.sort(() => 0.5 - Math.random()).slice(0, 2);
+        while(distractors.length < 2) distractors.push("Onjuist juridisch alternatief");
+
+        const opties = [correctMeaning, ...distractors].sort(() => 0.5 - Math.random());
+
+        document.getElementById('vraag').innerText = `Wat is de betekenis van: "${correctObj.v}"?`;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
-        [...q.o].sort(()=>Math.random()-0.5).forEach(o => {
-            let b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
-            b.onclick = () => { if(o === q.o[q.c]) { quizCount++; nextQ(); } else alert("Onjuist!"); };
+
+        opties.forEach(o => {
+            let b = document.createElement('button'); 
+            b.className = 'optie'; b.innerText = o;
+            b.onclick = () => { if(o === correctMeaning) { quizCount++; nextQ(); } else alert("Fout! Probeer het opnieuw."); };
             cont.appendChild(b);
         });
     }
@@ -183,6 +208,7 @@
         ctx.strokeStyle = 'var(--p-blauw)'; ctx.lineWidth = 2;
         walls.forEach(w => { ctx.strokeRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4); });
         ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten) { ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); } });
+        
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
             let d = dots.find(dot => dot.x === pacman.x && dot.y === pacman.y && !dot.eaten);
             if(d) { d.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
@@ -190,22 +216,24 @@
             if(!canM(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
         pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10; pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
+        
         let px = pacman.x*tileSize+tileSize/2, py = pacman.y*tileSize+tileSize/2;
         ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(px, py, tileSize/2-1, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(px, py); ctx.fill();
         if(Math.floor(frame/6)%2===0) { ctx.fillStyle = 'var(--p-blauw)'; ctx.fillRect(px-4, py-tileSize/2-4, 8, 5); }
+
         ghosts.forEach(g => {
             g.x += (pacman.x > g.x ? 1 : -1) * g.speed; g.y += (pacman.y > g.y ? 1 : -1) * g.speed;
             ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
             if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
                 levens--; document.getElementById('lvn-val').innerText = levens;
-                if(levens <= 0) { inGame = false; document.getElementById('quiz-box').style.display = 'block'; document.getElementById('restart-btn').style.display = 'block'; }
-                else startQuiz(5, "AANGEHOUDEN!");
+                if(levens <= 0) { inGame = false; document.getElementById('quiz-box').style.display = 'block'; document.getElementById('restart-btn').style.display = 'block'; document.getElementById('vraag').innerText = "DIENST BEËINDIGD. De dader heeft je gepakt."; document.getElementById('optie-container').innerHTML=''; }
+                else startQuiz(3);
             }
         });
         requestAnimationFrame(gameLoop);
     }
     function canM(x,y) { if(x<0 || x>18) return true; return !walls.some(w => w.x===x && w.y===y); }
-    function updateScoreboard() { db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
+    function updateScoreboard() { db.ref('ranking').orderByChild('score').limitToLast(10).on('value', snap => {
         const list = document.getElementById('score-list'); list.innerHTML = '';
         let res = []; snap.forEach(s => res.push(s.val()));
         res.reverse().forEach((r, i) => { list.innerHTML += `<div class="score-row ${i===0?'gold':''}"><span>${r.naam}</span><span>${r.score}</span></div>`; });

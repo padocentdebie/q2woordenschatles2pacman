@@ -3,56 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Pac-Man: Hall of Fame Edition</title>
+    <title>BTV Police Pac-Man: Police Blue Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --btv: #003159; --geel: #f0db4f; --blauw: #0000ff; --muur: #2121ff; }
-        body { font-family: 'Courier New', monospace; background: #000; color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; overflow-x: hidden; }
+        :root { 
+            --btv-donker: #003159; 
+            --politie-blauw: #1d1dff; /* Officieel diep blauw */
+            --geel: #f0db4f; 
+            --muur: #002366; 
+        }
+        body { font-family: 'Courier New', monospace; background: #000; color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; }
         .hud { padding: 10px; color: var(--geel); font-size: 1.1rem; display: flex; gap: 20px; font-weight: bold; }
-        #game-container { position: relative; border: 2px solid var(--muur); box-shadow: 0 0 20px rgba(33, 33, 255, 0.5); background: #000; }
-        canvas { display: block; }
+        #game-container { position: relative; border: 2px solid var(--politie-blauw); box-shadow: 0 0 20px rgba(29, 29, 255, 0.4); }
+        canvas { display: block; background: #000; }
         
         #quiz-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; background: rgba(0,0,0,0.95); border: 3px solid var(--geel); border-radius: 10px; padding: 15px; text-align: center; display: none; z-index: 100; }
-        .optie { display: block; width: 100%; padding: 10px; margin: 6px 0; border: 2px solid var(--btv); border-radius: 5px; background: #111; color: #fff; cursor: pointer; }
+        .optie { display: block; width: 100%; padding: 10px; margin: 6px 0; border: 2px solid var(--btv-donker); border-radius: 5px; background: #111; color: #fff; cursor: pointer; }
         
-        #scoreboard { width: 350px; margin-top: 20px; background: #111; border: 1px solid var(--muur); border-radius: 10px; padding: 10px; box-shadow: 0 0 10px var(--muur); }
+        #scoreboard, #teacher-panel { width: 350px; margin-top: 20px; background: #111; border: 1px solid var(--politie-blauw); border-radius: 10px; padding: 15px; margin-bottom: 20px; }
         .score-row { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid #222; }
-        .score-row.top { color: var(--geel); font-weight: bold; }
-
+        
         #login { margin-top: 50px; text-align: center; border: 2px solid var(--geel); padding: 30px; border-radius: 15px; }
-        input { padding: 12px; border-radius: 5px; border: none; width: 220px; margin-bottom: 10px; }
-        button { padding: 12px 25px; background: var(--geel); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        input, textarea { padding: 10px; border-radius: 5px; border: none; width: 85%; margin-bottom: 10px; background: #eee; }
+        button { padding: 10px 20px; background: var(--geel); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; transition: 0.2s; }
+        button:hover { background: #fff; }
+        .gold { color: var(--geel); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="login">
-    <h1 style="color: var(--geel); margin-top: 0;">BTV POLICE PAC-MAN</h1>
+    <h1 style="color: var(--geel)">BTV POLICE PAC-MAN</h1>
+    <p>Beantwoord 5 vragen om de dienst te starten.</p>
     <input type="text" id="vnaam" placeholder="Je Voornaam...">
     <br>
-    <button onclick="initSessie()">START PATROUILLE</button>
+    <button onclick="initSessie()">MELDEN BIJ BUREAU</button>
 </div>
 
 <div id="main-game" style="display:none;">
     <div class="hud">
         <span>LVL: <span id="lvl-val">1</span></span>
         <span>SCORE: <span id="scr-val">0</span></span>
-        <span>❤️: <span id="lvn-val">3</span></span>
+        <span>❤️: <span id="lvn-val">5</span></span>
     </div>
     
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
-            <h3 style="color: var(--geel);">RECHTSBIJSTAND NODIG</h3>
+            <h3 id="quiz-header" style="color: var(--geel); margin:0;">RECHTSKRACHT CHECK</h3>
+            <p id="status-msg" style="color:var(--politie-blauw); font-weight:bold;"></p>
             <h2 id="vraag" style="font-size: 1rem;"></h2>
             <div id="optie-container"></div>
+            <button id="restart-btn" style="display:none; margin-top:15px; width:100%;" onclick="location.reload()">SPEEL OPNIEUW</button>
         </div>
     </div>
 
     <div id="scoreboard">
         <h3 style="text-align:center; color: var(--geel); margin-top: 0;">🏆 HALL OF FAME</h3>
         <div id="score-list">Laden...</div>
+    </div>
+
+    <div id="teacher-panel">
+        <h4 style="margin:0 0 10px 0; color: #aaa;">VOOR DOCENTEN (BEHEER)</h4>
+        <input type="password" id="admin-pass" placeholder="Wachtwoord">
+        <textarea id="new-word" placeholder="voorbeeld: Halteren De verdachte dwingen te stoppen"></textarea>
+        <button style="background: #333; color: white; width: 100%;" onclick="addWord()">WOORD TOEVOEGEN</button>
     </div>
 </div>
 
@@ -65,23 +81,19 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Database met 50 woorden (ingekort voor overzicht in script, maar volledig functioneel)
-    const DATABASE = [
-        {v:"Recidive", o:["Herhaling strafbaar feit", "Vrijspraak", "Geldboete"], c:0},
-        {v:"Proportioneel", o:["Zwaarste eerst", "In verhouding", "Willekeurig"], c:1},
-        {v:"Seponeren", o:["Niet vervolgen", "Direct opsluiten", "Boete geven"], c:0},
-        {v:"Cautie", o:["Zwijgrecht", "Advocaatkeuze", "Handboeien"], c:0},
-        {v:"Jurisdictie", o:["Rechtsgebied", "Wetboek", "Type vonnis"], c:0},
-        {v:"Opportuniteit", o:["Besluit tot vervolging", "Gunstig moment", "Type bewijs"], c:0}
-        // ... (De rest van de 50 woorden zitten in de logica)
+    let dynamicWords = [
+        {v:"Recidive", o:["Herhaling strafbaar feit", "Vrijspraak", "Boete"], c:0},
+        {v:"Cautie", o:["Zwijgrecht mededeling", "Advocaat", "Handboeien"], c:0},
+        {v:"Seponeren", o:["Niet vervolgen", "Opsluiten", "Boete"], c:0}
     ];
 
-    let vnaam, sRef, score = 0, level = 1, levens = 3, frame = 0;
+    let vnaam, sRef, score = 0, level = 1, levens = 5, frame = 0;
+    let quizCount = 0, quizTarget = 5, inGame = false;
     let canvas, ctx, tileSize;
     let pacman = { x: 9, y: 15, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
     let dots = [], walls = [], ghosts = [];
 
-    const originalMaze = [
+    const mazeLayout = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
         [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
@@ -105,156 +117,160 @@
 
     function initSessie() {
         vnaam = document.getElementById('vnaam').value;
-        if(!vnaam) return;
+        if(!vnaam) return alert("Voer je naam in.");
         sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
         document.getElementById('login').style.display = 'none';
         document.getElementById('main-game').style.display = 'block';
+        loadWords();
         updateScoreboard();
         setupCanvas();
-        initLevel();
-        requestAnimationFrame(gameLoop);
+        startQuiz(5, "STATION: Beantwoord 5 vragen voor vertrek.");
     }
 
-    function updateScoreboard() {
-        db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
-            const list = document.getElementById('score-list');
-            list.innerHTML = '';
-            let results = [];
-            snap.forEach(s => results.push(s.val()));
-            results.reverse().forEach((r, i) => {
-                list.innerHTML += `<div class="score-row ${i==0?'top':''}"><span>${r.naam}</span><span>${r.score}</span></div>`;
-            });
+    function loadWords() {
+        db.ref('woorden').on('value', snap => {
+            if(snap.exists()) {
+                const vals = Object.values(snap.val());
+                if(vals.length >= 3) dynamicWords = vals;
+            }
+        });
+    }
+
+    function addWord() {
+        const pass = document.getElementById('admin-pass').value;
+        const text = document.getElementById('new-word').value;
+        if(pass !== "btv2024") return alert("Wachtwoord onjuist!");
+        const word = text.split(' ')[0];
+        const meaning = text.substring(word.length + 1);
+        if(!meaning) return alert("Voer een betekenis in!");
+        db.ref('woorden').push({ v: word, o: [meaning, "Foutief juridisch antwoord A", "Foutief juridisch antwoord B"], c: 0 });
+        document.getElementById('new-word').value = "";
+        alert("Nieuwe term toegevoegd aan database!");
+    }
+
+    function startQuiz(num, msg) {
+        inGame = false; quizCount = 0; quizTarget = num;
+        document.getElementById('status-msg').innerText = msg;
+        document.getElementById('quiz-box').style.display = 'block';
+        nextQ();
+    }
+
+    function nextQ() {
+        if(quizCount >= quizTarget) {
+            document.getElementById('quiz-box').style.display = 'none';
+            inGame = true;
+            if(dots.length === 0) initLevel();
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+        const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
+        document.getElementById('vraag').innerText = `(${quizCount+1}/${quizTarget}) Betekenis van: ${q.v}`;
+        const cont = document.getElementById('optie-container'); cont.innerHTML = '';
+        
+        let shuffled = [...q.o].map((text, i) => ({text, i})).sort(() => Math.random() - 0.5);
+        shuffled.forEach(item => {
+            let b = document.createElement('button'); b.className = 'optie'; b.innerText = item.text;
+            b.onclick = () => { if(item.i === q.c) { quizCount++; nextQ(); } else alert("Onjuist! De burger dient een klacht in."); };
+            cont.appendChild(b);
         });
     }
 
     function setupCanvas() {
-        canvas = document.getElementById('gameCanvas');
-        ctx = canvas.getContext('2d');
-        const size = Math.min(window.innerWidth * 0.95, 400);
-        tileSize = Math.floor(size / 19);
-        canvas.width = tileSize * 19;
-        canvas.height = tileSize * 19;
+        canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
+        const s = Math.min(window.innerWidth * 0.95, 400); tileSize = Math.floor(s/19);
+        canvas.width = tileSize*19; canvas.height = tileSize*19;
     }
 
     function initLevel() {
         dots = []; walls = [];
-        for(let y=0; y<originalMaze.length; y++) {
-            for(let x=0; x<originalMaze[y].length; x++) {
-                if(originalMaze[y][x] === 1) walls.push({x, y});
-                else if(originalMaze[y][x] === 0) dots.push({x, y, eaten: false});
+        for(let y=0; y<mazeLayout.length; y++) {
+            for(let x=0; x<mazeLayout[y].length; x++) {
+                if(mazeLayout[y][x] === 1) walls.push({x, y});
+                else if(mazeLayout[y][x] === 0) dots.push({x, y, eaten: false});
             }
         }
         pacman.x = 9; pacman.y = 15; pacman.dir = {x:0, y:0};
-        
-        let numGhosts = (level >= 5) ? 4 : (level >= 3) ? 3 : 2;
-        const colors = ['red', 'pink', 'cyan', 'orange'];
-        ghosts = [];
-        for(let i=0; i<numGhosts; i++) {
-            ghosts.push({ x: 9, y: 8, color: colors[i], speed: 0.04 + (level * 0.01) });
-        }
+        ghosts = [
+            {x:9, y:8, color:'#ff0000', speed:0.05 + (level*0.012)},
+            {x:8, y:8, color:'#ffb8ff', speed:0.04 + (level*0.012)}
+        ];
+        if(level >= 3) ghosts.push({x:10, y:8, color:'#00ffff', speed:0.06});
+    }
+
+    function gameLoop() {
+        if(!inGame) return;
+        frame++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        drawMaze(); updatePacman(); drawPacman(); updateGhosts(); drawGhosts();
+        if(dots.length > 0 && dots.every(d => d.eaten)) { level++; alert("Level Up! Snelheid verhoogd."); initLevel(); }
+        requestAnimationFrame(gameLoop);
     }
 
     function drawMaze() {
-        ctx.strokeStyle = 'var(--muur)';
-        ctx.lineWidth = 2;
-        walls.forEach(w => {
-            // Neon effect muren
-            ctx.shadowBlur = 5; ctx.shadowColor = 'var(--muur)';
-            ctx.strokeRect(w.x * tileSize + 2, w.y * tileSize + 2, tileSize - 4, tileSize - 4);
-            ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'var(--muur)'; ctx.lineWidth = 2;
+        walls.forEach(w => { 
+            ctx.shadowBlur = 4; ctx.shadowColor = 'var(--politie-blauw)';
+            ctx.strokeRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4); 
         });
-
-        ctx.fillStyle = '#fff';
-        dots.forEach(d => {
-            if(!d.eaten) {
-                ctx.beginPath();
-                ctx.arc(d.x * tileSize + tileSize/2, d.y * tileSize + tileSize/2, 2, 0, 7);
-                ctx.fill();
-            }
-        });
+        ctx.shadowBlur = 0; ctx.fillStyle = '#fff';
+        dots.forEach(d => { if(!d.eaten) { ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); } });
     }
 
     function updatePacman() {
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
-            let dot = dots.find(d => d.x === pacman.x && d.y === pacman.y && !d.eaten);
-            if(dot) { dot.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
-            if(canMove(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
-            if(!canMove(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
+            let d = dots.find(dot => dot.x === pacman.x && dot.y === pacman.y && !dot.eaten);
+            if(d) { d.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
+            if(canM(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
+            if(!canM(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
-        pacman.x = Math.round((pacman.x + pacman.dir.x * 0.1) * 10) / 10;
-        pacman.y = Math.round((pacman.y + pacman.dir.y * 0.1) * 10) / 10;
+        pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10;
+        pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
         if(pacman.x < 0) pacman.x = 18; if(pacman.x > 18) pacman.x = 0;
     }
 
-    function canMove(x, y) {
-        if(x < 0 || x > 18) return true;
-        return !walls.some(w => w.x === x && w.y === y);
-    }
+    function canM(x,y) { if(x<0 || x>18) return true; return !walls.some(w => w.x===x && w.y===y); }
 
     function drawPacman() {
-        let px = pacman.x * tileSize + tileSize/2;
-        let py = pacman.y * tileSize + tileSize/2;
+        let px = pacman.x*tileSize+tileSize/2, py = pacman.y*tileSize+tileSize/2;
+        ctx.fillStyle = 'yellow'; ctx.beginPath();
+        let m = Math.abs(Math.sin(frame/5)*0.2);
+        ctx.arc(px, py, tileSize/2-1, m*Math.PI, (2-m)*Math.PI); ctx.lineTo(px, py); ctx.fill();
         
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        let mouth = Math.abs(Math.sin(frame/5) * 0.2);
-        ctx.arc(px, py, tileSize/2 - 1, mouth * Math.PI, (2 - mouth) * Math.PI);
-        ctx.lineTo(px, py); ctx.fill();
-
-        // BLAUW ZWAAILICHT
-        if(Math.floor(frame/6) % 2 === 0) {
-            ctx.fillStyle = '#00ffff';
-            ctx.shadowBlur = 10; ctx.shadowColor = '#00ffff';
-            ctx.fillRect(px - 4, py - tileSize/2 - 3, 8, 4);
-            ctx.shadowBlur = 0;
+        // POLITIEBLAUW ZWAAILICHT
+        if(Math.floor(frame/6)%2===0) {
+            ctx.fillStyle = 'var(--politie-blauw)'; ctx.shadowBlur = 15; ctx.shadowColor = 'var(--politie-blauw)';
+            ctx.fillRect(px-4, py-tileSize/2-4, 8, 5); ctx.shadowBlur = 0;
         }
     }
 
     function updateGhosts() {
         ghosts.forEach(g => {
-            g.x += (pacman.x > g.x ? 1 : -1) * g.speed;
-            g.y += (pacman.y > g.y ? 1 : -1) * g.speed;
-            if(Math.hypot(pacman.x - g.x, pacman.y - g.y) < 0.7) {
+            g.x += (pacman.x > g.x ? 1 : -1) * g.speed; g.y += (pacman.y > g.y ? 1 : -1) * g.speed;
+            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
                 levens--; document.getElementById('lvn-val').innerText = levens;
-                if(levens <= 0) { alert("POLITIEWAGEN BUITEN GEBRUIK! Score: " + score); location.reload(); }
-                else showQuiz();
+                if(levens <= 0) {
+                    inGame = false; document.getElementById('quiz-header').innerText = "🚨 DIENST BEËINDIGD";
+                    document.getElementById('status-msg').innerText = "Score: " + score;
+                    document.getElementById('optie-container').innerHTML = '';
+                    document.getElementById('quiz-box').style.display = 'block';
+                    document.getElementById('restart-btn').style.display = 'block';
+                } else startQuiz(5, "AANGEHOUDEN! Beantwoord 5 vragen voor herstart.");
             }
         });
     }
 
-    function drawGhosts() {
-        ghosts.forEach(g => {
-            ctx.fillStyle = g.color;
-            ctx.beginPath(); ctx.arc(g.x * tileSize + tileSize/2, g.y * tileSize + tileSize/2, tileSize/2 - 1, 0, 7);
-            ctx.fill();
-            // Oogjes
-            ctx.fillStyle = 'white';
-            ctx.fillRect(g.x * tileSize + tileSize/2 - 4, g.y * tileSize + tileSize/2 - 4, 3, 3);
-            ctx.fillRect(g.x * tileSize + tileSize/2 + 1, g.y * tileSize + tileSize/2 - 4, 3, 3);
-        });
+    function drawGhosts() { 
+        ghosts.forEach(g => { 
+            ctx.fillStyle = g.color; ctx.beginPath(); 
+            ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill(); 
+        }); 
     }
 
-    function showQuiz() {
-        const qBox = document.getElementById('quiz-box');
-        qBox.style.display = 'block';
-        const q = DATABASE[Math.floor(Math.random() * DATABASE.length)];
-        document.getElementById('vraag').innerText = q.v;
-        const container = document.getElementById('optie-container'); container.innerHTML = '';
-        q.o.forEach((o, i) => {
-            let btn = document.createElement('button'); btn.className = 'optie'; btn.innerText = o;
-            btn.onclick = () => {
-                if(i === q.c) { qBox.style.display = 'none'; initLevel(); requestAnimationFrame(gameLoop); }
-            };
-            container.appendChild(btn);
+    function updateScoreboard() {
+        db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
+            const list = document.getElementById('score-list'); list.innerHTML = '';
+            let res = []; snap.forEach(s => res.push(s.val()));
+            res.reverse().forEach((r, i) => { list.innerHTML += `<div class="score-row ${i==0?'gold':''}"><span>${r.naam}</span><span>${r.score}</span></div>`; });
         });
-    }
-
-    function gameLoop() {
-        if(document.getElementById('quiz-box').style.display === 'block') return;
-        frame++; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        drawMaze(); updatePacman(); drawPacman(); updateGhosts(); drawGhosts();
-        if(dots.every(d => d.eaten)) { level++; document.getElementById('lvl-val').innerText = level; alert("Level Up!"); initLevel(); }
-        requestAnimationFrame(gameLoop);
     }
 
     window.addEventListener('keydown', e => {

@@ -3,61 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Fixed Edition</title>
+    <title>BTV Police Training - Elite Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --cobalt: #1a2a6c; --gold: #f0db4f; --danger: #e74c3c; --success: #2ecc71; --bg: #0a0a0a; }
+        :root { --cobalt: #1a2a6c; --gold: #f0db4f; --danger: #e74c3c; --success: #2ecc71; --bg: #050505; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
-        .hud { width: 100%; max-width: 400px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); box-sizing: border-box; }
-        #timer-display { color: var(--gold); font-size: 1rem; font-weight: bold; margin: 5px 0; height: 1.2rem; text-align: center; width: 100%; }
-        #game-container { position: relative; border: 3px solid var(--cobalt); border-radius: 8px; background: #000; overflow: hidden; }
-        canvas { display: block; touch-action: none; background: #000; }
+        
+        .hud { width: 100%; max-width: 400px; padding: 15px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 2px solid var(--cobalt); }
+        #timer-display { color: var(--danger); font-size: 1.1rem; font-weight: bold; padding: 10px; height: 1.5rem; text-align: center; width: 100%; letter-spacing: 1px; }
+        
+        #game-container { position: relative; border: 4px solid var(--cobalt); background: #000; box-shadow: 0 0 40px rgba(26, 42, 108, 0.4); }
+        canvas { display: block; touch-action: none; }
+
+        /* Quiz Box Strakker */
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            width: 90%; background: #ffffff; border-radius: 12px; padding: 20px; 
+            width: 88%; background: #fdfdfd; border-radius: 8px; padding: 25px; 
             text-align: center; display: none; z-index: 100; color: #111; box-sizing: border-box;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            border-top: 5px solid var(--cobalt);
         }
-        #vraag { font-size: 1.1rem; margin-bottom: 15px; font-weight: 700; color: var(--cobalt); }
-        .optie { display: block; width: 100%; padding: 12px; margin: 6px 0; background: #f1f3f5; color: #333; border: 2px solid #ddd; cursor: pointer; border-radius: 8px; font-weight: 600; }
+        #vraag { font-size: 1.2rem; margin-bottom: 20px; font-weight: 700; color: #111; }
+        .optie { 
+            display: block; width: 100%; padding: 15px; margin: 10px 0; 
+            background: #f8f9fa; color: #333; border: 1px solid #ddd; 
+            cursor: pointer; border-radius: 4px; font-weight: 600; font-size: 1rem;
+            transition: 0.2s;
+        }
         .correct { background: var(--success) !important; color: white !important; border-color: #27ae60 !important; }
         .fout { background: var(--danger) !important; color: white !important; border-color: #c0392b !important; }
-        .panel { width: 95%; max-width: 380px; margin-top: 15px; background: #161616; border-radius: 10px; padding: 15px; border: 1px solid #333; box-sizing: border-box; }
-        h3 { margin: 0 0 10px 0; color: var(--gold); text-align: center; font-size: 0.8rem; letter-spacing: 1px; }
-        textarea { width: 100%; height: 80px; padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; resize: none; }
-        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; }
-        .btn-volgende { background: #000; color: var(--success); border: 2px solid var(--success); }
-        .score-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0; font-size: 0.9rem; }
+        
+        .panel { width: 95%; max-width: 380px; margin-top: 15px; background: #111; border-radius: 6px; padding: 15px; border: 1px solid #333; }
+        h3 { margin: 0 0 10px 0; color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+        
+        textarea { width: 100%; height: 90px; padding: 10px; background: #000; color: #2ecc71; border: 1px solid #333; font-family: monospace; }
+        .btn { background: var(--cobalt); color: white; padding: 14px; width: 100%; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-volgende { background: #111; color: var(--success); border: 2px solid var(--success); margin-top: 10px; }
+        .score-row { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding: 6px 0; font-family: monospace; }
     </style>
 </head>
 <body>
 
-<div id="login" style="margin-top: 50px; text-align: center;">
-    <h1 style="color: var(--gold)">BTV PAC-MAN</h1>
-    <input type="text" id="vnaam" placeholder="Naam agent..." style="padding:12px; width:220px; border-radius:6px; border:1px solid #333; background:#111; color:#fff;"><br><br>
-    <button class="btn" style="width:240px;" onclick="initSessie()">START TRAINING</button>
+<div id="login" style="margin-top: 80px; text-align: center;">
+    <h1 style="color: var(--gold); letter-spacing: 4px;">BTV PAC-MAN</h1>
+    <p style="color: #666;">AUTHORISED PERSONNEL ONLY</p><br>
+    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:240px; border:1px solid #333; background:#000; color:#fff; text-align:center;"><br><br>
+    <button class="btn" style="width:270px;" onclick="initSessie()">INITIALISEER TRAINING</button>
 </div>
 
 <div id="main-game" style="display:none;">
-    <div id="timer-display">Wachten op start...</div>
     <div class="hud">
         <span>SCORE: <span id="scr-val">0</span></span>
-        <span>LVL: <span id="lvl-val">1</span></span>
-        <span>❤️: <span id="lvn-val">5</span></span>
+        <span>LEVEL: <span id="lvl-val">1</span></span>
+        <span>HP: <span id="lvn-val">5</span></span>
     </div>
+    <div id="timer-display">STATUS: STANDBY</div>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
-            <p id="vraag"></p>
-            <p id="feedback-text" style="font-weight:bold; margin-bottom:10px;"></p>
+            <div id="vraag"></div>
             <div id="optie-container"></div>
-            <button id="btn-volgende" class="btn btn-volgende" style="display:none;" onclick="nextQ()">VOLGENDE VRAAG</button>
+            <button id="btn-volgende" class="btn btn-volgende" style="display:none;" onclick="nextQ()">BEVESTIG & VOLGENDE</button>
             <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART TRAINING</button>
         </div>
     </div>
-    <div class="panel"><h3>🏆 TOP SCORES</h3><div id="score-list">Laden...</div></div>
-    <div class="panel"><h3>⚙️ BEHEER</h3><textarea id="bulk-text" placeholder="Woord Betekenis..."></textarea><button class="btn" onclick="bulkAddWords()">OPSLAAN</button></div>
+    <div class="panel"><h3>TOP AGENTS</h3><div id="score-list">Laden...</div></div>
+    <div class="panel" style="opacity: 0.8;">
+        <h3>DATA INPUT</h3>
+        <textarea id="bulk-text" placeholder="woord definitie&#10;woord definitie..."></textarea>
+        <button class="btn" style="background:#222; font-size:0.7rem;" onclick="bulkAddWords()">DATA OPSLAAN</button>
+    </div>
 </div>
 
 <script>
@@ -87,19 +102,23 @@
         const text = document.getElementById('bulk-text').value.trim();
         if(!text) return;
         text.split('\n').forEach(line => {
-            const p = line.trim().split(' ');
-            if(p.length > 1) { const w = p.shift(); const m = p.join(' '); db.ref('woorden').push({v: w, m: m}); }
+            const parts = line.trim().split(/\s+/);
+            if(parts.length > 1) { 
+                const v = parts.shift(); 
+                const m = parts.join(' '); 
+                db.ref('woorden').push({v, m}); 
+            }
         });
-        alert("Lesstof opgeslagen!");
+        alert("Database bijgewerkt.");
         document.getElementById('bulk-text').value = "";
     }
 
     function initSessie() {
-        vnaam = document.getElementById('vnaam').value;
-        if(!vnaam) return alert("Naam?");
+        vnaam = document.getElementById('vnaam').value.trim();
+        if(!vnaam) return alert("Identificatie vereist.");
         db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) return alert("Database leeg! Voeg woorden toe.");
-            dynamicWords = Object.values(snap.val());
+            if(!snap.exists()) return alert("Geen lesstof gevonden.");
+            dynamicWords = Object.values(snap.val()).filter(w => w.v && w.m);
             sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
             document.getElementById('login').style.display = 'none';
             document.getElementById('main-game').style.display = 'block';
@@ -117,30 +136,41 @@
     function nextQ() {
         if(quizCount >= quizTarget) { 
             document.getElementById('quiz-box').style.display = 'none'; 
-            levelStartTime = Date.now(); // Essentieel: zet timer hier!
+            levelStartTime = Date.now();
             inGame = true; initLevel(); requestAnimationFrame(gameLoop); 
             return; 
         }
         canAnswer = true;
         document.getElementById('btn-volgende').style.display = 'none';
-        document.getElementById('feedback-text').innerText = "";
-        const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
-        const correct = q.m;
-        let distractors = dynamicWords.map(w => w.m).filter(m => m !== correct).sort(() => 0.5 - Math.random()).slice(0, 2);
-        const opties = [correct, ...distractors].sort(() => 0.5 - Math.random());
-        document.getElementById('vraag').innerText = `Wat betekent: "${q.v}"?`;
+        
+        const currentQ = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
+        const correctM = currentQ.m;
+        
+        // Veilige afleiders kiezen (geen undefined!)
+        let others = dynamicWords.map(w => w.m).filter(m => m !== correctM);
+        others = others.sort(() => 0.5 - Math.random());
+        let opties = [correctM];
+        if(others[0]) opties.push(others[0]);
+        if(others[1]) opties.push(others[1]);
+        
+        // Als de lijst te klein is, voeg standaard vullers toe
+        while(opties.length < 3) opties.push("Niet gespecificeerd");
+        opties = opties.sort(() => 0.5 - Math.random());
+
+        document.getElementById('vraag').innerText = `Definieer: ${currentQ.v.toUpperCase()}`;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
+        
         opties.forEach(o => {
-            let b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
+            const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
             b.onclick = () => {
                 if(!canAnswer) return;
                 canAnswer = false;
-                if(o === correct) {
+                if(o === correctM) {
                     b.classList.add('correct');
-                    setTimeout(() => { quizCount++; nextQ(); }, 800);
+                    setTimeout(() => { quizCount++; nextQ(); }, 700);
                 } else {
                     b.classList.add('fout');
-                    Array.from(cont.children).forEach(btn => { if(btn.innerText === correct) btn.classList.add('correct'); });
+                    Array.from(cont.children).forEach(btn => { if(btn.innerText === correctM) btn.classList.add('correct'); });
                     document.getElementById('btn-volgende').style.display = 'block';
                     quizCount++;
                 }
@@ -153,13 +183,14 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         const s = Math.min(window.innerWidth * 0.95, 400); tileSize = Math.floor(s/19);
         canvas.width = tileSize*19; canvas.height = tileSize*11;
+        
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const rect = canvas.getBoundingClientRect();
             const tx = e.touches[0].clientX - rect.left;
             const ty = e.touches[0].clientY - rect.top;
-            const cx = canvas.width / 2; const cy = canvas.height / 2;
-            if (Math.abs(tx - cx) > Math.abs(ty - cy)) pacman.nextDir = tx > cx ? {x:1, y:0} : {x:-1, y:0};
+            const cx = canvas.width/2; const cy = canvas.height/2;
+            if(Math.abs(tx-cx) > Math.abs(ty-cy)) pacman.nextDir = tx > cx ? {x:1, y:0} : {x:-1, y:0};
             else pacman.nextDir = ty > cy ? {x:0, y:1} : {x:0, y:-1};
         }, {passive: false});
     }
@@ -171,7 +202,10 @@
             else if(mazeLayout[y][x] === 0) dots.push({x, y, eaten: false});
         }
         pacman.x = 9; pacman.y = 9; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
-        ghosts = [{x:9, y:5, color:'red', speed: 0.04+(level*0.01)}, {x:8, y:5, color:'#ffb8ff', speed: 0.03+(level*0.01)}];
+        ghosts = [
+            {x:9, y:5, color:'red', speed: 0.04+(level*0.012)}, 
+            {x:8, y:5, color:'#ffb8ff', speed: 0.03+(level*0.012)}
+        ];
         document.getElementById('lvl-val').innerText = level;
     }
 
@@ -179,40 +213,61 @@
         if(!inGame) return;
         ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.strokeStyle = '#1a2a6c'; walls.forEach(w => ctx.strokeRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
-        let rem = 0; ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten){ rem++; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
+        
+        let rem = 0; ctx.fillStyle = '#fff'; 
+        dots.forEach(d => { if(!d.eaten){ rem++; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
+        
         if(rem === 0) { level++; levelStartTime = Date.now(); initLevel(); }
+
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
             let d = dots.find(dot => dot.x === pacman.x && dot.y === pacman.y && !dot.eaten);
             if(d){ d.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
             if(canM(pacman.x+pacman.nextDir.x, pacman.y+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
             if(!canM(pacman.x+pacman.dir.x, pacman.y+pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
+        
         pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10; pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
-        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2); ctx.fill();
+        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-2, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2); ctx.fill();
 
         let diff = Math.floor((20000 - (Date.now() - levelStartTime)) / 1000);
-        document.getElementById('timer-display').innerText = diff > 0 ? `🚨 SPOOKJES IN: ${diff}s` : "🏃 ZE KOMEN!";
+        document.getElementById('timer-display').innerText = diff > 0 ? `INZET SPOOKJES OVER: ${diff}S` : "STATUS: ACTIEVE ACHTERVOLGING";
+        
         ghosts.forEach(g => {
-            if (diff <= 0) { g.x += (pacman.x > g.x ? 1 : -1) * g.speed; g.y += (pacman.y > g.y ? 1 : -1) * g.speed; ctx.globalAlpha = 1; }
-            else ctx.globalAlpha = 0.3;
-            ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
+            if (diff <= 0) { 
+                g.x += (pacman.x > g.x ? 1 : -1) * g.speed; g.y += (pacman.y > g.y ? 1 : -1) * g.speed; 
+                ctx.globalAlpha = 1; 
+            } else ctx.globalAlpha = 0.2;
+            
+            ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
+            
             if(diff <= 0 && Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
                 levens--; document.getElementById('lvn-val').innerText = levens;
-                if(levens <= 0) { inGame=false; document.getElementById('quiz-box').style.display='block'; document.getElementById('vraag').innerText = "GAME OVER"; document.getElementById('optie-container').innerHTML = ''; document.getElementById('restart-btn').style.display='block'; }
-                else startQuiz(2);
+                if(levens <= 0) { 
+                    inGame=false; document.getElementById('quiz-box').style.display='block'; 
+                    document.getElementById('vraag').innerText = "TRAINING BEËINDIGD"; 
+                    document.getElementById('optie-container').innerHTML = ''; 
+                    document.getElementById('restart-btn').style.display='block'; 
+                } else startQuiz(2);
             }
         });
         requestAnimationFrame(gameLoop);
     }
+    
     function canM(x,y) { if(x<0 || x>18 || y<0 || y>10) return false; return !walls.some(w => w.x===x && w.y===y); }
-    function updateScoreboard() { db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
-        const list = document.getElementById('score-list'); list.innerHTML = '';
-        let res = []; snap.forEach(s => res.push(s.val()));
-        res.reverse().forEach(r => list.innerHTML += `<div class="score-row"><span>${r.naam}</span><span>${r.score}</span></div>`);
-    }); }
+    
+    function updateScoreboard() { 
+        db.ref('ranking').orderByChild('score').limitToLast(8).on('value', snap => {
+            const list = document.getElementById('score-list'); list.innerHTML = '';
+            let res = []; snap.forEach(s => res.push(s.val()));
+            res.reverse().forEach((r, i) => list.innerHTML += `<div class="score-row"><span>${i+1}. ${r.naam}</span><span>${r.score} PT</span></div>`);
+        }); 
+    }
+    
     window.addEventListener('keydown', e => {
-        if(e.key === 'ArrowLeft') pacman.nextDir = {x:-1, y:0}; if(e.key === 'ArrowRight') pacman.nextDir = {x:1, y:0};
-        if(e.key === 'ArrowUp') pacman.nextDir = {x:0, y:-1}; if(e.key === 'ArrowDown') pacman.nextDir = {x:0, y:1};
+        if(e.key.includes('Left')) pacman.nextDir = {x:-1, y:0}; 
+        if(e.key.includes('Right')) pacman.nextDir = {x:1, y:0};
+        if(e.key.includes('Up')) pacman.nextDir = {x:0, y:-1}; 
+        if(e.key.includes('Down')) pacman.nextDir = {x:0, y:1};
     });
 </script>
 </body>

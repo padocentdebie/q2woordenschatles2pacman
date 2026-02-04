@@ -3,53 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Stabiele Versie</title>
+    <title>BTV Police Training - Touch & Learn Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --cobalt: #1a2a6c; --gold: #f0db4f; --danger: #e74c3c; --bg: #0a0a0a; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        :root { --cobalt: #1a2a6c; --gold: #f0db4f; --danger: #e74c3c; --success: #2ecc71; --bg: #0a0a0a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
         
-        .hud { width: 400px; padding: 15px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); }
-        #game-container { position: relative; border: 4px solid var(--cobalt); border-radius: 8px; }
+        .hud { width: 100%; max-width: 400px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); box-sizing: border-box; }
+        #timer-display { color: var(--gold); font-size: 1rem; font-weight: bold; margin: 5px 0; height: 1.2rem; }
         
-        /* Quiz - Hoog contrast & Rustige lay-out */
+        #game-container { position: relative; border: 3px solid var(--cobalt); border-radius: 8px; background: #000; overflow: hidden; }
+        canvas { display: block; touch-action: none; }
+
+        /* Quiz Overlay */
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            width: 85%; background: #ffffff; border-radius: 12px; padding: 25px; 
-            text-align: center; display: none; z-index: 100; color: #111;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            width: 90%; background: #ffffff; border-radius: 12px; padding: 20px; 
+            text-align: center; display: none; z-index: 100; color: #111; box-sizing: border-box;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
-        #vraag { font-size: 1.1rem; margin-bottom: 20px; font-weight: 700; color: #000; }
-        .optie { 
-            display: block; width: 100%; padding: 14px; margin: 8px 0; 
-            background: #f1f3f5; color: #333; border: 2px solid #ddd; 
-            cursor: pointer; border-radius: 8px; font-size: 0.95rem; font-weight: 500;
-        }
-        .optie:hover { background: var(--cobalt); color: #fff; border-color: var(--cobalt); }
-        
-        .panel { width: 380px; margin-top: 20px; background: #161616; border-radius: 12px; padding: 20px; border: 1px solid #333; }
-        h3 { margin-top: 0; color: var(--gold); text-align: center; font-size: 0.9rem; text-transform: uppercase; }
-        
-        textarea { width: 100%; height: 100px; padding: 10px; box-sizing: border-box; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; }
-        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-red { background: transparent; color: var(--danger); border: 1px solid var(--danger); font-size: 0.75rem; margin-top: 15px; }
+        #vraag { font-size: 1.1rem; margin-bottom: 15px; font-weight: 700; color: var(--cobalt); }
+        #feedback-text { margin-bottom: 10px; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; }
 
-        .score-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; }
+        .optie { 
+            display: block; width: 100%; padding: 12px; margin: 6px 0; 
+            background: #f1f3f5; color: #333; border: 2px solid #ddd; 
+            cursor: pointer; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+        }
+        .correct { background: var(--success) !important; color: white !important; border-color: #27ae60 !important; }
+        .fout { background: var(--danger) !important; color: white !important; border-color: #c0392b !important; }
+        
+        .panel { width: 95%; max-width: 380px; margin-top: 15px; background: #161616; border-radius: 10px; padding: 15px; border: 1px solid #333; box-sizing: border-box; }
+        h3 { margin: 0 0 10px 0; color: var(--gold); text-align: center; font-size: 0.8rem; letter-spacing: 1px; }
+        textarea { width: 100%; height: 80px; padding: 8px; box-sizing: border-box; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; resize: none; }
+        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .btn-volgende { background: #000; color: var(--success); border: 2px solid var(--success); }
     </style>
 </head>
 <body>
 
-<div id="login" style="margin-top: 80px; text-align: center;">
+<div id="login" style="margin-top: 50px; text-align: center;">
     <h1 style="color: var(--gold)">BTV PAC-MAN</h1>
-    <input type="text" id="vnaam" placeholder="Naam agent..." style="padding:15px; width:250px; border-radius:8px; border:1px solid #333; background:#111; color:#fff;"><br><br>
-    <button class="btn" style="width:280px;" onclick="initSessie()">START TRAINING</button>
+    <input type="text" id="vnaam" placeholder="Naam agent..." style="padding:12px; width:220px; border-radius:6px; border:1px solid #333; background:#111; color:#fff;"><br><br>
+    <button class="btn" style="width:240px;" onclick="initSessie()">START TRAINING</button>
 </div>
 
 <div id="main-game" style="display:none;">
+    <div id="timer-display">Wachten...</div>
     <div class="hud">
-        <span>SCORE: <span id="scr-val">0</span></span>
-        <span>LEVEL: <span id="lvl-val">1</span></span>
+        <span>PT: <span id="scr-val">0</span></span>
+        <span>LVL: <span id="lvl-val">1</span></span>
         <span>❤️: <span id="lvn-val">5</span></span>
     </div>
     
@@ -57,23 +61,22 @@
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
             <p id="vraag"></p>
+            <p id="feedback-text"></p>
             <div id="optie-container"></div>
-            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTARTEN</button>
+            <button id="btn-volgende" class="btn btn-volgende" style="display:none;" onclick="nextQ()">VOLGENDE VRAAG</button>
+            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART</button>
         </div>
     </div>
 
     <div class="panel">
-        <h3>🏆 HALL OF FAME</h3>
+        <h3>🏆 LEADERBOARD</h3>
         <div id="score-list">Laden...</div>
-        <button class="btn btn-red" onclick="resetScores()">WIS SCORES</button>
     </div>
 
-    <div class="panel" style="margin-bottom: 50px;">
-        <h3>🛠 BEHEER</h3>
-        <textarea id="bulk-text" placeholder="plak hier woorden en hun betekenis"></textarea>
-        <button class="btn" onclick="bulkAddWords()">IMPORTLIJST OPSLAAN</button>
-        <button class="btn btn-red" onclick="clearWords()">WIS WOORDENLIJST</button>
-        <p id="fb" style="text-align:center; color: #2ecc71; font-size: 0.8rem;"></p>
+    <div class="panel">
+        <h3>⚙️ IMPORT LESSTOF</h3>
+        <textarea id="bulk-text" placeholder="Term Betekenis..."></textarea>
+        <button class="btn" onclick="bulkAddWords()">OPSLAAN</button>
     </div>
 </div>
 
@@ -86,9 +89,9 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let dynamicWords = [];
-    let vnaam, sRef, score = 0, level = 1, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 3;
-    let canvas, ctx, tileSize, pacman = { x: 9, y: 11, dir: {x:0, y:0}, nextDir: {x:0, y:0} }, dots = [], walls = [], ghosts = [];
+    let dynamicWords = [], vnaam, sRef, score = 0, level = 1, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 3;
+    let canvas, ctx, tileSize, pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0} }, dots = [], walls = [], ghosts = [];
+    let levelStartTime = 0, canAnswer = true;
 
     const mazeLayout = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -104,34 +107,22 @@
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    function resetScores() { if(confirm("Hall of Fame wissen?")) db.ref('ranking').remove(); }
-    function clearWords() { if(confirm("Woordenlijst wissen?")) db.ref('woorden').remove(); }
-
     function bulkAddWords() {
         const text = document.getElementById('bulk-text').value.trim();
         if(!text) return;
-        const lines = text.split('\n');
-        lines.forEach(line => {
+        text.split('\n').forEach(line => {
             const p = line.trim().split(' ');
-            if(p.length > 1) {
-                const w = p.shift();
-                const m = p.join(' ');
-                db.ref('woorden').push({v: w, m: m});
-            }
+            if(p.length > 1) { const w = p.shift(); const m = p.join(' '); db.ref('woorden').push({v: w, m: m}); }
         });
-        document.getElementById('fb').innerText = "✅ Opgeslagen!";
+        alert("Geïmporteerd!");
         document.getElementById('bulk-text').value = "";
     }
 
     function initSessie() {
         vnaam = document.getElementById('vnaam').value;
-        if(!vnaam) return alert("Voer je naam in.");
-        
+        if(!vnaam) return alert("Naam?");
         db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) {
-                alert("Database is leeg! Voeg eerst woorden toe.");
-                return;
-            }
+            if(!snap.exists()) return alert("Database leeg!");
             dynamicWords = Object.values(snap.val());
             sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
             document.getElementById('login').style.display = 'none';
@@ -150,32 +141,33 @@
     function nextQ() {
         if(quizCount >= quizTarget) { 
             document.getElementById('quiz-box').style.display='none'; 
-            inGame=true; initLevel(); requestAnimationFrame(gameLoop); 
+            inGame=true; levelStartTime = Date.now(); initLevel(); requestAnimationFrame(gameLoop); 
             return; 
         }
-
-        // Kies willekeurig woord en vang 'undefined' op
+        canAnswer = true;
+        document.getElementById('btn-volgende').style.display = 'none';
+        document.getElementById('feedback-text').innerText = "";
         const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
-        const correct = q.m || q.o?.[0] || "Betekenis onbekend";
-        const woordVraag = q.v || "Onbekend Woord";
-
-        // Filter andere betekenissen voor afleiders
-        let distractors = dynamicWords
-            .map(w => w.m || w.o?.[0])
-            .filter(m => m && m !== correct)
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 2);
-
-        while(distractors.length < 2) distractors.push("Onjuist juridisch alternatief");
-
+        const correct = q.m;
+        let distractors = dynamicWords.map(w => w.m).filter(m => m !== correct).sort(() => 0.5 - Math.random()).slice(0, 2);
         const opties = [correct, ...distractors].sort(() => 0.5 - Math.random());
-        
-        document.getElementById('vraag').innerText = `Betekenis van: "${woordVraag}"?`;
+        document.getElementById('vraag').innerText = `Wat betekent: "${q.v}"?`;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
-        
         opties.forEach(o => {
             let b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
-            b.onclick = () => { if(o === correct) { quizCount++; nextQ(); } else alert("Fout!"); };
+            b.onclick = () => {
+                if(!canAnswer) return;
+                canAnswer = false;
+                if(o === correct) {
+                    b.classList.add('correct');
+                    setTimeout(() => { quizCount++; nextQ(); }, 800);
+                } else {
+                    b.classList.add('fout');
+                    Array.from(cont.children).forEach(btn => { if(btn.innerText === correct) btn.classList.add('correct'); });
+                    document.getElementById('btn-volgende').style.display = 'block';
+                    quizCount++;
+                }
+            };
             cont.appendChild(b);
         });
     }
@@ -184,6 +176,23 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         const s = Math.min(window.innerWidth * 0.95, 400); tileSize = Math.floor(s/19);
         canvas.width = tileSize*19; canvas.height = tileSize*11;
+
+        // Touch listener
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const tx = touch.clientX - rect.left;
+            const ty = touch.clientY - rect.top;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            if (Math.abs(tx - centerX) > Math.abs(ty - centerY)) {
+                pacman.nextDir = tx > centerX ? {x:1, y:0} : {x:-1, y:0};
+            } else {
+                pacman.nextDir = ty > centerY ? {x:0, y:1} : {x:0, y:-1};
+            }
+        }, {passive: false});
     }
 
     function initLevel() {
@@ -192,24 +201,21 @@
             if(mazeLayout[y][x] === 1) walls.push({x, y});
             else if(mazeLayout[y][x] === 0) dots.push({x, y, eaten: false});
         }
-        pacman.x = 9; pacman.y = 9; pacman.dir = {x:0, y:0};
-        ghosts = [
-            {x:9, y:5, color:'red', speed: 0.04 + (level*0.01)},
-            {x:8, y:5, color:'#ffb8ff', speed: 0.03 + (level*0.01)}
-        ];
+        pacman.x = 9; pacman.y = 9; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
+        ghosts = [{x:9, y:5, color:'red', speed: 0.04+(level*0.01)}, {x:8, y:5, color:'#ffb8ff', speed: 0.03+(level*0.01)}];
+        document.getElementById('lvl-val').innerText = level;
     }
 
     function gameLoop() {
         if(!inGame) return;
         frame++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        
         ctx.strokeStyle = '#1a2a6c'; ctx.lineWidth = 2;
         walls.forEach(w => ctx.strokeRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
         
-        let remaining = 0;
-        ctx.fillStyle = '#fff';
+        let remaining = 0; ctx.fillStyle = '#fff';
         dots.forEach(d => { if(!d.eaten){ remaining++; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
-
-        if(remaining === 0) { level++; document.getElementById('lvl-val').innerText = level; initLevel(); }
+        if(remaining === 0) { level++; initLevel(); }
 
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
             let d = dots.find(dot => dot.x === pacman.x && dot.y === pacman.y && !dot.eaten);
@@ -219,33 +225,10 @@
         }
         
         pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10; pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
-        ctx.fillStyle = 'yellow'; ctx.beginPath();
-        ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0.2*Math.PI, 1.8*Math.PI);
-        ctx.lineTo(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2); ctx.fill();
+        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2); ctx.fill();
+
+        let diff = Math.floor((20000 - (Date.now() - levelStartTime)) / 1000);
+        document.getElementById('timer-display').innerText = diff > 0 ? `SPOOKJES IN: ${diff}s` : "REN!";
 
         ghosts.forEach(g => {
-            g.x += (pacman.x > g.x ? 1 : -1) * g.speed; g.y += (pacman.y > g.y ? 1 : -1) * g.speed;
-            ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
-            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
-                levens--; document.getElementById('lvn-val').innerText = levens;
-                if(levens <= 0) { inGame = false; document.getElementById('quiz-box').style.display='block'; document.getElementById('vraag').innerText = "GAME OVER"; document.getElementById('optie-container').innerHTML = ''; document.getElementById('restart-btn').style.display='block'; }
-                else startQuiz(2);
-            }
-        });
-        requestAnimationFrame(gameLoop);
-    }
-    function canM(x,y) { if(x<0 || x>18 || y<0 || y>10) return false; return !walls.some(w => w.x===x && w.y===y); }
-    function updateScoreboard() { db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
-        const list = document.getElementById('score-list'); list.innerHTML = '';
-        let res = []; snap.forEach(s => res.push(s.val()));
-        res.reverse().forEach((r, i) => list.innerHTML += `<div class="score-row"><span>${r.naam}</span><span>${r.score}</span></div>`);
-    }); }
-    window.addEventListener('keydown', e => {
-        if(e.key === 'ArrowLeft') pacman.nextDir = {x:-1, y:0};
-        if(e.key === 'ArrowRight') pacman.nextDir = {x:1, y:0};
-        if(e.key === 'ArrowUp') pacman.nextDir = {x:0, y:-1};
-        if(e.key === 'ArrowDown') pacman.nextDir = {x:0, y:1};
-    });
-</script>
-</body>
-</html>
+            if (diff <= 0) { g.x += (pacman.

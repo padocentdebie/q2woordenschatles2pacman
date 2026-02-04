@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Touch & Learn Edition</title>
+    <title>BTV Police Training - Fixed Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #1a2a6c; --gold: #f0db4f; --danger: #e74c3c; --success: #2ecc71; --bg: #0a0a0a; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
-        
         .hud { width: 100%; max-width: 400px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); box-sizing: border-box; }
-        #timer-display { color: var(--gold); font-size: 1rem; font-weight: bold; margin: 5px 0; height: 1.2rem; }
-        
+        #timer-display { color: var(--gold); font-size: 1rem; font-weight: bold; margin: 5px 0; height: 1.2rem; text-align: center; width: 100%; }
         #game-container { position: relative; border: 3px solid var(--cobalt); border-radius: 8px; background: #000; overflow: hidden; }
-        canvas { display: block; touch-action: none; }
-
-        /* Quiz Overlay */
+        canvas { display: block; touch-action: none; background: #000; }
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             width: 90%; background: #ffffff; border-radius: 12px; padding: 20px; 
@@ -24,21 +20,15 @@
             box-shadow: 0 0 50px rgba(0,0,0,1);
         }
         #vraag { font-size: 1.1rem; margin-bottom: 15px; font-weight: 700; color: var(--cobalt); }
-        #feedback-text { margin-bottom: 10px; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; }
-
-        .optie { 
-            display: block; width: 100%; padding: 12px; margin: 6px 0; 
-            background: #f1f3f5; color: #333; border: 2px solid #ddd; 
-            cursor: pointer; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
-        }
+        .optie { display: block; width: 100%; padding: 12px; margin: 6px 0; background: #f1f3f5; color: #333; border: 2px solid #ddd; cursor: pointer; border-radius: 8px; font-weight: 600; }
         .correct { background: var(--success) !important; color: white !important; border-color: #27ae60 !important; }
         .fout { background: var(--danger) !important; color: white !important; border-color: #c0392b !important; }
-        
         .panel { width: 95%; max-width: 380px; margin-top: 15px; background: #161616; border-radius: 10px; padding: 15px; border: 1px solid #333; box-sizing: border-box; }
         h3 { margin: 0 0 10px 0; color: var(--gold); text-align: center; font-size: 0.8rem; letter-spacing: 1px; }
-        textarea { width: 100%; height: 80px; padding: 8px; box-sizing: border-box; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; resize: none; }
+        textarea { width: 100%; height: 80px; padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; resize: none; }
         .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; }
         .btn-volgende { background: #000; color: var(--success); border: 2px solid var(--success); }
+        .score-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -50,42 +40,28 @@
 </div>
 
 <div id="main-game" style="display:none;">
-    <div id="timer-display">Wachten...</div>
+    <div id="timer-display">Wachten op start...</div>
     <div class="hud">
-        <span>PT: <span id="scr-val">0</span></span>
+        <span>SCORE: <span id="scr-val">0</span></span>
         <span>LVL: <span id="lvl-val">1</span></span>
         <span>❤️: <span id="lvn-val">5</span></span>
     </div>
-    
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
             <p id="vraag"></p>
-            <p id="feedback-text"></p>
+            <p id="feedback-text" style="font-weight:bold; margin-bottom:10px;"></p>
             <div id="optie-container"></div>
             <button id="btn-volgende" class="btn btn-volgende" style="display:none;" onclick="nextQ()">VOLGENDE VRAAG</button>
-            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART</button>
+            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART TRAINING</button>
         </div>
     </div>
-
-    <div class="panel">
-        <h3>🏆 LEADERBOARD</h3>
-        <div id="score-list">Laden...</div>
-    </div>
-
-    <div class="panel">
-        <h3>⚙️ IMPORT LESSTOF</h3>
-        <textarea id="bulk-text" placeholder="Term Betekenis..."></textarea>
-        <button class="btn" onclick="bulkAddWords()">OPSLAAN</button>
-    </div>
+    <div class="panel"><h3>🏆 TOP SCORES</h3><div id="score-list">Laden...</div></div>
+    <div class="panel"><h3>⚙️ BEHEER</h3><textarea id="bulk-text" placeholder="Woord Betekenis..."></textarea><button class="btn" onclick="bulkAddWords()">OPSLAAN</button></div>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY",
-        databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "aangiftebotje"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", projectId: "aangiftebotje" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -114,7 +90,7 @@
             const p = line.trim().split(' ');
             if(p.length > 1) { const w = p.shift(); const m = p.join(' '); db.ref('woorden').push({v: w, m: m}); }
         });
-        alert("Geïmporteerd!");
+        alert("Lesstof opgeslagen!");
         document.getElementById('bulk-text').value = "";
     }
 
@@ -122,7 +98,7 @@
         vnaam = document.getElementById('vnaam').value;
         if(!vnaam) return alert("Naam?");
         db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) return alert("Database leeg!");
+            if(!snap.exists()) return alert("Database leeg! Voeg woorden toe.");
             dynamicWords = Object.values(snap.val());
             sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
             document.getElementById('login').style.display = 'none';
@@ -140,8 +116,9 @@
 
     function nextQ() {
         if(quizCount >= quizTarget) { 
-            document.getElementById('quiz-box').style.display='none'; 
-            inGame=true; levelStartTime = Date.now(); initLevel(); requestAnimationFrame(gameLoop); 
+            document.getElementById('quiz-box').style.display = 'none'; 
+            levelStartTime = Date.now(); // Essentieel: zet timer hier!
+            inGame = true; initLevel(); requestAnimationFrame(gameLoop); 
             return; 
         }
         canAnswer = true;
@@ -176,22 +153,14 @@
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         const s = Math.min(window.innerWidth * 0.95, 400); tileSize = Math.floor(s/19);
         canvas.width = tileSize*19; canvas.height = tileSize*11;
-
-        // Touch listener
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const tx = touch.clientX - rect.left;
-            const ty = touch.clientY - rect.top;
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            if (Math.abs(tx - centerX) > Math.abs(ty - centerY)) {
-                pacman.nextDir = tx > centerX ? {x:1, y:0} : {x:-1, y:0};
-            } else {
-                pacman.nextDir = ty > centerY ? {x:0, y:1} : {x:0, y:-1};
-            }
+            const tx = e.touches[0].clientX - rect.left;
+            const ty = e.touches[0].clientY - rect.top;
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            if (Math.abs(tx - cx) > Math.abs(ty - cy)) pacman.nextDir = tx > cx ? {x:1, y:0} : {x:-1, y:0};
+            else pacman.nextDir = ty > cy ? {x:0, y:1} : {x:0, y:-1};
         }, {passive: false});
     }
 
@@ -208,27 +177,43 @@
 
     function gameLoop() {
         if(!inGame) return;
-        frame++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        
-        ctx.strokeStyle = '#1a2a6c'; ctx.lineWidth = 2;
-        walls.forEach(w => ctx.strokeRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
-        
-        let remaining = 0; ctx.fillStyle = '#fff';
-        dots.forEach(d => { if(!d.eaten){ remaining++; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
-        if(remaining === 0) { level++; initLevel(); }
-
+        ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.strokeStyle = '#1a2a6c'; walls.forEach(w => ctx.strokeRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
+        let rem = 0; ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten){ rem++; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
+        if(rem === 0) { level++; levelStartTime = Date.now(); initLevel(); }
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
             let d = dots.find(dot => dot.x === pacman.x && dot.y === pacman.y && !dot.eaten);
             if(d){ d.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
-            if(canM(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
-            if(!canM(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
+            if(canM(pacman.x+pacman.nextDir.x, pacman.y+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
+            if(!canM(pacman.x+pacman.dir.x, pacman.y+pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
-        
         pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10; pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
         ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0.2*Math.PI, 1.8*Math.PI); ctx.lineTo(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2); ctx.fill();
 
         let diff = Math.floor((20000 - (Date.now() - levelStartTime)) / 1000);
-        document.getElementById('timer-display').innerText = diff > 0 ? `SPOOKJES IN: ${diff}s` : "REN!";
-
+        document.getElementById('timer-display').innerText = diff > 0 ? `🚨 SPOOKJES IN: ${diff}s` : "🏃 ZE KOMEN!";
         ghosts.forEach(g => {
-            if (diff <= 0) { g.x += (pacman.
+            if (diff <= 0) { g.x += (pacman.x > g.x ? 1 : -1) * g.speed; g.y += (pacman.y > g.y ? 1 : -1) * g.speed; ctx.globalAlpha = 1; }
+            else ctx.globalAlpha = 0.3;
+            ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
+            if(diff <= 0 && Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
+                levens--; document.getElementById('lvn-val').innerText = levens;
+                if(levens <= 0) { inGame=false; document.getElementById('quiz-box').style.display='block'; document.getElementById('vraag').innerText = "GAME OVER"; document.getElementById('optie-container').innerHTML = ''; document.getElementById('restart-btn').style.display='block'; }
+                else startQuiz(2);
+            }
+        });
+        requestAnimationFrame(gameLoop);
+    }
+    function canM(x,y) { if(x<0 || x>18 || y<0 || y>10) return false; return !walls.some(w => w.x===x && w.y===y); }
+    function updateScoreboard() { db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
+        const list = document.getElementById('score-list'); list.innerHTML = '';
+        let res = []; snap.forEach(s => res.push(s.val()));
+        res.reverse().forEach(r => list.innerHTML += `<div class="score-row"><span>${r.naam}</span><span>${r.score}</span></div>`);
+    }); }
+    window.addEventListener('keydown', e => {
+        if(e.key === 'ArrowLeft') pacman.nextDir = {x:-1, y:0}; if(e.key === 'ArrowRight') pacman.nextDir = {x:1, y:0};
+        if(e.key === 'ArrowUp') pacman.nextDir = {x:0, y:-1}; if(e.key === 'ArrowDown') pacman.nextDir = {x:0, y:1};
+    });
+</script>
+</body>
+</html>

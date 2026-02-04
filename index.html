@@ -3,50 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Pac-Man: Hybrid Edition</title>
+    <title>BTV Police Pac-Man PRO</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --btv: #003159; --geel: #f0db4f; --blauw: #2121ff; }
-        body { font-family: 'Courier New', Courier, monospace; background: #000; color: #fff; margin: 0; overflow: hidden; touch-action: none; }
-        #stage { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        canvas { border: 4px solid var(--blauw); background: #000; box-shadow: 0 0 20px var(--blauw); max-width: 95vw; max-height: 70vh; }
-        
-        #quiz-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 450px; background: rgba(0,0,0,0.95); border: 3px solid var(--geel); border-radius: 15px; padding: 25px; text-align: center; z-index: 100; box-shadow: 0 0 30px rgba(240, 219, 79, 0.3); }
-        .optie { display: block; width: 100%; padding: 15px; margin: 12px 0; border: 2px solid var(--btv); border-radius: 10px; background: #111; color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
-        .optie:hover { background: var(--btv); border-color: var(--geel); }
-        
-        .hud { display: flex; gap: 30px; font-weight: bold; color: var(--geel); padding: 15px; font-size: 1.2rem; text-shadow: 2px 2px #000; }
-        #login-screen { text-align: center; border: 2px solid var(--geel); padding: 40px; border-radius: 20px; }
-        input { padding: 15px; border-radius: 8px; border: none; width: 220px; margin-bottom: 15px; font-size: 1rem; }
-        button#start-btn { padding: 15px 35px; background: var(--geel); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 1.1rem; }
-        #control-hint { margin-top: 10px; color: #666; font-size: 0.9rem; }
+        :root { --btv: #003159; --geel: #f0db4f; --blauw: #0000ff; --muur: #2121ff; }
+        body { font-family: 'Courier New', monospace; background: #000; color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; overflow: hidden; }
+        .hud { padding: 10px; color: var(--geel); font-size: 1.1rem; display: flex; gap: 20px; font-weight: bold; }
+        #game-container { position: relative; border: 4px solid var(--muur); box-shadow: 0 0 15px var(--muur); }
+        canvas { display: block; background: #000; }
+        #quiz-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; background: rgba(0,0,0,0.95); border: 3px solid var(--geel); border-radius: 10px; padding: 15px; text-align: center; display: none; z-index: 100; box-shadow: 0 0 40px var(--geel); }
+        .optie { display: block; width: 100%; padding: 10px; margin: 6px 0; border: 2px solid var(--btv); border-radius: 5px; background: #111; color: #fff; cursor: pointer; font-size: 0.9rem; }
+        #login { margin-top: 50px; text-align: center; border: 2px solid var(--geel); padding: 30px; border-radius: 15px; }
+        input { padding: 12px; border-radius: 5px; border: none; width: 220px; font-size: 1rem; margin-bottom: 10px; }
+        button { padding: 12px 25px; background: var(--geel); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div id="stage">
-    <div id="login-screen">
-        <h1 style="color: var(--geel); font-size: 2.5rem; margin-top: 0;">BTV PAC-MAN</h1>
-        <input type="text" id="vnaam" placeholder="Je Voornaam...">
-        <br>
-        <button id="start-btn" onclick="initSessie()">START MISSIE</button>
-        <p id="control-hint">Gebruik ⌨️ Pijltjes of 📱 Swipe</p>
-    </div>
+<div id="login">
+    <h1 style="color: var(--geel); margin-top: 0;">BTV POLICE PAC-MAN</h1>
+    <p>Niveaus: 2 tot 4 geesten + 50 termen</p>
+    <input type="text" id="vnaam" placeholder="Je Voornaam...">
+    <br>
+    <button onclick="initSessie()">START PATROUILLE</button>
+</div>
 
-    <div id="quiz-box" style="display:none;">
-        <h3 id="q-status" style="color: var(--geel); margin-top: 0;">DATA RECOVERY</h3>
-        <h2 id="vraag">...</h2>
-        <div id="optie-container"></div>
+<div id="main-game" style="display:none;">
+    <div class="hud">
+        <span>LVL: <span id="lvl-val">1</span></span>
+        <span>SCORE: <span id="scr-val">0</span></span>
+        <span>❤️: <span id="lvn-val">3</span></span>
     </div>
-
-    <div id="game-container" style="display:none;">
-        <div class="hud">
-            <span>LEVEL: <span id="lvl-val">1</span></span>
-            <span>SCORE: <span id="scr-val">0</span></span>
-            <span>LIVES: <span id="lvn-val">3</span></span>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="quiz-box">
+            <h3 style="color: var(--geel); margin: 0;">VERHOOR NODIG</h3>
+            <h2 id="vraag" style="font-size: 1.1rem; margin: 10px 0;"></h2>
+            <div id="optie-container"></div>
         </div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
     </div>
 </div>
 
@@ -60,134 +55,253 @@
     const db = firebase.database();
 
     const DATABASE = [
-        { v: "Wat is 'Recidive'?", o: ["Herhaling strafbaar feit", "Vrijspraak", "Nieuw bewijs"], c: 0 },
-        { v: "Wat is 'Proportioneel'?", o: ["Altijd maximaal", "In verhouding", "Willekeurig"], c: 1 },
-        { v: "Consistent verklaren?", o: ["Zonder tegenspraak", "Heel erg luid", "Met veel emotie"], c: 0 },
-        { v: "Wat betekent 'Seponeren'?", o: ["Zaak stoppen", "Hoger beroep", "Directe boete"], c: 0 },
-        { v: "De 'Cautie' is...", o: ["Het zwijgrecht", "De arrestatie", "Het proces-verbaal"], c: 0 },
-        { v: "Wat is 'Jurisdictie'?", o: ["Rechtsgebied", "Wetboek", "Advocatuur"], c: 0 },
-        { v: "Een 'Delict' is een...", o: ["Strafbaar feit", "Getuige", "Veroordeling"], c: 0 },
-        { v: "Wat is 'Hechtenis'?", o: ["Vrijheidsbeneming", "Geldboete", "Vrijspraak"], c: 0 },
-        { v: "Mandateren betekent...", o: ["Bevoegdheid geven", "Ontslag nemen", "Iemand schorsen"], c: 0 },
-        { v: "Wat is 'Opportuniteit'?", o: ["Besluit tot vervolging", "Type bewijs", "Een getuigenis"], c: 0 }
+        {v:"Recidive", o:["Herhaling van strafbaar feit", "Vrijspraak", "Bewijslast"], c:0},
+        {v:"Proportioneel", o:["Zwaarste middel eerst", "In redelijke verhouding", "Volgens de klok"], c:1},
+        {v:"Consistent", o:["Zonder tegenstrijdigheid", "Erg luidruchtig", "Kort samengevat"], c:0},
+        {v:"Seponeren", o:["Niet verder vervolgen", "Direct opsluiten", "In beslag nemen"], c:0},
+        {v:"Cautie", o:["Recht op advocaat", "Zwijgrecht mededeling", "Handboeien procedure"], c:1},
+        {v:"Jurisdictie", o:["Rechtsgebied/Bevoegdheid", "Wetsartikel", "Type vonnis"], c:0},
+        {v:"Opportuniteit", o:["Kans op promotie", "Besluit om wel/niet te vervolgen", "Tijdstip delict"], c:1},
+        {v:"Hechtenis", o:["Vorm van vrijheidsbeneming", "Geldboete", "Taakstraf"], c:0},
+        {v:"Mandateren", o:["Bevoegdheid overdragen", "Iemand schorsen", "Proces-verbaal sluiten"], c:0},
+        {v:"Subsidiariteit", o:["Lichtste middel eerst", "Financiele steun", "Tweede kans"], c:0},
+        {v:"Delict", o:["Strafbaar feit", "Wetboek", "Rechtszaal"], c:0},
+        {v:"Dagvaarding", o:["Oproep voor de rechter", "Vrijlatingsbewijs", "Boetebrief"], c:0},
+        {v:"Vonnis", o:["Beslissing van rechter", "Eis officier", "Verklaring"], c:0},
+        {v:"Hoger beroep", o:["Zaak opnieuw beoordelen", "Klacht politie", "Vrijspraak"], c:0},
+        {v:"Gratie", o:["Kwijtschelding straf", "Kortere cel", "Verlof"], c:0},
+        {v:"Mishandeling", o:["Lichamelijk letsel", "Uitschelden", "Niet luisteren"], c:0},
+        {v:"Diefstal", o:["Wegnemen goed van ander", "Lenen", "Vernielen"], c:0},
+        {v:"Verduistering", o:["Goed onder je toe-eigenen", "Winkeldiefstal", "Witwassen"], c:0},
+        {v:"Huisvredebreuk", o:["Onbevoegd in woning", "Hard praten", "Ramen inslaan"], c:0},
+        {v:"Laster", o:["Zwartmaken met leugens", "Waarheid zeggen", "Roddelen"], c:0},
+        {v:"Meineed", o:["Vals zweren", "Niet getuigen", "Slechte voorbereiding"], c:0},
+        {v:"Dwangmiddel", o:["Inbreuk op grondrechten", "Verzoek", "Boete"], c:0},
+        {v:"Staande houden", o:["Vragen naar ID", "Arresteren", "Fouilleren"], c:0},
+        {v:"Aanhouden", o:["Arresteren en meenemen", "Vraag stellen", "Controle"], c:0},
+        {v:"Inbeslagname", o:["Goederen veiligstellen", "Weggooien", "Kopie maken"], c:0},
+        {v:"Huiszoeking", o:["Woning doorzoeken", "Aanbellen", "Post checken"], c:0},
+        {v:"Getuige", o:["Iemand die iets zag", "Dader", "Advocaat"], c:0},
+        {v:"Verdachte", o:["Redelijk vermoeden van schuld", "Aangever", "Rechter"], c:0},
+        {v:"Aangifte", o:["Kennisgeving strafbaar feit", "Verklaring", "Tip"], c:0},
+        {v:"Proces-verbaal", o:["Officieel verslag", "Brief burgemeester", "Notitie"], c:0},
+        {v:"Schikking", o:["Afdoening zonder rechter", "Zitting", "Beroep"], c:0},
+        {v:"Wraking", o:["Rechter weigeren", "Advocaat ontslaan", "Getuige weigeren"], c:0},
+        {v:"Noodweer", o:["Zelfverdediging", "Hulp bij ongeluk", "Vluchten"], c:0},
+        {v:"Voorbedachte raad", o:["Planmatig handelen", "Opwelling", "Per ongeluk"], c:0},
+        {v:"Poging tot", o:["Begin uitvoering delict", "Praten over plan", "Aanmoedigen"], c:0},
+        {v:"Medeplichtig", o:["Hulp bieden bij delict", "Zelf plegen", "Toekijken"], c:0},
+        {v:"Onrechtmatig", o:["In strijd met wet", "Niet handig", "Volgens regels"], c:0},
+        {v:"Opsporing", o:["Onderzoek strafbare feiten", "Orde bewaken", "Verkeer"], c:0},
+        {v:"Vrijspraak", o:["Feit niet bewezen", "Lagere straf", "Schadevergoeding"], c:0},
+        {v:"Ontslag rechtsvervolging", o:["Bewezen maar niet strafbaar", "Geen bewijs", "Dader weg"], c:0},
+        {v:"Taakstraf", o:["Onbetaalde arbeid", "Geldboete", "Cursus"], c:0},
+        {v:"Halsmisdrijf", o:["Zeer ernstig delict", "Overtreding", "Verkeersfout"], c:0},
+        {v:"Rechtshulp", o:["Bijstand advocaat", "Hulp buren", "Brief gemeente"], c:0},
+        {v:"Griffier", o:["Ondersteuner rechter", "Aanklager", "Beveiliging"], c:0},
+        {v:"Balie", o:["Verzamelnaam advocaten", "Receptie", "Gevangenis"], c:0},
+        {v:"Pleidooi", o:["Betoog advocaat", "Eis officier", "Uitleg rechter"], c:0},
+        {v:"Requisitoir", o:["Betoog en eis officier", "Verweer", "Vonnis"], c:0},
+        {v:"Schorsing", o:["Tijdelijke stopzetting", "Einde zaak", "Vrijspraak"], c:0},
+        {v:"Recidivegevaar", o:["Kans op herhaling", "Ontsnapping", "Gevaar getuige"], c:0},
+        {v:"Wetboek van Strafrecht", o:["Lijst feiten en straffen", "Gedragsregels", "Geschiedenis"], c:0}
     ];
 
-    let sRef, vnaam, score = 0, levens = 3, level = 1, frame = 0;
-    let pX, pY, pDir = {x:0, y:0};
-    let dots = [], walls = [], ghost = {x:0, y:0};
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    let vnaam, sRef, score = 0, level = 1, levens = 3, frame = 0;
+    let canvas, ctx, tileSize;
+    let pacman = { x: 9, y: 15, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
+    let dots = [], walls = [], ghosts = [];
+
+    const originalMaze = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,0,1],
+        [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1],
+        [1,1,1,1,0,1,1,1,2,1,2,1,1,1,0,1,1,1,1],
+        [1,1,1,1,0,1,2,2,2,2,2,2,2,1,0,1,1,1,1],
+        [1,1,1,1,0,1,2,1,1,2,1,1,2,1,0,1,1,1,1],
+        [2,2,2,2,0,2,2,1,2,2,2,1,2,2,0,2,2,2,2],
+        [1,1,1,1,0,1,2,1,1,1,1,1,2,1,0,1,1,1,1],
+        [1,1,1,1,0,1,2,2,2,2,2,2,2,1,0,1,1,1,1],
+        [1,1,1,1,0,1,2,1,1,1,1,1,2,1,0,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
+        [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+        [1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1],
+        [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
 
     function initSessie() {
         vnaam = document.getElementById('vnaam').value;
-        if(!vnaam) return alert("Voer je naam in!");
+        if(!vnaam) return alert("Naam invoeren!");
         sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
-        document.getElementById('login-screen').style.display = 'none';
-        startQuiz();
-    }
-
-    function startQuiz() {
-        document.getElementById('quiz-box').style.display = 'block';
-        const q = DATABASE[Math.floor(Math.random()*DATABASE.length)];
-        document.getElementById('vraag').innerText = q.v;
-        const box = document.getElementById('optie-container'); box.innerHTML = '';
-        q.o.forEach((t, i) => {
-            const b = document.createElement('button'); b.className = 'optie'; b.innerText = t;
-            b.onclick = () => { if(i==q.c) launchGame(); else alert("Onjuist! Probeer opnieuw."); };
-            box.appendChild(b);
-        });
-    }
-
-    function launchGame() {
-        document.getElementById('quiz-box').style.display = 'none';
-        document.getElementById('game-container').style.display = 'block';
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('main-game').style.display = 'block';
+        setupCanvas();
         initLevel();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function setupCanvas() {
+        canvas = document.getElementById('gameCanvas');
+        ctx = canvas.getContext('2d');
+        const size = Math.min(window.innerWidth * 0.95, 450);
+        tileSize = Math.floor(size / 19);
+        canvas.width = tileSize * 19;
+        canvas.height = tileSize * 19;
     }
 
     function initLevel() {
-        dots = []; 
-        pX = 200; pY = 320; pDir = {x:0, y:0};
-        ghost = {x:200, y:80};
-        
-        // --- 3 Levels Doolhof ---
-        if(level == 1) walls = [{x:60, y:60, w:280, h:20}, {x:60, y:280, w:280, h:20}];
-        else if(level == 2) walls = [{x:40, y:40, w:20, h:320}, {x:340, y:40, w:20, h:320}, {x:120, y:200, w:160, h:20}];
-        else walls = [{x:0, y:190, w:140, h:20}, {x:260, y:190, w:140, h:20}, {x:190, y:0, w:20, h:140}, {x:190, y:260, w:20, h:140}];
-
-        for(let i=40; i<380; i+=40) for(let j=40; j<380; j+=40) {
-            if(!walls.some(w => i > w.x-15 && i < w.x+w.w+15 && j > w.y-15 && j < w.y+w.h+15)) dots.push({x:i, y:j, e:false});
+        dots = []; walls = [];
+        for(let y=0; y<originalMaze.length; y++) {
+            for(let x=0; x<originalMaze[y].length; x++) {
+                if(originalMaze[y][x] === 1) walls.push({x, y});
+                else if(originalMaze[y][x] === 0) dots.push({x, y, eaten: false});
+            }
         }
-        document.getElementById('lvl-val').innerText = level;
-        requestAnimationFrame(draw);
+        pacman.x = 9; pacman.y = 15; pacman.dir = {x:0, y:0};
+        
+        // GHOST LOGIC: Meer geesten bij hoger level
+        let numGhosts = 2;
+        if(level >= 3) numGhosts = 3;
+        if(level >= 5) numGhosts = 4;
+
+        ghosts = [];
+        const colors = ['#ff0000', '#ffb8ff', '#00ffff', '#ffb852'];
+        for(let i=0; i<numGhosts; i++) {
+            ghosts.push({ 
+                x: 9, y: 8, 
+                color: colors[i], 
+                speed: 0.04 + (level * 0.012) 
+            });
+        }
     }
 
-    function draw() {
-        if(document.getElementById('game-container').style.display === 'none') return;
+    function gameLoop() {
+        if(document.getElementById('quiz-box').style.display === 'block') return;
         frame++;
-        ctx.fillStyle = 'black'; ctx.fillRect(0,0,400,400);
-
-        // Muren & Punten
-        ctx.fillStyle = '#2121ff'; walls.forEach(w => {
-            ctx.fillRect(w.x, w.y, w.w, w.h);
-            ctx.strokeStyle = "white"; ctx.strokeRect(w.x, w.y, w.w, w.h);
-        });
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.fillStyle = '#ffb8ae'; dots.forEach(d => {
-            if(!d.e) {
-                ctx.beginPath(); ctx.arc(d.x, d.y, 3, 0, 7); ctx.fill();
-                if(Math.hypot(pX-d.x, pY-d.y) < 18) { d.e = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score:score}); }
+        drawMaze();
+        updatePacman();
+        drawPacman();
+        updateGhosts();
+        drawGhosts();
+        
+        if(dots.every(d => d.eaten)) {
+            level++;
+            document.getElementById('lvl-val').innerText = level;
+            alert("LEVEL " + level + " BEGONNEN! Meer geesten/snelheid!");
+            initLevel();
+        }
+        requestAnimationFrame(gameLoop);
+    }
+
+    function drawMaze() {
+        ctx.fillStyle = 'var(--muur)';
+        walls.forEach(w => {
+            ctx.fillRect(w.x * tileSize + 1, w.y * tileSize + 1, tileSize - 2, tileSize - 2);
+        });
+        ctx.fillStyle = '#fff';
+        dots.forEach(d => {
+            if(!d.eaten) {
+                ctx.beginPath();
+                ctx.arc(d.x * tileSize + tileSize/2, d.y * tileSize + tileSize/2, 2, 0, 7);
+                ctx.fill();
             }
         });
-
-        // Beweging Logica
-        let speed = 3;
-        let nX = pX + pDir.x * speed;
-        let nY = pY + pDir.y * speed;
-        
-        if(!walls.some(w => nX > w.x-15 && nX < w.x+w.w+15 && nY > w.y-15 && nY < w.y+w.h+15)) {
-            pX = Math.max(15, Math.min(385, nX));
-            pY = Math.max(15, Math.min(385, nY));
-        }
-
-        // Pacman Animatie
-        ctx.fillStyle = 'yellow'; ctx.beginPath();
-        let angle = (pDir.x > 0) ? 0 : (pDir.x < 0) ? Math.PI : (pDir.y < 0) ? 1.5*Math.PI : 0.5*Math.PI;
-        let mouth = Math.abs(Math.sin(frame/4)*0.3);
-        ctx.arc(pX, pY, 14, angle + mouth, angle + 2*Math.PI - mouth);
-        ctx.lineTo(pX, pY); ctx.fill();
-
-        // Ghost AI
-        ghost.x += (pX > ghost.x ? 1 : -1) * (0.9 + level*0.3);
-        ghost.y += (pY > ghost.y ? 1 : -1) * (0.9 + level*0.3);
-        ctx.fillStyle = 'red'; ctx.font = "20px Arial"; ctx.fillText("👻", ghost.x-10, ghost.y+8);
-
-        // Game Over & Win
-        if(Math.hypot(pX-ghost.x, pY-ghost.y) < 22) {
-            levens--; document.getElementById('lvn-val').innerText = levens;
-            if(levens <= 0) { alert("GAME OVER! Je score: " + score); location.reload(); } else { startQuiz(); }
-            return;
-        }
-
-        if(dots.every(d => d.e)) { level++; alert("LEVEL COMPLETE!"); initLevel(); return; }
-        requestAnimationFrame(draw);
     }
 
-    // --- INPUT: KEYBOARD ---
-    window.addEventListener('keydown', (e) => {
-        if(e.key == "ArrowLeft") pDir = {x:-1, y:0};
-        else if(e.key == "ArrowRight") pDir = {x:1, y:0};
-        else if(e.key == "ArrowUp") pDir = {x:0, y:-1};
-        else if(e.key == "ArrowDown") pDir = {x:0, y:1};
+    function updatePacman() {
+        if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
+            let dot = dots.find(d => d.x === pacman.x && d.y === pacman.y && !d.eaten);
+            if(dot) { dot.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
+            if(canMove(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
+            if(!canMove(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
+        }
+        pacman.x = Math.round((pacman.x + pacman.dir.x * 0.1) * 10) / 10;
+        pacman.y = Math.round((pacman.y + pacman.dir.y * 0.1) * 10) / 10;
+        // Tunnel
+        if(pacman.x < 0) pacman.x = 18; if(pacman.x > 18) pacman.x = 0;
+    }
+
+    function canMove(x, y) {
+        if(x < 0 || x > 18) return true;
+        return !walls.some(w => w.x === x && w.y === y);
+    }
+
+    function drawPacman() {
+        let px = pacman.x * tileSize + tileSize/2;
+        let py = pacman.y * tileSize + tileSize/2;
+        ctx.fillStyle = 'yellow'; ctx.beginPath();
+        let mouth = Math.abs(Math.sin(frame/5) * 0.2);
+        ctx.arc(px, py, tileSize/2 - 1, mouth * Math.PI, (2 - mouth) * Math.PI);
+        ctx.lineTo(px, py); ctx.fill();
+
+        // BLAUW ZWAAILICHT
+        let flash = Math.floor(frame / 6) % 2;
+        if(flash === 0) {
+            ctx.fillStyle = 'cyan';
+            ctx.shadowBlur = 10; ctx.shadowColor = 'cyan';
+            ctx.fillRect(px - 4, py - tileSize/2 - 3, 8, 4);
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function updateGhosts() {
+        ghosts.forEach(g => {
+            if(pacman.x > g.x) g.x += g.speed; else g.x -= g.speed;
+            if(pacman.y > g.y) g.y += g.speed; else g.y -= g.speed;
+            if(Math.hypot(pacman.x - g.x, pacman.y - g.y) < 0.7) {
+                levens--; document.getElementById('lvn-val').innerText = levens;
+                if(levens <= 0) { alert("POLITIEWAGEN TOTAL LOSS! Score: " + score); location.reload(); }
+                else { showQuiz(); }
+            }
+        });
+    }
+
+    function drawGhosts() {
+        ghosts.forEach(g => {
+            ctx.fillStyle = g.color;
+            ctx.beginPath();
+            ctx.arc(g.x * tileSize + tileSize/2, g.y * tileSize + tileSize/2, tileSize/2 - 1, 0, 7);
+            ctx.fill();
+        });
+    }
+
+    function showQuiz() {
+        const qBox = document.getElementById('quiz-box');
+        qBox.style.display = 'block';
+        const q = DATABASE[Math.floor(Math.random() * DATABASE.length)];
+        document.getElementById('vraag').innerText = q.v;
+        const container = document.getElementById('optie-container'); container.innerHTML = '';
+        q.o.forEach((o, i) => {
+            let btn = document.createElement('button'); btn.className = 'optie'; btn.innerText = o;
+            btn.onclick = () => {
+                if(i === q.c) { qBox.style.display = 'none'; initLevel(); requestAnimationFrame(gameLoop); }
+                else { alert("FOUTIEVE VERKLARING!"); }
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    window.addEventListener('keydown', e => {
+        if(e.key === 'ArrowLeft') pacman.nextDir = {x:-1, y:0};
+        if(e.key === 'ArrowRight') pacman.nextDir = {x:1, y:0};
+        if(e.key === 'ArrowUp') pacman.nextDir = {x:0, y:-1};
+        if(e.key === 'ArrowDown') pacman.nextDir = {x:0, y:1};
     });
 
-    // --- INPUT: TOUCH/SWIPE ---
     let tS = null;
-    window.addEventListener('touchstart', e => tS = {x: e.touches[0].clientX, y: e.touches[0].clientY});
+    window.addEventListener('touchstart', e => tS = {x:e.touches[0].clientX, y:e.touches[0].clientY});
     window.addEventListener('touchend', e => {
-        if(!tS) return;
         let dx = e.changedTouches[0].clientX - tS.x, dy = e.changedTouches[0].clientY - tS.y;
-        if(Math.abs(dx) > Math.abs(dy)) pDir = {x: dx > 0 ? 1 : -1, y: 0};
-        else pDir = {x: 0, y: dy > 0 ? 1 : -1};
+        if(Math.abs(dx) > Math.abs(dy)) pacman.nextDir = {x: dx>0?1:-1, y:0};
+        else pacman.nextDir = {x:0, y:dy>0?1:-1};
     });
 </script>
 </body>

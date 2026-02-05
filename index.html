@@ -3,37 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Fix Edition</title>
+    <title>BTV Police - Zwaailicht Editie</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; }
-        body { background: #000; margin: 0; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
+        body { background: #000; margin: 0; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; overflow: hidden; touch-action: none; }
         .hud { width: 100%; max-width: 450px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; }
         #game-container { position: relative; border: 4px solid #222; margin-top: 5px; }
         #quiz-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 280px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; display: none; z-index: 100; color: #000; border: 4px solid var(--cobalt); }
         .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #eee; border: 2px solid #ccc; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px; width: 180px; }
-        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; user-select: none; -webkit-tap-highlight-color: transparent; }
-        .panel { width: 95%; max-width: 400px; background: #111; padding: 12px; border: 1px solid #333; border-radius: 8px; margin-top: 10px; }
-        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; }
-        textarea { width: 100%; height: 80px; background: #000; color: #0f0; border: 1px solid #444; margin-top: 5px; font-family: monospace; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px; width: 180px; }
+        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; user-select: none; }
+        .panel { width: 95%; max-width: 400px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 8px; margin-top: 5px; }
+        .btn { background: var(--cobalt); color: white; padding: 10px; width: 100%; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="login" style="margin-top: 80px; text-align: center;">
+<div id="login" style="margin-top: 50px; text-align: center;">
     <h1 style="color: var(--gold);">BTV PAC-MAN</h1>
     <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:200px; text-align:center;"><br><br>
     <button class="btn" style="width:230px;" onclick="window.initSessie()">START TRAINING</button>
 </div>
 
 <div id="main-game" style="display:none; width: 100%; flex-direction: column; align-items: center;">
-    <div class="hud">
-        <span>LVL: <span id="lvl-val">1</span></span>
-        <span>SCORE: <span id="scr-val">0</span></span>
-        <span>HP: <span id="lvn-val">5</span></span>
-    </div>
+    <div class="hud"><span>LVL: <span id="lvl-val">1</span></span><span>SCORE: <span id="scr-val">0</span></span><span>HP: <span id="lvn-val">5</span></span></div>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box"><div id="vraag"></div><div id="optie-container"></div></div>
@@ -42,15 +37,9 @@
         <div></div><div class="ctrl-btn" onmousedown="setDir(0,-1)" ontouchstart="setDir(0,-1)">UP</div><div></div>
         <div class="ctrl-btn" onmousedown="setDir(-1,0)" ontouchstart="setDir(-1,0)">L</div><div class="ctrl-btn" onmousedown="setDir(0,1)" ontouchstart="setDir(0,1)">DN</div><div class="ctrl-btn" onmousedown="setDir(1,0)" ontouchstart="setDir(1,0)">R</div>
     </div>
-
     <div class="panel">
-        <h4 style="margin:0;">IMPORT (Woord Vertaling)</h4>
-        <textarea id="bulk-text" placeholder="hond dog&#10;kat cat"></textarea>
-        <button class="btn" onclick="window.bulkAddWords()">STAP 1: IMPORT DATA</button>
-    </div>
-    
-    <div class="panel" style="border-color: var(--danger); margin-bottom: 30px;">
-        <button class="btn" style="background: #333; font-size: 0.7rem;" onclick="window.hardReset()">RESET DATABASE (CODE 112)</button>
+        <textarea id="bulk-text" style="width:100%; height:40px; background:#000; color:#0f0; border:1px solid #444;" placeholder="Import data..."></textarea>
+        <button class="btn" style="margin-top:5px;" onclick="window.bulkAddWords()">IMPORT</button>
     </div>
 </div>
 
@@ -68,48 +57,35 @@ const mazeLayout = [
     [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
     [1,3,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,3,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1], 
-    [1,0,0,0,0,0,0,0,1,2,2,2,1,0,0,0,0,0,0,0,1], 
+    [1,1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1],
+    [0,0,0,0,0,0,0,0,1,2,2,2,1,0,0,0,0,0,0,0,0], // TUNNEL
     [1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,3,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,3,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
 
+window.addEventListener("keydown", (e) => {
+    if(!inGame) return;
+    if(e.key === "ArrowUp") setDir(0,-1);
+    if(e.key === "ArrowDown") setDir(0,1);
+    if(e.key === "ArrowLeft") setDir(-1,0);
+    if(e.key === "ArrowRight") setDir(1,0);
+    if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+});
+
 window.setDir = (x, y) => { pacman.nextDir = {x, y}; };
 
 window.initSessie = () => {
     vnaam = document.getElementById('vnaam').value.trim();
-    if(!vnaam) return alert("Agent naam?");
     db.ref('woorden').once('value', snap => {
-        if(!snap.exists()) {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('main-game').style.display = 'flex';
-            return alert("Database is leeg! Gebruik het import vak onderaan.");
-        }
+        if(!snap.exists()) return alert("Importeer data!");
         dynamicWords = Object.values(snap.val());
         sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
         document.getElementById('login').style.display = 'none';
         document.getElementById('main-game').style.display = 'flex';
         setupCanvas(); startQuiz();
     });
-};
-
-window.bulkAddWords = () => {
-    const text = document.getElementById('bulk-text').value.trim();
-    if(!text) return alert("Geen woorden ingevuld.");
-    text.split('\n').forEach(l => {
-        let p = l.split(/\s+/);
-        if(p.length >= 2) { const v = p.shift(); const m = p.join(' '); db.ref('woorden').push({v, m}); }
-    });
-    alert("Data geladen! De pagina herstart nu...");
-    location.reload();
-};
-
-window.hardReset = () => {
-    if(confirm("Wis alles?") && prompt("Code:") === '112') {
-        db.ref().remove(); location.reload();
-    }
 };
 
 function startQuiz() {
@@ -119,20 +95,14 @@ function startQuiz() {
 }
 
 window.nextQ = () => {
-    if(quizCount >= 3) { 
-        document.getElementById('quiz-box').style.display = 'none'; 
-        inGame = true; initLevel(); requestAnimationFrame(gameLoop); 
-        return; 
-    }
+    if(quizCount >= 3) { document.getElementById('quiz-box').style.display = 'none'; inGame = true; initLevel(); requestAnimationFrame(gameLoop); return; }
     const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
-    const filterPool = dynamicWords.filter(w => w.m !== q.m).sort(() => 0.5 - Math.random());
-    const opties = [q.m, filterPool[0]?.m || "...", filterPool[1]?.m || "..."].sort(() => 0.5 - Math.random());
-    
+    const opties = [q.m, "Fout 1", "Fout 2"].sort(() => 0.5 - Math.random());
     document.getElementById('vraag').innerText = q.v;
     const cont = document.getElementById('optie-container'); cont.innerHTML = '';
     opties.forEach(o => {
         const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
-        b.onclick = () => { if(o === q.m) { quizCount++; window.nextQ(); } else { alert("Fout! Opnieuw."); startQuiz(); } };
+        b.onclick = () => { if(o === q.m) { quizCount++; window.nextQ(); } else { startQuiz(); } };
         cont.appendChild(b);
     });
 };
@@ -149,36 +119,32 @@ function initLevel() {
         if(mazeLayout[y][x] === 1) walls.push({x, y});
         else if(mazeLayout[y][x] === 0 || mazeLayout[y][x] === 3) dots.push({x, y, eaten: false, power: mazeLayout[y][x]===3});
     }
-    pacman.x = 1; pacman.y = 1; pacman.dir = {x:0,y:0};
-    let speed = 0.07 + (level * 0.01);
+    pacman.x = 1; pacman.y = 1; pacman.dir = {x:0, y:0};
+    let speed = 0.07 + (level * 0.015);
     ghosts = [{x:10, y:5, color:'cyan', dir:{x:0, y:-1}, speed: speed}, {x:10, y:5, color:'pink', dir:{x:0, y:-1}, speed: speed}];
 }
 
 function canMove(x, y) {
     let rx = Math.round(x), ry = Math.round(y);
+    if(rx < 0 || rx >= 21) return true; // Tunnel
     return mazeLayout[ry] && mazeLayout[ry][rx] !== 1;
 }
 
 function gameLoop() {
     if(!inGame) return;
-    tick++;
-    ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    tick++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+1, w.y*tileSize+1, tileSize-2, tileSize-2));
     
     let dotsLeft = false;
-    dots.forEach(d => { 
-        if(!d.eaten){ 
-            dotsLeft = true;
-            ctx.fillStyle = d.power?'#fff':'#f0db4f'; 
-            ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power?4:2, 0, 7); ctx.fill(); 
-        }
-    });
+    dots.forEach(d => { if(!d.eaten){ dotsLeft = true; ctx.fillStyle = d.power?'#fff':'#f0db4f'; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power?5:2, 0, 7); ctx.fill(); }});
+    if(!dotsLeft) { level++; startQuiz(); return; }
 
-    if(!dotsLeft) { level++; score += 500; document.getElementById('lvl-val').innerText = level; document.getElementById('scr-val').innerText = score; startQuiz(); return; }
+    // Zwaailicht Kleur
+    let siren;
+    if(powerTimer > 0) siren = (tick % 10 < 5) ? "#ff0000" : "#0044ff";
+    else siren = (Math.sin(tick * 0.2) > 0) ? "#0044ff" : "#f0db4f";
 
-    let sirenColor = (Math.sin(tick * 0.2) > 0) ? "#0044ff" : "#f0db4f";
-    
-    // Pacman
+    // Pacman Logic & Tunnel
     if(Math.abs(pacman.x - Math.round(pacman.x)) < 0.1 && Math.abs(pacman.y - Math.round(pacman.y)) < 0.1) {
         if(canMove(pacman.x+pacman.nextDir.x, pacman.y+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
         if(!canMove(pacman.x+pacman.dir.x, pacman.y+pacman.dir.y)) pacman.dir = {x:0, y:0};
@@ -186,19 +152,21 @@ function gameLoop() {
         if(d) { d.eaten = true; score += 10; if(d.power) powerTimer = 400; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
     }
     pacman.x += pacman.dir.x * 0.13; pacman.y += pacman.dir.y * 0.13;
+    if(pacman.x < -0.5) pacman.x = 20.5; if(pacman.x > 20.5) pacman.x = -0.5;
 
     ctx.save();
-    ctx.shadowBlur = 15; ctx.shadowColor = sirenColor;
-    ctx.fillStyle = 'yellow';
-    ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
+    ctx.shadowBlur = 15; ctx.shadowColor = siren;
+    ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
     ctx.restore();
 
+    // Spook Patrouille Logic
     ghosts.forEach(g => {
         if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
             let v = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));
             if(v.length > 0) g.dir = v[Math.floor(Math.random()*v.length)];
         }
         g.x += g.dir.x * g.speed; g.y += g.dir.y * g.speed;
+        if(g.x < -0.5) g.x = 20.5; if(g.x > 20.5) g.x = -0.5;
         ctx.fillStyle = powerTimer > 0 ? '#fff' : g.color;
         ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
         if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
@@ -210,6 +178,15 @@ function gameLoop() {
     if(powerTimer > 0) powerTimer--;
     requestAnimationFrame(gameLoop);
 }
+
+window.bulkAddWords = () => {
+    const text = document.getElementById('bulk-text').value.trim();
+    text.split('\n').forEach(l => {
+        let p = l.split(/\s+/);
+        if(p.length >= 2) db.ref('woorden').push({v:p[0], m:p[1]});
+    });
+    alert("Data geladen!"); location.reload();
+};
 </script>
 </body>
 </html>

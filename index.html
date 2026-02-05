@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police - Level Edition</title>
+    <title>BTV Police Training - Fix Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --cobalt: #0044ff; --gold: #f0db4f; }
-        body { background: #000; margin: 0; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-        .hud { width: 100%; max-width: 450px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; font-size: 0.9rem; }
+        :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; }
+        body { background: #000; margin: 0; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; touch-action: manipulation; }
+        .hud { width: 100%; max-width: 450px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; }
         #game-container { position: relative; border: 4px solid #222; margin-top: 5px; }
-        #quiz-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 280px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; display: none; z-index: 100; color: #000; border: 4px solid var(--cobalt); }
+        #quiz-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 280px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; display: none; z-index: 100; color: #000; border: 4px solid var(--cobalt); }
         .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #eee; border: 2px solid #ccc; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px; width: 170px; }
-        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 18px; border-radius: 10px; text-align: center; font-weight: bold; }
-        .btn { background: var(--cobalt); color: white; padding: 10px; width: 100%; border: none; font-weight: bold; border-radius: 4px; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px; width: 180px; }
+        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .panel { width: 95%; max-width: 400px; background: #111; padding: 12px; border: 1px solid #333; border-radius: 8px; margin-top: 10px; }
+        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        textarea { width: 100%; height: 80px; background: #000; color: #0f0; border: 1px solid #444; margin-top: 5px; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -37,8 +39,18 @@
         <div id="quiz-box"><div id="vraag"></div><div id="optie-container"></div></div>
     </div>
     <div class="controls">
-        <div></div><div class="ctrl-btn" onclick="setDir(0,-1)">UP</div><div></div>
-        <div class="ctrl-btn" onclick="setDir(-1,0)">L</div><div class="ctrl-btn" onclick="setDir(0,1)">DN</div><div class="ctrl-btn" onclick="setDir(1,0)">R</div>
+        <div></div><div class="ctrl-btn" onmousedown="setDir(0,-1)" ontouchstart="setDir(0,-1)">UP</div><div></div>
+        <div class="ctrl-btn" onmousedown="setDir(-1,0)" ontouchstart="setDir(-1,0)">L</div><div class="ctrl-btn" onmousedown="setDir(0,1)" ontouchstart="setDir(0,1)">DN</div><div class="ctrl-btn" onmousedown="setDir(1,0)" ontouchstart="setDir(1,0)">R</div>
+    </div>
+
+    <div class="panel">
+        <h4 style="margin:0;">IMPORT (Woord Vertaling)</h4>
+        <textarea id="bulk-text" placeholder="hond dog&#10;kat cat"></textarea>
+        <button class="btn" onclick="window.bulkAddWords()">STAP 1: IMPORT DATA</button>
+    </div>
+    
+    <div class="panel" style="border-color: var(--danger); margin-bottom: 30px;">
+        <button class="btn" style="background: #333; font-size: 0.7rem;" onclick="window.hardReset()">RESET DATABASE (CODE 112)</button>
     </div>
 </div>
 
@@ -49,7 +61,7 @@ const db = firebase.database();
 
 let dynamicWords = [], vnaam, sRef, score = 0, levens = 5, level = 1, inGame = false, quizCount = 0;
 let canvas, ctx, tileSize, pacman = { x: 1, y: 1, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
-let dots = [], walls = [], ghosts = [], powerTimer = 0, tick = 0, baseGhostSpeed = 0.07;
+let dots = [], walls = [], ghosts = [], powerTimer = 0, tick = 0;
 
 const mazeLayout = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -68,13 +80,36 @@ window.setDir = (x, y) => { pacman.nextDir = {x, y}; };
 
 window.initSessie = () => {
     vnaam = document.getElementById('vnaam').value.trim();
+    if(!vnaam) return alert("Agent naam?");
     db.ref('woorden').once('value', snap => {
+        if(!snap.exists()) {
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('main-game').style.display = 'flex';
+            return alert("Database is leeg! Gebruik het import vak onderaan.");
+        }
         dynamicWords = Object.values(snap.val());
         sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
         document.getElementById('login').style.display = 'none';
         document.getElementById('main-game').style.display = 'flex';
         setupCanvas(); startQuiz();
     });
+};
+
+window.bulkAddWords = () => {
+    const text = document.getElementById('bulk-text').value.trim();
+    if(!text) return alert("Geen woorden ingevuld.");
+    text.split('\n').forEach(l => {
+        let p = l.split(/\s+/);
+        if(p.length >= 2) { const v = p.shift(); const m = p.join(' '); db.ref('woorden').push({v, m}); }
+    });
+    alert("Data geladen! De pagina herstart nu...");
+    location.reload();
+};
+
+window.hardReset = () => {
+    if(confirm("Wis alles?") && prompt("Code:") === '112') {
+        db.ref().remove(); location.reload();
+    }
 };
 
 function startQuiz() {
@@ -90,12 +125,14 @@ window.nextQ = () => {
         return; 
     }
     const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
-    const opties = [q.m, "Fout A", "Fout B"].sort(() => 0.5 - Math.random());
+    const filterPool = dynamicWords.filter(w => w.m !== q.m).sort(() => 0.5 - Math.random());
+    const opties = [q.m, filterPool[0]?.m || "...", filterPool[1]?.m || "..."].sort(() => 0.5 - Math.random());
+    
     document.getElementById('vraag').innerText = q.v;
     const cont = document.getElementById('optie-container'); cont.innerHTML = '';
     opties.forEach(o => {
         const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
-        b.onclick = () => { if(o === q.m) { quizCount++; window.nextQ(); } else { startQuiz(); } };
+        b.onclick = () => { if(o === q.m) { quizCount++; window.nextQ(); } else { alert("Fout! Opnieuw."); startQuiz(); } };
         cont.appendChild(b);
     });
 };
@@ -112,13 +149,9 @@ function initLevel() {
         if(mazeLayout[y][x] === 1) walls.push({x, y});
         else if(mazeLayout[y][x] === 0 || mazeLayout[y][x] === 3) dots.push({x, y, eaten: false, power: mazeLayout[y][x]===3});
     }
-    pacman.x = 1; pacman.y = 1; pacman.dir = {x:0, y:0};
-    // Snelheid verhogen per level
-    let currentSpeed = baseGhostSpeed + (level * 0.01);
-    ghosts = [
-        {x:10, y:5, color:'cyan', dir:{x:0, y:-1}, speed: currentSpeed},
-        {x:10, y:5, color:'pink', dir:{x:0, y:-1}, speed: currentSpeed}
-    ];
+    pacman.x = 1; pacman.y = 1; pacman.dir = {x:0,y:0};
+    let speed = 0.07 + (level * 0.01);
+    ghosts = [{x:10, y:5, color:'cyan', dir:{x:0, y:-1}, speed: speed}, {x:10, y:5, color:'pink', dir:{x:0, y:-1}, speed: speed}];
 }
 
 function canMove(x, y) {
@@ -141,17 +174,7 @@ function gameLoop() {
         }
     });
 
-    // Level check: zijn alle puntjes op?
-    if(!dotsLeft) {
-        level++;
-        score += 500;
-        document.getElementById('lvl-val').innerText = level;
-        document.getElementById('scr-val').innerText = score;
-        inGame = false;
-        alert("Level " + (level-1) + " Gehaald! Klaar voor de volgende ronde?");
-        startQuiz();
-        return;
-    }
+    if(!dotsLeft) { level++; score += 500; document.getElementById('lvl-val').innerText = level; document.getElementById('scr-val').innerText = score; startQuiz(); return; }
 
     let sirenColor = (Math.sin(tick * 0.2) > 0) ? "#0044ff" : "#f0db4f";
     
@@ -170,7 +193,6 @@ function gameLoop() {
     ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-1, 0, 7); ctx.fill();
     ctx.restore();
 
-    // Ghosts
     ghosts.forEach(g => {
         if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
             let v = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));

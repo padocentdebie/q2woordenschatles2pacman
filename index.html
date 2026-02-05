@@ -121,6 +121,10 @@
             text-transform: uppercase; 
             -webkit-tap-highlight-color: transparent;
         }
+        .btn-danger {
+            background: var(--danger);
+            margin-top: 5px;
+        }
         .score-row { 
             display: flex; 
             justify-content: space-between; 
@@ -136,6 +140,18 @@
         }
         input, button, .btn, .optie {
             -webkit-tap-highlight-color: transparent;
+        }
+        .admin-controls {
+            margin-top: 10px;
+            padding: 10px;
+            background: #222;
+            border-radius: 5px;
+        }
+        .admin-title {
+            color: var(--gold);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -160,7 +176,23 @@
             <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART TRAINING</button>
         </div>
     </div>
-    <div class="panel"><h3>TOP SCORES</h3><div id="score-list">Laden...</div></div>
+    
+    <div class="panel">
+        <h3>TOP SCORES</h3>
+        <div id="score-list">Laden...</div>
+        <div class="admin-controls">
+            <div class="admin-title">ADMIN CONTROLS</div>
+            <button class="btn btn-danger" onclick="resetAllScores()" id="reset-btn">
+                🔥 ALLE SCORES RESETTEN
+            </button>
+            <div id="reset-confirm" style="display:none; margin-top:10px;">
+                <p style="color: #fff; font-size:0.8rem;">Weet je het zeker? Dit verwijdert ALLE scores!</p>
+                <button class="btn btn-danger" onclick="confirmReset()" style="width:48%; display:inline-block;">JA, RESET</button>
+                <button class="btn" onclick="cancelReset()" style="width:48%; display:inline-block; background:#666;">ANNULEREN</button>
+            </div>
+        </div>
+    </div>
+    
     <div class="panel">
         <textarea id="bulk-text" style="width:100%; height:50px; background:#000; color:#0f0; border:1px solid #333; margin-bottom:5px;" placeholder="woord betekenis (per regel)"></textarea>
         <button class="btn" style="font-size:0.7rem;" onclick="bulkAddWords()">STAP 1: IMPORT DATA</button>
@@ -177,7 +209,15 @@
     const db = firebase.database();
 
     let dynamicWords = [], vnaam, sRef, score = 0, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 5;
-    let canvas, ctx, tileSize, pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0}, rotation: 0 };
+    let canvas, ctx, tileSize, pacman = { 
+        x: 9, 
+        y: 9, 
+        dir: {x:0, y:0}, 
+        nextDir: {x:0, y:0}, 
+        rotation: 0,
+        sirenActive: true, // Zwaailicht aan/uit
+        sirenPhase: 0 // Fase voor zwaailicht animatie
+    };
     let dots = [], walls = [], ghosts = [], fruit = { x: -1, y: -1, active: false }, powerTimer = 0, levelStartTime = 0;
     let ghostChaseStart = false;
     let chaseStartTime = 0;
@@ -197,6 +237,44 @@
         [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
+
+    // RESET FUNCTIES
+    function resetAllScores() {
+        document.getElementById('reset-confirm').style.display = 'block';
+        document.getElementById('reset-btn').style.display = 'none';
+    }
+    
+    function cancelReset() {
+        document.getElementById('reset-confirm').style.display = 'none';
+        document.getElementById('reset-btn').style.display = 'block';
+    }
+    
+    function confirmReset() {
+        // Verwijder ALLE scores uit de database
+        db.ref('ranking').remove()
+            .then(() => {
+                alert("✅ Alle scores zijn gereset!");
+                updateScoreboard();
+                cancelReset();
+                
+                // Reset ook lokale score van huidige speler
+                score = 0;
+                document.getElementById('scr-val').innerText = score;
+                
+                // Update persoonlijke score in database
+                if (sRef) {
+                    sRef.set({
+                        naam: vnaam,
+                        score: 0,
+                        timestamp: Date.now()
+                    });
+                }
+            })
+            .catch((error) => {
+                alert("❌ Fout bij resetten: " + error.message);
+                cancelReset();
+            });
+    }
 
     function bulkAddWords() {
         const text = document.getElementById('bulk-text').value.trim();
@@ -405,6 +483,9 @@
         }
         
         pacman.x = 9; pacman.y = 9; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
+        pacman.sirenActive = true;
+        pacman.sirenPhase = 0;
+        
         ghosts = [
             {x:9, y:5, color:'red', speed: 0.04, path: [], dir: {x:0, y:0}},
             {x:8, y:5, color:'pink', speed: 0.035, path: [], dir: {x:0, y:0}}
@@ -413,6 +494,118 @@
         ghostChaseStart = false;
         gameStartTime = Date.now();
         chaseStartTime = 0;
+    }
+
+    function drawPoliceSiren(x, y, phase) {
+        const centerX = x * tileSize + tileSize / 2;
+        const centerY = y * tileSize + tileSize / 2;
+        const radius = tileSize * 0.7;
+        
+        // Update siren phase voor animatie
+        pacman.sirenPhase = (pacman.sirenPhase + 0.2) % (Math.PI * 2);
+        
+        // Teken zwaailicht cirkel
+        ctx.save();
+        ctx.globalAlpha = 0.6;
+        
+        // Blauw licht (links)
+        ctx.beginPath();
+        const blueAngle = phase;
+        ctx.arc(centerX, centerY, radius, blueAngle, blueAngle + Math.PI);
+        ctx.fillStyle = '#0044ff';
+        ctx.fill();
+        
+        // Rood licht (rechts)
+        ctx.beginPath();
+        const redAngle = phase + Math.PI;
+        ctx.arc(centerX, centerY, radius, redAngle, redAngle + Math.PI);
+        ctx.fillStyle = '#ff0000';
+        ctx.fill();
+        
+        // Teken flitsende kern
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, tileSize * 0.15, 0, Math.PI * 2);
+        
+        // Wissel tussen wit en geel voor flits effect
+        if (Math.sin(phase * 3) > 0) {
+            ctx.fillStyle = '#ffffff';
+        } else {
+            ctx.fillStyle = '#ffff00';
+        }
+        ctx.fill();
+        
+        // Teken extra flitsen
+        for (let i = 0; i < 4; i++) {
+            const angle = phase + (i * Math.PI / 2);
+            const flashX = centerX + Math.cos(angle) * radius * 0.7;
+            const flashY = centerY + Math.sin(angle) * radius * 0.7;
+            
+            ctx.beginPath();
+            ctx.arc(flashX, flashY, tileSize * 0.08, 0, Math.PI * 2);
+            ctx.fillStyle = i % 2 === 0 ? '#0044ff' : '#ff0000';
+            ctx.globalAlpha = 0.7 * Math.abs(Math.sin(phase * 4 + i));
+            ctx.fill();
+        }
+        
+        ctx.restore();
+    }
+
+    function drawPacManWithSiren(x, y, rotation, mouthOpen) {
+        const centerX = x * tileSize + tileSize / 2;
+        const centerY = y * tileSize + tileSize / 2;
+        
+        // Teken eerst Pac-Man
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(rotation);
+        
+        // Pac-Man lichaam
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.arc(0, 0, tileSize/2-2, (0.2 + mouthOpen) * Math.PI, (1.8 - mouthOpen) * Math.PI);
+        ctx.lineTo(0, 0);
+        ctx.fill();
+        
+        // Pac-Man oog
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(tileSize * 0.15, -tileSize * 0.2, tileSize * 0.08, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+        
+        // Teken politie zwaailicht boven Pac-Man
+        if (pacman.sirenActive) {
+            drawPoliceSiren(x, y - 0.8, pacman.sirenPhase);
+        }
+        
+        // Teken lichtbundels op de grond
+        if (pacman.sirenActive) {
+            ctx.save();
+            ctx.globalAlpha = 0.15;
+            
+            for (let i = 0; i < 8; i++) {
+                const angle = pacman.sirenPhase + (i * Math.PI / 4);
+                const length = tileSize * 1.5;
+                const beamEndX = centerX + Math.cos(angle) * length;
+                const beamEndY = centerY + Math.sin(angle) * length;
+                
+                // Creëer gradient voor lichtbundel
+                const gradient = ctx.createLinearGradient(centerX, centerY, beamEndX, beamEndY);
+                gradient.addColorStop(0, i % 2 === 0 ? 'rgba(0, 68, 255, 0.6)' : 'rgba(255, 0, 0, 0.6)');
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(beamEndX, beamEndY);
+                ctx.lineWidth = tileSize * 0.1;
+                ctx.strokeStyle = gradient;
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
     }
 
     function gameLoop() {
@@ -484,17 +677,9 @@
         pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10; 
         pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
         
-        // Teken Pac-Man
-        ctx.save(); 
-        ctx.translate(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2); 
-        ctx.rotate(pacman.rotation);
-        ctx.fillStyle = 'yellow'; 
-        ctx.beginPath(); 
+        // Teken Pac-Man met zwaailicht
         let mouth = Math.abs(Math.sin(frame*0.2)) * 0.25;
-        ctx.arc(0, 0, tileSize/2-2, (0.2 + mouth) * Math.PI, (1.8 - mouth) * Math.PI); 
-        ctx.lineTo(0,0); 
-        ctx.fill(); 
-        ctx.restore();
+        drawPacManWithSiren(pacman.x, pacman.y, pacman.rotation, mouth);
         
         // Timer display
         let diff = Math.floor((20000 - (Date.now() - levelStartTime)) / 1000);

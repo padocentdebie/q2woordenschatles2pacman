@@ -3,84 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Touch Edition</title>
+    <title>BTV Police Training - Compact Quiz</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --bg: #000; }
-        /* Voorkom scrollen volledig */
-        html, body { overflow: hidden; height: 100%; position: fixed; width: 100%; margin: 0; padding: 0; background: #000; }
+        html, body { overflow: hidden; height: 100%; position: fixed; width: 100%; margin: 0; background: #000; }
         body { font-family: 'Segoe UI', sans-serif; color: #eee; display: flex; flex-direction: column; align-items: center; touch-action: none; }
         
-        @keyframes blue-pulse {
-            0% { box-shadow: 0 0 15px #0044ff; border-color: #0044ff; }
-            50% { box-shadow: 0 0 35px #00aaff; border-color: #00aaff; }
-            100% { box-shadow: 0 0 15px #0044ff; border-color: #0044ff; }
+        @keyframes sirene {
+            0% { box-shadow: 0 0 10px #0044ff; border-color: #0044ff; }
+            50% { box-shadow: 0 0 30px #00aaff; border-color: #00aaff; }
+            100% { box-shadow: 0 0 10px #0044ff; border-color: #0044ff; }
         }
-        .blue-active { animation: blue-pulse 0.5s infinite; }
+        .blue-alert { animation: sirene 0.4s infinite; }
 
         .hud { width: 100%; max-width: 450px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; }
         #timer-display { color: #fff; font-size: 0.8rem; padding: 5px; text-align: center; width: 100%; background: #222; }
         
-        #game-container { position: relative; border: 4px solid #111; background: #000; margin-top: 5px; }
-        canvas { display: block; background: #000; margin: 0 auto; }
-        
-        /* Quiz Box */
+        #game-container { position: relative; border: 4px solid #111; background: #000; margin-top: 5px; transition: 0.2s; }
+        canvas { display: block; background: #000; }
+
+        /* COMPACTE QUIZBOX FIX */
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            width: 90%; background: #fff; border-radius: 8px; padding: 15px; 
-            text-align: center; display: none; z-index: 100; color: #000; box-sizing: border-box;
-            border: 5px solid var(--cobalt); box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            width: 85%; max-width: 320px; background: #fff; border-radius: 12px; padding: 15px; 
+            text-align: center; display: none; z-index: 100; color: #000; 
+            border: 4px solid var(--cobalt); box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
-        .optie { display: block; width: 100%; padding: 10px; margin: 5px 0; background: #eee; border: 2px solid #ccc; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
-        .correct { background: #2ecc71 !important; color: #fff; }
-        .fout { background: var(--danger) !important; color: #fff; }
-        
-        /* Touch Controls */
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; width: 180px; }
-        .ctrl-btn { background: #333; border: 2px solid var(--cobalt); color: white; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; user-select: none; }
-        .ctrl-btn:active { background: var(--cobalt); }
+        #vraag { font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; color: var(--cobalt); text-transform: uppercase; }
+        .optie { display: block; width: 100%; padding: 10px; margin: 6px 0; background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .optie:active { background: #e9ecef; }
 
-        .panel { width: 95%; max-width: 400px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 8px; margin-top: 5px; }
-        .btn { background: var(--cobalt); color: white; padding: 10px; width: 100%; border: none; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
-        textarea { width: 100%; height: 40px; background: #000; color: #0f0; border: 1px solid #333; margin-top: 5px; box-sizing: border-box; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; width: 160px; }
+        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 0.8rem; }
+        .panel { width: 95%; max-width: 350px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 8px; margin-top: 5px; font-size: 0.8rem; }
+        .btn { background: var(--cobalt); color: white; padding: 10px; width: 100%; border: none; font-weight: bold; border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <div id="login" style="margin-top: 50px; text-align: center;">
     <h1 style="color: var(--gold);">BTV PAC-MAN</h1>
-    <p style="color: var(--cobalt);">TOUCH & DESKTOP TRAINING</p>
-    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:200px; text-align:center;"><br><br>
-    <button class="btn" style="width:230px;" onclick="window.initSessie()">START</button>
+    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:180px; text-align:center;"><br><br>
+    <button class="btn" style="width:210px;" onclick="window.initSessie()">START TRAINING</button>
 </div>
 
-<div id="main-game" style="display:none; width: 100%; height: 100%; overflow-y: auto;">
+<div id="main-game" style="display:none; width: 100%;">
     <div class="hud"><span>SCORE: <span id="scr-val">0</span></span><span>HP: <span id="lvn-val">5</span></span></div>
     <div id="timer-display">STATUS: STANDBY</div>
-    
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
-            <div id="vraag">LADEN...</div>
+            <div id="vraag">...</div>
             <div id="optie-container"></div>
-            <button id="btn-volgende" class="btn" style="display:none; background:var(--danger);" onclick="window.nextQ()">FOUT: OPNIEUW</button>
+            <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="window.nextQ()">FOUT: RESET</button>
         </div>
     </div>
-
     <center>
         <div class="controls">
             <div></div><div class="ctrl-btn" onclick="setDir(0,-1)">UP</div><div></div>
             <div class="ctrl-btn" onclick="setDir(-1,0)">L</div><div class="ctrl-btn" onclick="setDir(0,1)">DN</div><div class="ctrl-btn" onclick="setDir(1,0)">R</div>
         </div>
-    </center>
-
-    <center>
-        <div class="panel"><h3>TOP 5 AGENTS</h3><div id="score-list"></div></div>
-        <div class="panel">
-            <textarea id="bulk-text" placeholder="woord vertaling"></textarea>
-            <button class="btn" style="font-size:0.7rem;" onclick="window.bulkAddWords()">IMPORT</button>
-        </div>
+        <div class="panel" id="score-list">Top Scores laden...</div>
     </center>
 </div>
 
@@ -90,7 +75,7 @@
     const db = firebase.database();
 
     let dynamicWords = [], vnaam, sRef, score = 0, levens = 5, inGame = false, quizCount = 0;
-    let canvas, ctx, tileSize, pacman = { x: 10, y: 14, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
+    let canvas, ctx, tileSize, pacman = { x: 10, y: 10, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
     let dots = [], walls = [], ghosts = [], powerTimer = 0, ghostSpawnTimer = 300;
 
     const mazeLayout = [
@@ -99,15 +84,12 @@
         [1,3,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,3,1],
         [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1],
-        [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
-        [1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1],
-        [1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1],
-        [0,0,0,0,0,0,1,0,1,1,2,1,1,0,1,0,0,0,0,0,0],
-        [1,1,1,1,1,0,1,0,1,2,2,2,1,0,1,0,1,1,1,1,1],
+        [1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
+        [0,0,0,0,0,0,0,0,1,2,2,2,1,0,0,0,0,0,0,0,0],
+        [1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1],
-        [1,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,3,1],
+        [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
@@ -115,34 +97,25 @@
 
     window.initSessie = function() {
         vnaam = document.getElementById('vnaam').value.trim();
-        if(!vnaam) return alert("Naam!");
+        if(!vnaam) return alert("Agent naam?");
         db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) return alert("Importeer eerst woorden!");
+            if(!snap.exists()) return alert("Geen data!");
             dynamicWords = Object.values(snap.val());
             sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
             document.getElementById('login').style.display = 'none';
             document.getElementById('main-game').style.display = 'block';
-            updateScoreboard(); setupCanvas(); startQuiz(5);
+            setupCanvas(); startQuiz();
         });
     };
 
-    window.bulkAddWords = function() {
-        const text = document.getElementById('bulk-text').value.trim();
-        text.split('\n').forEach(line => {
-            const p = line.trim().split(/\s+/);
-            if(p.length >= 2) { const v = p.shift(); const m = p.join(' '); db.ref('woorden').push({v, m}); }
-        });
-        alert("Import OK!");
-    };
-
-    function startQuiz(num) {
+    function startQuiz() {
         inGame = false; quizCount = 0;
         document.getElementById('quiz-box').style.display = 'block';
         window.nextQ();
     }
 
     window.nextQ = function() {
-        if(quizCount >= 5) {
+        if(quizCount >= 3) {
             document.getElementById('quiz-box').style.display = 'none';
             inGame = true; ghostSpawnTimer = 300; initLevel(); requestAnimationFrame(gameLoop);
             return;
@@ -150,56 +123,53 @@
         document.getElementById('btn-volgende').style.display = 'none';
         const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
         let fPool = dynamicWords.map(w => w.m).filter(m => m !== q.m).sort(() => 0.5 - Math.random());
-        let opties = [q.m, fPool[0], fPool[1]].sort(() => 0.5 - Math.random());
+        let opties = [q.m, fPool[0]||"A", fPool[1]||"B"].sort(() => 0.5 - Math.random());
         document.getElementById('vraag').innerText = q.v;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
         opties.forEach(o => {
             const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
-            b.onclick = () => {
-                if(o === q.m) { quizCount++; window.nextQ(); }
-                else { quizCount = 0; document.getElementById('btn-volgende').style.display = 'block'; }
-            };
+            b.onclick = () => { if(o === q.m) { quizCount++; window.nextQ(); } else { quizCount = 0; document.getElementById('btn-volgende').style.display='block'; } };
             cont.appendChild(b);
         });
-    };
+    }
 
     function setupCanvas() {
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
-        const s = Math.min(window.innerWidth * 0.9, 400); tileSize = Math.floor(s/21);
-        canvas.width = tileSize*21; canvas.height = tileSize*15;
-        window.addEventListener("keydown", (e) => {
-            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault();
-            if(e.code === "ArrowUp") setDir(0,-1); if(e.code === "ArrowDown") setDir(0,1);
-            if(e.code === "ArrowLeft") setDir(-1,0); if(e.code === "ArrowRight") setDir(1,0);
+        const s = Math.min(window.innerWidth * 0.95, 400); tileSize = Math.floor(s/21);
+        canvas.width = tileSize*21; canvas.height = tileSize*12;
+        window.addEventListener("keydown", e => {
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) e.preventDefault();
+            if(e.key === "ArrowUp") setDir(0,-1); if(e.key === "ArrowDown") setDir(0,1);
+            if(e.key === "ArrowLeft") setDir(-1,0); if(e.key === "ArrowRight") setDir(1,0);
         });
     }
 
     function initLevel() {
         dots = []; walls = [];
-        for(let y=0; y<15; y++) for(let x=0; x<21; x++) {
+        for(let y=0; y<12; y++) for(let x=0; x<21; x++) {
             if(mazeLayout[y][x] === 1) walls.push({x, y});
             else if(mazeLayout[y][x] === 0 || mazeLayout[y][x] === 3) dots.push({x, y, eaten: false, power: mazeLayout[y][x]===3});
         }
         pacman.x = 10; pacman.y = 10; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
-        ghosts = [{x:10, y:5, color:'#00ffff', dir:{x:1, y:0}, speed:0.08}, {x:9, y:5, color:'#00ffff', dir:{x:-1, y:0}, speed:0.07}];
+        ghosts = [{x:9, y:6, color:'#00ffff', dir:{x:1, y:0}, speed:0.09}, {x:11, y:6, color:'#00ffff', dir:{x:-1, y:0}, speed:0.09}];
     }
 
     function canMove(x,y) { 
-        if(y === 9 && (x < 0 || x > 20)) return true;
-        if(x < 0 || x > 20 || y < 0 || y > 14) return false;
+        if(y === 6 && (x < 0 || x > 20)) return true;
+        if(x < 0 || x > 20 || y < 0 || y > 11) return false;
         return mazeLayout[y][x] !== 1; 
     }
 
     function gameLoop() {
         if(!inGame) return;
         ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        
+        const gc = document.getElementById('game-container');
+        if(powerTimer > 0) gc.classList.add('blue-alert'); else gc.classList.remove('blue-alert');
+
         ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
-        dots.forEach(d => { if(!d.eaten){ ctx.fillStyle = d.power?'#fff':'#f0db4f'; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power?5:2, 0, 7); ctx.fill(); }});
+        dots.forEach(d => { if(!d.eaten){ ctx.fillStyle = d.power?'#fff':'#f0db4f'; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power?4:2, 0, 7); ctx.fill(); }});
 
-        // Tunnel
         if(pacman.x < -0.5) pacman.x = 20.5; if(pacman.x > 20.5) pacman.x = -0.5;
-
         if(Math.abs(pacman.x - Math.round(pacman.x)) < 0.1 && Math.abs(pacman.y - Math.round(pacman.y)) < 0.1) {
             let px = Math.round(pacman.x), py = Math.round(pacman.y);
             let d = dots.find(dot => dot.x === px && dot.y === py && !dot.eaten);
@@ -207,40 +177,31 @@
             if(canMove(px+pacman.nextDir.x, py+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
             if(!canMove(px+pacman.dir.x, py+pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
-        pacman.x += pacman.dir.x * 0.12; pacman.y += pacman.dir.y * 0.12;
-        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
+        pacman.x += pacman.dir.x * 0.13; pacman.y += pacman.dir.y * 0.13;
+        ctx.save(); ctx.shadowBlur = 12; ctx.shadowColor = '#0044ff'; ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill(); ctx.restore();
 
         if(ghostSpawnTimer > 0) {
             ghostSpawnTimer--;
-            document.getElementById('timer-display').innerText = "UNIT STANDBY: " + Math.ceil(ghostSpawnTimer/60);
+            document.getElementById('timer-display').innerText = "STANDBY: " + Math.ceil(ghostSpawnTimer/60);
         } else {
             document.getElementById('timer-display').innerText = "PATROUILLE ACTIEF";
             ghosts.forEach(g => {
                 if(g.x < -0.5) g.x = 20.5; if(g.x > 20.5) g.x = -0.5;
                 if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
                     g.x = Math.round(g.x); g.y = Math.round(g.y);
-                    let valid = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));
-                    if(valid.length > 0) g.dir = valid[Math.floor(Math.random()*valid.length)];
+                    let v = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));
+                    if(v.length > 0) g.dir = v[Math.floor(Math.random()*v.length)];
                 }
                 g.x += g.dir.x * g.speed; g.y += g.dir.y * g.speed;
-                ctx.fillStyle = powerTimer > 0 ? '#fff' : g.color;
-                ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
+                ctx.fillStyle = powerTimer > 0 ? '#fff' : g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
                 if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
-                    if(powerTimer > 0) { g.x = 10; g.y = 5; score += 200; }
-                    else { levens--; document.getElementById('lvn-val').innerText = levens; if(levens<=0) location.reload(); else startQuiz(5); }
+                    if(powerTimer > 0) { g.x = 10; g.y = 6; score += 200; }
+                    else { levens--; document.getElementById('lvn-val').innerText = levens; if(levens<=0) location.reload(); else startQuiz(); }
                 }
             });
         }
         if(powerTimer > 0) powerTimer--;
         requestAnimationFrame(gameLoop);
-    }
-
-    function updateScoreboard() { 
-        db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
-            const l = document.getElementById('score-list'); l.innerHTML = '';
-            let r = []; snap.forEach(s => r.push(s.val()));
-            r.reverse().forEach(x => l.innerHTML += `<div class="score-row"><span>${x.naam}</span><span>${x.score}</span></div>`);
-        }); 
     }
 </script>
 </body>

@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Blue Unit</title>
+    <title>BTV Police Training - Final Blue Unit</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --bg: #000; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; overflow: hidden; }
         
-        /* Blauwe Unit Animatie */
         @keyframes blue-pulse {
-            0% { box-shadow: 0 0 10px #0044ff; border-color: #0044ff; }
-            50% { box-shadow: 0 0 30px #00aaff; border-color: #00aaff; }
-            100% { box-shadow: 0 0 10px #0044ff; border-color: #0044ff; }
+            0% { box-shadow: 0 0 15px #0044ff; border-color: #0044ff; }
+            50% { box-shadow: 0 0 35px #00aaff; border-color: #00aaff; }
+            100% { box-shadow: 0 0 15px #0044ff; border-color: #0044ff; }
         }
-        .blue-active { animation: blue-pulse 0.6s infinite; }
+        .blue-active { animation: blue-pulse 0.5s infinite; }
 
         .hud { width: 100%; max-width: 450px; padding: 15px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 4px solid var(--cobalt); box-sizing: border-box; }
         #timer-display { color: #fff; font-size: 0.9rem; padding: 10px; text-align: center; width: 100%; background: #222; min-height: 1.2rem; }
@@ -33,19 +32,19 @@
         .correct { background: #2ecc71 !important; color: #fff; }
         .fout { background: var(--danger) !important; color: #fff; }
         
-        .panel { width: 95%; max-width: 430px; margin-top: 10px; background: #111; padding: 15px; border: 1px solid #333; box-sizing: border-box; border-radius: 8px; }
+        .panel { width: 95%; max-width: 430px; margin-top: 10px; background: #111; padding: 15px; border: 1px solid #333; box-sizing: border-box; border-radius: 8px; overflow-y: auto; max-height: 200px; }
         .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; }
         .score-row { display: flex; justify-content: space-between; padding: 6px; font-family: monospace; border-bottom: 1px solid #222; }
-        textarea { width: 100%; height: 60px; background: #000; color: #0f0; border: 1px solid #333; margin-top: 10px; padding: 5px; box-sizing: border-box; }
+        textarea { width: 100%; height: 60px; background: #000; color: #0f0; border: 1px solid #333; margin-top: 10px; padding: 5px; box-sizing: border-box; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div id="login" style="margin-top: 50px; text-align: center;">
     <h1 style="color: var(--gold); letter-spacing: 2px;">BTV PAC-MAN</h1>
-    <p style="color: var(--cobalt); font-weight: bold;">BLUE UNIT TRAINING</p>
+    <p style="color: var(--cobalt); font-weight: bold;">STABIELE BLUE UNIT MODUS</p>
     <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:220px; border-radius:5px; text-align:center; border:none; margin-bottom:10px;"><br>
-    <button class="btn" style="width:250px;" onclick="initSessie()">START TRAINING</button>
+    <button class="btn" style="width:250px;" onclick="window.initSessie()">START TRAINING</button>
 </div>
 
 <div id="main-game" style="display:none;">
@@ -54,29 +53,30 @@
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
-            <div id="vraag" style="font-size:1.1rem; font-weight:800; margin-bottom:15px; text-transform: uppercase;"></div>
+            <div id="vraag" style="font-size:1.1rem; font-weight:800; margin-bottom:15px; text-transform: uppercase;">LADEN...</div>
             <div id="optie-container"></div>
-            <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="nextQ()">FOUT: RESET NAAR 0</button>
+            <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="window.nextQ()">FOUT: RESET NAAR 0</button>
         </div>
     </div>
+    
     <div class="panel"><h3>TOP SCORES</h3><div id="score-list">Laden...</div></div>
+    
     <div class="panel">
-        <h4 style="margin:0;">IMPORT WOORDEN</h4>
-        <textarea id="bulk-text" placeholder="woord betekenis (per regel)"></textarea>
-        <button class="btn" style="margin-top:5px; font-size:0.8rem;" onclick="bulkAddWords()">STAP 1: IMPORT DATA</button>
+        <h4 style="margin:0;">DATA IMPORT</h4>
+        <textarea id="bulk-text" placeholder="woord vertaling (bijv: Kat Poes)"></textarea>
+        <button class="btn" style="margin-top:5px; font-size:0.8rem;" onclick="window.bulkAddWords()">STAP 1: IMPORT DATA</button>
     </div>
+    
     <div class="panel" style="border-color: var(--danger);">
-        <button class="btn" style="background: #333; font-size: 0.7rem;" onclick="hardResetDatabase()">WIS DATABASE (CODE 112)</button>
+        <button class="btn" style="background: #333; font-size: 0.7rem;" onclick="window.hardResetDatabase()">WIS DATABASE (CODE 112)</button>
     </div>
 </div>
 
 <script>
-    // 1. CONFIG
     const firebaseConfig = { apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", projectId: "aangiftebotje" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 2. VARIABELEN
     let dynamicWords = [], vnaam, sRef, score = 0, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 5;
     let canvas, ctx, tileSize, pacman = { x: 10, y: 14, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
     let dots = [], walls = [], ghosts = [], powerTimer = 0, ghostSpawnTimer = 300;
@@ -91,7 +91,7 @@
         [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
         [1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1],
         [1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1],
-        [0,0,0,0,0,0,1,0,1,1,2,1,1,0,1,0,0,0,0,0,0],
+        [0,0,0,0,0,0,1,0,1,1,2,1,1,0,1,0,0,0,0,0,0], // TUNNEL RIJ
         [1,1,1,1,1,0,1,0,1,2,2,2,1,0,1,0,1,1,1,1,1],
         [1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -104,12 +104,11 @@
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    // 3. FUNCTIES
     window.initSessie = function() {
         vnaam = document.getElementById('vnaam').value.trim();
-        if(!vnaam) return alert("Agent naam invoeren!");
+        if(!vnaam) return alert("Agent naam aub.");
         db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) return alert("Database is leeg. Importeer eerst woorden!");
+            if(!snap.exists()) return alert("Database leeg! Gebruik de import knop.");
             dynamicWords = Object.values(snap.val());
             sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
             document.getElementById('login').style.display = 'none';
@@ -120,16 +119,16 @@
 
     window.bulkAddWords = function() {
         const text = document.getElementById('bulk-text').value.trim();
-        if(!text) return alert("Plak eerst je lijst.");
+        if(!text) return alert("Geen data.");
         text.split('\n').forEach(line => {
             const p = line.trim().split(/\s+/);
-            if(p.length > 1) { const v = p.shift(); const m = p.join(' '); db.ref('woorden').push({v, m}); }
+            if(p.length >= 2) { const v = p.shift(); const m = p.join(' '); db.ref('woorden').push({v, m}); }
         });
-        alert("Data geïmporteerd!");
+        alert("Data klaar!"); document.getElementById('bulk-text').value = "";
     };
 
     window.hardResetDatabase = function() {
-        if(confirm("ALLES WISSEN?") && prompt("CODE:") === '112') {
+        if(confirm("DIT WIST ALLES.") && prompt("CODE:") === '112') {
             Promise.all([db.ref('ranking').remove(), db.ref('woorden').remove()]).then(() => location.reload());
         }
     };
@@ -137,8 +136,7 @@
     function startQuiz(num) {
         inGame = false; quizCount = 0; quizTarget = num;
         document.getElementById('quiz-box').style.display = 'block';
-        document.getElementById('game-container').classList.remove('blue-active');
-        nextQ();
+        window.nextQ();
     }
 
     window.nextQ = function() {
@@ -147,18 +145,19 @@
             inGame = true; ghostSpawnTimer = 300; initLevel(); requestAnimationFrame(gameLoop);
             return;
         }
-        let canAnswer = true;
         document.getElementById('btn-volgende').style.display = 'none';
-        const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
+        const qRaw = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
+        const q = qRaw || {v: "Error", m: "Hercarichi"};
         let fPool = dynamicWords.map(w => w.m).filter(m => m !== q.m).sort(() => 0.5 - Math.random());
-        let opties = [q.m, fPool[0], fPool[1]].sort(() => 0.5 - Math.random());
+        let opties = [q.m, fPool[0] || "X", fPool[1] || "Y"].sort(() => 0.5 - Math.random());
         document.getElementById('vraag').innerText = q.v;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
+        let canAnswer = true;
         opties.forEach(o => {
             const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
             b.onclick = () => {
                 if(!canAnswer) return; canAnswer = false;
-                if(o === q.m) { b.classList.add('correct'); setTimeout(() => { quizCount++; nextQ(); }, 600); }
+                if(o === q.m) { b.classList.add('correct'); setTimeout(() => { quizCount++; window.nextQ(); }, 600); }
                 else { b.classList.add('fout'); quizCount = 0; document.getElementById('btn-volgende').style.display = 'block'; }
             };
             cont.appendChild(b);
@@ -185,8 +184,8 @@
         }
         pacman.x = 10; pacman.y = 14; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
         ghosts = [
-            {x:10, y:9, color:'#00ffff', dir:{x:1, y:0}, speed:0.07},
-            {x:10, y:10, color:'#00ffff', dir:{x:-1, y:0}, speed:0.06}
+            {x:10, y:9, color:'#00ffff', dir:{x:1, y:0}, speed:0.08},
+            {x:10, y:10, color:'#00ffff', dir:{x:-1, y:0}, speed:0.07}
         ];
     }
 
@@ -199,21 +198,13 @@
     function gameLoop() {
         if(!inGame) return;
         frame++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        
-        // Blauwe aura logica
-        if(powerTimer > 0) document.getElementById('game-container').classList.add('blue-active');
-        else document.getElementById('game-container').classList.remove('blue-active');
+        document.getElementById('game-container').className = (powerTimer > 0) ? 'blue-active' : '';
 
-        // Muren & Dots
+        // MAZE
         ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
-        dots.forEach(d => {
-            if(!d.eaten){
-                ctx.fillStyle = d.power ? '#fff' : '#f0db4f';
-                ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power ? 5 : 2, 0, 7); ctx.fill();
-            }
-        });
+        dots.forEach(d => { if(!d.eaten){ ctx.fillStyle = d.power ? '#fff' : '#f0db4f'; ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power?5:2, 0, 7); ctx.fill(); }});
 
-        // Pacman Tunnel & Beweging
+        // PACMAN TUNNEL
         if(pacman.x < -0.5) pacman.x = 20.5; if(pacman.x > 20.5) pacman.x = -0.5;
         if(Math.abs(pacman.x - Math.round(pacman.x)) < 0.1 && Math.abs(pacman.y - Math.round(pacman.y)) < 0.1) {
             let px = Math.round(pacman.x), py = Math.round(pacman.y);
@@ -222,38 +213,29 @@
             if(canMove(px+pacman.nextDir.x, py+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
             if(!canMove(px+pacman.dir.x, py+pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
-        pacman.x += pacman.dir.x * 0.1; pacman.y += pacman.dir.y * 0.1;
+        pacman.x += pacman.dir.x * 0.12; pacman.y += pacman.dir.y * 0.12;
+        ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = '#0044ff'; ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill(); ctx.restore();
 
-        // TEKEN PACMAN MET BLAUWE AURA
-        ctx.save();
-        ctx.shadowBlur = 15; ctx.shadowColor = '#0044ff';
-        ctx.fillStyle = 'yellow'; ctx.beginPath();
-        ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
-        ctx.restore();
-
-        // Ghost Logica (Wacht 5 seconden)
+        // GHOSTS
         if(ghostSpawnTimer > 0) {
-            ghostSpawnTimer--;
-            document.getElementById('timer-display').innerText = "UNIT STANDBY: " + Math.ceil(ghostSpawnTimer/60);
+            ghostSpawnTimer--; document.getElementById('timer-display').innerText = "UNIT STANDBY: " + Math.ceil(ghostSpawnTimer/60);
         } else {
-            document.getElementById('timer-display').innerText = powerTimer > 0 ? "BLUE ALERT" : "PATROUILLE";
+            document.getElementById('timer-display').innerText = "PATROUILLE ACTIEF";
             ghosts.forEach(g => {
+                if(g.x < -0.5) g.x = 20.5; if(g.x > 20.5) g.x = -0.5;
                 if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
                     g.x = Math.round(g.x); g.y = Math.round(g.y);
-                    let dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));
-                    if(dirs.length > 0) g.dir = dirs[Math.floor(Math.random()*dirs.length)];
+                    let valid = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));
+                    if(valid.length > 0) g.dir = valid[Math.floor(Math.random()*valid.length)];
                 }
                 g.x += g.dir.x * g.speed; g.y += g.dir.y * g.speed;
-                ctx.fillStyle = powerTimer > 0 ? '#fff' : g.color;
-                ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
-
+                ctx.fillStyle = powerTimer > 0 ? '#fff' : g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
                 if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
                     if(powerTimer > 0) { g.x = 10; g.y = 9; score += 200; }
                     else { levens--; document.getElementById('lvn-val').innerText = levens; if(levens<=0) location.reload(); else startQuiz(5); }
                 }
             });
         }
-
         if(powerTimer > 0) powerTimer--;
         requestAnimationFrame(gameLoop);
     }

@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Pac-Man Edition</title>
+    <title>BTV Police Training - Volledige Versie</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --success: #2ecc71; --bg: #000; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; touch-action: none; overflow-x: hidden; }
         .hud { width: 100%; max-width: 450px; padding: 15px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 4px solid var(--cobalt); box-sizing: border-box; }
         #timer-display { color: #fff; font-size: 1rem; font-weight: bold; padding: 10px; text-align: center; width: 100%; background: #222; min-height: 1.2rem; }
         #game-container { position: relative; border: 6px solid #111; background: #000; }
-        canvas { display: block; background: #000; }
+        canvas { display: block; background: #000; margin: 0 auto; }
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             width: 90%; background: #fff; border-radius: 8px; padding: 20px; 
@@ -22,17 +22,18 @@
         .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #eee; border: 2px solid #ccc; cursor: pointer; border-radius: 6px; font-weight: bold; color: #000; font-size: 0.9rem; }
         .correct { background: var(--success) !important; color: #fff; border-color: #1e8449; }
         .fout { background: var(--danger) !important; color: #fff; border-color: #922b21; }
-        .progress-text { font-size: 0.8rem; color: #666; margin-top: 5px; font-weight: bold; }
-        .panel { width: 95%; max-width: 430px; margin-top: 10px; background: #111; padding: 10px; border: 1px solid #333; }
-        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; }
-        .score-row { display: flex; justify-content: space-between; padding: 4px; font-family: monospace; font-size: 0.9rem; border-bottom: 1px solid #222; }
+        .panel { width: 95%; max-width: 430px; margin-top: 10px; background: #111; padding: 15px; border: 1px solid #333; box-sizing: border-box; border-radius: 8px; }
+        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; margin-bottom: 5px; }
+        .score-row { display: flex; justify-content: space-between; padding: 6px; font-family: monospace; font-size: 0.9rem; border-bottom: 1px solid #222; }
+        textarea { width: 100%; height: 60px; background: #000; color: #0f0; border: 1px solid #333; margin-bottom: 10px; padding: 5px; box-sizing: border-box; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div id="login" style="margin-top: 50px; text-align: center;">
     <h1 style="color: var(--gold); letter-spacing: 2px;">BTV PAC-MAN</h1>
-    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:220px; border-radius:5px; text-align:center;"><br><br>
+    <p>POLICE TRAINING SIMULATOR</p>
+    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="padding:15px; width:220px; border-radius:5px; text-align:center; border:none; margin-bottom:10px;"><br>
     <button class="btn" style="width:250px;" onclick="initSessie()">START TRAINING</button>
 </div>
 
@@ -44,23 +45,35 @@
         <div id="quiz-box">
             <div id="vraag" style="font-size:1.1rem; font-weight:800; margin-bottom:15px; text-transform: uppercase;"></div>
             <div id="optie-container"></div>
-            <div class="progress-text" id="prog-val">Voortgang: 0 / 5</div>
+            <div id="prog-val" style="font-size: 0.8rem; color: #666; margin-top: 5px; font-weight: bold;">Voortgang: 0 / 5</div>
             <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="nextQ()">FOUT: RESET NAAR 0</button>
-            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART TRAINING</button>
         </div>
     </div>
-    <div class="panel"><h3>TOP SCORES</h3><div id="score-list">Laden...</div></div>
+
     <div class="panel">
-        <textarea id="bulk-text" style="width:100%; height:50px; background:#000; color:#0f0; border:1px solid #333; margin-bottom:5px;" placeholder="woord betekenis (per regel)"></textarea>
-        <button class="btn" style="font-size:0.7rem;" onclick="bulkAddWords()">IMPORT DATA</button>
+        <h3 style="margin-top:0; color:var(--gold);">TOP SCORES</h3>
+        <div id="score-list">Laden...</div>
+    </div>
+
+    <div class="panel">
+        <h3 style="margin-top:0;">DATA IMPORT</h3>
+        <textarea id="bulk-text" placeholder="woord betekenis&#10;woord2 betekenis2"></textarea>
+        <button class="btn" style="font-size:0.8rem;" onclick="bulkAddWords()">IMPORT DATA</button>
+    </div>
+
+    <div class="panel" style="border-color: var(--danger);">
+        <h3 style="margin-top:0; color:var(--danger);">ADMIN</h3>
+        <button class="btn" style="background: #333; font-size: 0.7rem;" onclick="hardResetDatabase()">WIS VOLLEDIGE DATABASE (CODE 112)</button>
     </div>
 </div>
 
 <script>
+    // 1. DATABASE SETUP
     const firebaseConfig = { apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", projectId: "aangiftebotje" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 2. GLOBALE VARIABELEN
     let dynamicWords = [], vnaam, sRef, score = 0, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 5;
     let canvas, ctx, tileSize, pacman = { x: 10, y: 14, dir: {x:0, y:0}, nextDir: {x:0, y:0}, rotation: 0 };
     let dots = [], walls = [], ghosts = [], powerTimer = 0;
@@ -75,5 +88,207 @@
         [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
         [1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1],
         [1,1,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,1,1],
-        [0,0,0,0,0,0,1,0,1,1,2,1,1,0,1,0,0,0,0,0,0], // Tunnel
-        [1,1,1,1,1,0,1,0,1,2
+        [0,0,0,0,0,0,1,0,1,1,2,1,1,0,1,0,0,0,0,0,0], // Tunnel rij 9
+        [1,1,1,1,1,0,1,0,1,2,2,2,1,0,1,0,1,1,1,1,1],
+        [1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1],
+        [1,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,3,1],
+        [1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,1,1],
+        [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    // 3. CORE FUNCTIONALITEITEN
+    window.initSessie = function() {
+        vnaam = document.getElementById('vnaam').value.trim();
+        if(!vnaam) return alert("Voer je naam in.");
+        db.ref('woorden').once('value', snap => {
+            if(!snap.exists()) return alert("De woordenlijst is leeg. Importeer eerst woorden onderaan.");
+            dynamicWords = Object.values(snap.val());
+            sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('main-game').style.display = 'block';
+            updateScoreboard();
+            setupCanvas();
+            startQuiz(5);
+        });
+    };
+
+    window.bulkAddWords = function() {
+        const text = document.getElementById('bulk-text').value.trim();
+        if(!text) return alert("Plak eerst je lijst.");
+        text.split('\n').forEach(line => {
+            const parts = line.trim().split(/\s+/);
+            if(parts.length > 1) { 
+                const v = parts.shift(); 
+                const m = parts.join(' '); 
+                db.ref('woorden').push({v, m}); 
+            }
+        });
+        alert("Succesvol toegevoegd!");
+        document.getElementById('bulk-text').value = "";
+    };
+
+    window.hardResetDatabase = function() {
+        if(confirm("DIT WIST ALLES. WEET JE HET ZEKER?") && prompt("VOER CODE IN:") === '112') {
+            Promise.all([db.ref('ranking').remove(), db.ref('woorden').remove()]).then(() => location.reload());
+        }
+    };
+
+    // 4. QUIZ LOGICA
+    function startQuiz(num) {
+        inGame = false; quizCount = 0; quizTarget = num;
+        document.getElementById('quiz-box').style.display = 'block';
+        nextQ();
+    }
+
+    window.nextQ = function() {
+        if(quizCount >= quizTarget) {
+            document.getElementById('quiz-box').style.display = 'none';
+            inGame = true; initLevel(); requestAnimationFrame(gameLoop);
+            return;
+        }
+        let canAnswer = true;
+        document.getElementById('btn-volgende').style.display = 'none';
+        document.getElementById('prog-val').innerText = `Voortgang: ${quizCount} / ${quizTarget}`;
+        const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
+        let fPool = dynamicWords.map(w => w.m).filter(m => m !== q.m).sort(() => 0.5 - Math.random());
+        let opties = [q.m, fPool[0], fPool[1]].sort(() => 0.5 - Math.random());
+        
+        document.getElementById('vraag').innerText = q.v;
+        const cont = document.getElementById('optie-container'); cont.innerHTML = '';
+        opties.forEach(o => {
+            const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
+            b.onclick = () => {
+                if(!canAnswer) return; canAnswer = false;
+                if(o === q.m) { b.classList.add('correct'); setTimeout(() => { quizCount++; nextQ(); }, 600); }
+                else { 
+                    b.classList.add('fout'); quizCount = 0; 
+                    Array.from(cont.children).forEach(btn => { if(btn.innerText === q.m) btn.classList.add('correct'); });
+                    document.getElementById('btn-volgende').style.display = 'block';
+                }
+            };
+            cont.appendChild(b);
+        });
+    };
+
+    // 5. GAME ENGINE
+    function setupCanvas() {
+        canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
+        const s = Math.min(window.innerWidth * 0.95, 450); tileSize = Math.floor(s/21);
+        canvas.width = tileSize*21; canvas.height = tileSize*20;
+        
+        // Touch Besturing
+        let tX, tY;
+        canvas.addEventListener('touchstart', e => { tX = e.touches[0].clientX; tY = e.touches[0].clientY; }, {passive:true});
+        canvas.addEventListener('touchend', e => {
+            let dX = e.changedTouches[0].clientX - tX, dY = e.changedTouches[0].clientY - tY;
+            if(Math.abs(dX) > Math.abs(dY)) pacman.nextDir = dX > 0 ? {x:1, y:0} : {x:-1, y:0};
+            else pacman.nextDir = dY > 0 ? {x:0, y:1} : {x:0, y:-1};
+        }, {passive:true});
+
+        // Keyboard Besturing
+        window.onkeydown = (e) => {
+            if(e.key.includes("Up")) pacman.nextDir = {x:0, y:-1};
+            if(e.key.includes("Down")) pacman.nextDir = {x:0, y:1};
+            if(e.key.includes("Left")) pacman.nextDir = {x:-1, y:0};
+            if(e.key.includes("Right")) pacman.nextDir = {x:1, y:0};
+        };
+    }
+
+    function initLevel() {
+        dots = []; walls = [];
+        for(let y=0; y<20; y++) for(let x=0; x<21; x++) {
+            if(mazeLayout[y][x] === 1) walls.push({x, y});
+            else if(mazeLayout[y][x] === 0 || mazeLayout[y][x] === 3) dots.push({x, y, eaten: false, power: mazeLayout[y][x]===3});
+        }
+        pacman.x = 10; pacman.y = 14; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
+        ghosts = [
+            {x:10, y:9, color:'red', dir:{x:1, y:0}, speed:0.07},
+            {x:9, y:9, color:'pink', dir:{x:-1, y:0}, speed:0.06}
+        ];
+    }
+
+    function canMove(x,y) {
+        if(y === 9 && (x < 0 || x > 20)) return true; // Tunnel vrijgave
+        if(x < 0 || x > 20 || y < 0 || y > 19) return false;
+        return mazeLayout[y][x] !== 1;
+    }
+
+    function gameLoop() {
+        if(!inGame) return;
+        frame++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        
+        // Muren en Dots
+        ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
+        dots.forEach(d => {
+            if(!d.eaten){
+                ctx.fillStyle = d.power ? '#fff' : '#f0db4f';
+                ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, d.power ? 5 : 2, 0, 7); ctx.fill();
+            }
+        });
+
+        // Tunnel Teleport
+        if(pacman.x < -0.5) pacman.x = 20.5; if(pacman.x > 20.5) pacman.x = -0.5;
+        
+        // Grid Check & Beweging
+        if(Math.abs(pacman.x - Math.round(pacman.x)) < 0.1 && Math.abs(pacman.y - Math.round(pacman.y)) < 0.1) {
+            let px = Math.round(pacman.x), py = Math.round(pacman.y);
+            let d = dots.find(dot => dot.x === px && dot.y === py && !dot.eaten);
+            if(d){ d.eaten = true; score += 10; if(d.power) powerTimer = 400; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
+            if(canMove(px+pacman.nextDir.x, py+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
+            if(!canMove(px+pacman.dir.x, py+pacman.dir.y)) pacman.dir = {x:0, y:0};
+        }
+        pacman.x += pacman.dir.x * 0.1; pacman.y += pacman.dir.y * 0.1;
+
+        // Teken Pacman
+        ctx.fillStyle = 'yellow'; ctx.beginPath();
+        ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
+
+        // Ghost Logica
+        ghosts.forEach(g => {
+            if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
+                g.x = Math.round(g.x); g.y = Math.round(g.y);
+                let dirs = [{x:1, y:0}, {x:-1, y:0}, {x:0, y:1}, {x:0, y:-1}].filter(d => canMove(g.x+d.x, g.y+d.y) && !(d.x===-g.dir.x && d.y===-g.dir.y));
+                if(dirs.length > 0) g.dir = dirs[Math.floor(Math.random()*dirs.length)];
+            }
+            g.x += g.dir.x * g.speed; g.y += g.dir.y * g.speed;
+            ctx.fillStyle = powerTimer > 0 ? 'blue' : g.color;
+            ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill();
+
+            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
+                if(powerTimer > 0) { g.x = 10; g.y = 9; score += 200; }
+                else { 
+                    levens--; 
+                    document.getElementById('lvn-val').innerText = levens; 
+                    if(levens<=0) { alert("Training Voorbij! Score: " + score); location.reload(); } 
+                    else startQuiz(5); 
+                }
+            }
+        });
+
+        if(powerTimer > 0) {
+            powerTimer--;
+            document.getElementById('timer-display').innerText = "POWER MODE: " + Math.ceil(powerTimer/60);
+            document.getElementById('timer-display').style.color = "cyan";
+        } else {
+            document.getElementById('timer-display').innerText = "AGENT " + vnaam.toUpperCase() + " IN VELD";
+            document.getElementById('timer-display').style.color = "white";
+        }
+        
+        requestAnimationFrame(gameLoop);
+    }
+
+    function updateScoreboard() { 
+        db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
+            const list = document.getElementById('score-list'); list.innerHTML = '';
+            let res = []; snap.forEach(s => res.push(s.val()));
+            res.reverse().forEach(r => list.innerHTML += `<div class="score-row"><span>${r.naam}</span><span>${r.score}</span></div>`);
+        }); 
+    }
+</script>
+</body>
+</html>

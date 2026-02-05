@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Compact Quiz</title>
+    <title>BTV Police Training - Admin Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --bg: #000; }
-        html, body { overflow: hidden; height: 100%; position: fixed; width: 100%; margin: 0; background: #000; }
-        body { font-family: 'Segoe UI', sans-serif; color: #eee; display: flex; flex-direction: column; align-items: center; touch-action: none; }
+        html, body { overflow-y: auto; background: #000; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; color: #eee; display: flex; flex-direction: column; align-items: center; }
         
         @keyframes sirene {
             0% { box-shadow: 0 0 10px #0044ff; border-color: #0044ff; }
@@ -19,26 +19,27 @@
         .blue-alert { animation: sirene 0.4s infinite; }
 
         .hud { width: 100%; max-width: 450px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; }
-        #timer-display { color: #fff; font-size: 0.8rem; padding: 5px; text-align: center; width: 100%; background: #222; }
+        #timer-display { color: #fff; font-size: 0.8rem; padding: 5px; text-align: center; width: 100%; max-width: 450px; background: #222; }
         
-        #game-container { position: relative; border: 4px solid #111; background: #000; margin-top: 5px; transition: 0.2s; }
+        #game-container { position: relative; border: 4px solid #111; background: #000; margin-top: 5px; transition: 0.2s; touch-action: none; }
         canvas { display: block; background: #000; }
 
-        /* COMPACTE QUIZBOX FIX */
         #quiz-box { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            width: 85%; max-width: 320px; background: #fff; border-radius: 12px; padding: 15px; 
+            width: 85%; max-width: 300px; background: #fff; border-radius: 12px; padding: 15px; 
             text-align: center; display: none; z-index: 100; color: #000; 
             border: 4px solid var(--cobalt); box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
         #vraag { font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; color: var(--cobalt); text-transform: uppercase; }
-        .optie { display: block; width: 100%; padding: 10px; margin: 6px 0; background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
-        .optie:active { background: #e9ecef; }
+        .optie { display: block; width: 100%; padding: 10px; margin: 6px 0; background: #f8f9fa; border: 2px solid #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
 
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; width: 160px; }
-        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 0.8rem; }
-        .panel { width: 95%; max-width: 350px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 8px; margin-top: 5px; font-size: 0.8rem; }
-        .btn { background: var(--cobalt); color: white; padding: 10px; width: 100%; border: none; font-weight: bold; border-radius: 4px; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 10px 0; width: 160px; }
+        .ctrl-btn { background: #222; border: 2px solid var(--cobalt); color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; user-select: none; }
+
+        .panel { width: 95%; max-width: 400px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 8px; margin-top: 10px; box-sizing: border-box; }
+        .btn { background: var(--cobalt); color: white; padding: 10px; width: 100%; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        textarea { width: 100%; height: 60px; background: #000; color: #0f0; border: 1px solid #333; margin: 5px 0; box-sizing: border-box; font-family: monospace; }
+        .score-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
@@ -49,9 +50,10 @@
     <button class="btn" style="width:210px;" onclick="window.initSessie()">START TRAINING</button>
 </div>
 
-<div id="main-game" style="display:none; width: 100%;">
+<div id="main-game" style="display:none; width: 100%; display: flex; flex-direction: column; align-items: center;">
     <div class="hud"><span>SCORE: <span id="scr-val">0</span></span><span>HP: <span id="lvn-val">5</span></span></div>
     <div id="timer-display">STATUS: STANDBY</div>
+    
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="quiz-box">
@@ -60,13 +62,26 @@
             <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="window.nextQ()">FOUT: RESET</button>
         </div>
     </div>
-    <center>
-        <div class="controls">
-            <div></div><div class="ctrl-btn" onclick="setDir(0,-1)">UP</div><div></div>
-            <div class="ctrl-btn" onclick="setDir(-1,0)">L</div><div class="ctrl-btn" onclick="setDir(0,1)">DN</div><div class="ctrl-btn" onclick="setDir(1,0)">R</div>
-        </div>
-        <div class="panel" id="score-list">Top Scores laden...</div>
-    </center>
+
+    <div class="controls">
+        <div></div><div class="ctrl-btn" onclick="setDir(0,-1)">UP</div><div></div>
+        <div class="ctrl-btn" onclick="setDir(-1,0)">L</div><div class="ctrl-btn" onclick="setDir(0,1)">DN</div><div class="ctrl-btn" onclick="setDir(1,0)">R</div>
+    </div>
+
+    <div class="panel">
+        <h4 style="margin:0 0 5px 0; color: var(--gold);">TOP 5 AGENTS</h4>
+        <div id="score-list">Laden...</div>
+    </div>
+
+    <div class="panel">
+        <h4 style="margin:0 0 5px 0;">DATA IMPORT</h4>
+        <textarea id="bulk-text" placeholder="woord vertaling (bijv: Kat Poes)"></textarea>
+        <button class="btn" style="font-size:0.7rem;" onclick="window.bulkAddWords()">STAP 1: IMPORT DATA</button>
+    </div>
+
+    <div class="panel" style="border-color: var(--danger); margin-bottom: 30px;">
+        <button class="btn" style="background: #333; font-size: 0.6rem;" onclick="window.hardResetDatabase()">WIS DATABASE (CODE 112)</button>
+    </div>
 </div>
 
 <script>
@@ -99,13 +114,29 @@
         vnaam = document.getElementById('vnaam').value.trim();
         if(!vnaam) return alert("Agent naam?");
         db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) return alert("Geen data!");
+            if(!snap.exists()) return alert("Database leeg! Gebruik het import vak onderaan.");
             dynamicWords = Object.values(snap.val());
             sRef = db.ref('ranking').push({ naam: vnaam, score: 0 });
             document.getElementById('login').style.display = 'none';
-            document.getElementById('main-game').style.display = 'block';
-            setupCanvas(); startQuiz();
+            document.getElementById('main-game').style.display = 'flex';
+            updateScoreboard(); setupCanvas(); startQuiz();
         });
+    };
+
+    window.bulkAddWords = function() {
+        const text = document.getElementById('bulk-text').value.trim();
+        if(!text) return alert("Geen data om te importeren.");
+        text.split('\n').forEach(line => {
+            const p = line.trim().split(/\s+/);
+            if(p.length >= 2) { const v = p.shift(); const m = p.join(' '); db.ref('woorden').push({v, m}); }
+        });
+        alert("Data geïmporteerd! Vernieuw de pagina.");
+    };
+
+    window.hardResetDatabase = function() {
+        if(confirm("DIT WIST ALLES.") && prompt("CODE:") === '112') {
+            db.ref('ranking').remove(); db.ref('woorden').remove(); location.reload();
+        }
     };
 
     function startQuiz() {
@@ -202,6 +233,14 @@
         }
         if(powerTimer > 0) powerTimer--;
         requestAnimationFrame(gameLoop);
+    }
+
+    function updateScoreboard() { 
+        db.ref('ranking').orderByChild('score').limitToLast(5).on('value', snap => {
+            const list = document.getElementById('score-list'); list.innerHTML = '';
+            let res = []; snap.forEach(s => res.push(s.val()));
+            res.reverse().forEach(r => list.innerHTML += `<div class="score-row"><span>${r.naam}</span><span>${r.score}</span></div>`);
+        }); 
     }
 </script>
 </body>

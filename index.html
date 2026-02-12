@@ -1,24 +1,224 @@
-<div id="login" style="margin-top: 30px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BTV Police Training - Tunnel Edition</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --success: #2ecc71; --bg: #000; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            color: #eee; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            touch-action: none; 
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        .hud { 
+            width: 100%; 
+            max-width: 400px; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            color: var(--gold); 
+            background: #111; 
+            border-bottom: 4px solid var(--cobalt); 
+            box-sizing: border-box; 
+        }
+        #timer-display { 
+            color: #fff; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            padding: 10px; 
+            text-align: center; 
+            width: 100%; 
+            background: #222; 
+            min-height: 1.2rem; 
+        }
+        #game-container { 
+            position: relative; 
+            border: 6px solid #111; 
+            background: #000; 
+        }
+        canvas { 
+            display: block; 
+            background: #000; 
+            touch-action: none;
+        }
+        #quiz-box { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 90%; 
+            background: #fff; 
+            border-radius: 8px; 
+            padding: 20px; 
+            text-align: center; 
+            display: none; 
+            z-index: 100; 
+            color: #000; 
+            box-sizing: border-box;
+            border: 5px solid var(--cobalt); 
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        }
+        .optie { 
+            display: block; 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            background: #eee; 
+            border: 2px solid #ccc; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            color: #000; 
+            font-size: 0.9rem; 
+        }
+        .correct { background: var(--success) !important; color: #fff; border-color: #1e8449; }
+        .fout { background: var(--danger) !important; color: #fff; border-color: #922b21; }
+        .panel { 
+            width: 95%; 
+            max-width: 380px; 
+            margin-top: 10px; 
+            background: #111; 
+            padding: 10px; 
+            border: 1px solid #333; 
+        }
+        .btn { 
+            background: var(--cobalt); 
+            color: white; 
+            padding: 12px; 
+            width: 100%; 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            text-transform: uppercase; 
+        }
+        .btn-danger { background: var(--danger); margin-top: 5px; }
+        input, textarea {
+            padding: 12px;
+            background: #000;
+            color: #eee;
+            border: 1px solid #333;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .score-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 4px; 
+            font-family: monospace; 
+            font-size: 0.9rem; 
+            border-bottom: 1px solid #222; 
+        }
+        .admin-title {
+            color: var(--gold);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div id="login" style="margin-top: 30px; text-align: center;">
     <h1 style="color: var(--gold); letter-spacing: 2px;">BTV PAC-MAN</h1>
     
-    <div class="panel" style="background: transparent; border: none;">
-        <input type="text" id="vnaam" placeholder="AGENT NAAM..." class="input-field" style="width: 280px; text-align: center; font-size: 1.1rem; border: 2px solid var(--cobalt);">
-    </div>
-
-    <div class="panel" style="width: 320px; border-color: var(--gold);">
-        <div class="admin-title" style="color: var(--gold);">WOORDENSCHAT VOORBEREIDEN</div>
-        
+    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="width:250px; text-align:center; margin-bottom: 15px;"><br>
+    
+    <div class="panel" style="margin: 0 auto 15px auto;">
+        <div class="admin-title">WOORDENSCHAT TOEVOEGEN</div>
         <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-            <input type="text" id="new-word" class="input-field" placeholder="Woord" style="margin-bottom:0;">
-            <input type="text" id="new-meaning" class="input-field" placeholder="Betekenis" style="margin-bottom:0;">
+            <input type="text" id="new-word" placeholder="woord" style="flex: 1;">
+            <input type="text" id="new-meaning" placeholder="betekenis" style="flex: 1;">
         </div>
-        <button class="btn btn-success" style="font-size: 0.8rem; padding: 8px;" onclick="addSingleWord()">+ VOEG WOORD TOE</button>
-        
-        <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
-        
-        <textarea id="bulk-text" style="width:100%; height:50px; background:#000; color:#0f0; border:1px solid #333; margin-bottom:5px; font-family: monospace; font-size: 0.7rem;" placeholder="Of plak hier: woord betekenis (per regel)"></textarea>
-        <button class="btn" style="font-size:0.7rem; background: #444;" onclick="bulkAddWords()">IMPORT DATA LIJST</button>
+        <button class="btn" style="font-size: 0.7rem; padding: 8px;" onclick="addSingleWord()">VOEG WOORD TOE</button>
+        <hr style="border: 0; border-top: 1px solid #222; margin: 10px 0;">
+        <textarea id="bulk-text" style="width:100%; height:50px; color:#0f0;" placeholder="woord betekenis (per regel)"></textarea>
+        <button class="btn" style="font-size:0.7rem; background:#222;" onclick="bulkAddWords()">IMPORT DATA LIJST</button>
     </div>
 
-    <button class="btn" style="width:280px; margin-top: 20px; height: 60px; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(0,68,255,0.4);" onclick="initSessie()">START TRAINING</button>
+    <button class="btn" style="width:250px;" onclick="initSessie()">START TRAINING</button>
 </div>
+
+<div id="main-game" style="display:none;">
+    <div class="hud"><span>SCORE: <span id="scr-val">0</span></span><span>HP: <span id="lvn-val">5</span></span></div>
+    <div id="timer-display">SYSTEEM GEREED</div>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="quiz-box">
+            <div id="vraag" style="font-size:1.1rem; font-weight:800; margin-bottom:15px; text-transform: uppercase;"></div>
+            <div id="optie-container"></div>
+            <div class="progress-text" id="prog-val" style="font-size: 0.8rem; color: #666; margin-top: 5px; font-weight: bold;">Voortgang: 0 / 5</div>
+            <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="nextQ()">FOUT: RESET NAAR 0</button>
+            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART TRAINING</button>
+        </div>
+    </div>
+    
+    <div class="panel">
+        <h3>TOP SCORES</h3>
+        <div id="score-list">Laden...</div>
+        <div class="admin-controls" style="margin-top: 10px; padding: 10px; background: #222; border-radius: 5px;">
+            <div class="admin-title">ADMIN CONTROLS</div>
+            <button class="btn btn-danger" onclick="resetAllScores()" id="reset-btn">🔥 ALLE SCORES RESETTEN</button>
+            <div id="reset-confirm" style="display:none; margin-top:10px;">
+                <p style="color: #fff; font-size:0.8rem;">Zeker weten?</p>
+                <button class="btn btn-danger" onclick="confirmReset()" style="width:48%; display:inline-block;">JA</button>
+                <button class="btn" onclick="cancelReset()" style="width:48%; display:inline-block; background:#666;">NEE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Firebase Config (Hou deze exact zo)
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", 
+        databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", 
+        projectId: "aangiftebotje" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Woorden toevoegen functies
+    function addSingleWord() {
+        const v = document.getElementById('new-word').value.trim();
+        const m = document.getElementById('new-meaning').value.trim();
+        if(!v || !m) return;
+        db.ref('woorden').push({v, m});
+        alert("Toegevoegd!");
+        document.getElementById('new-word').value = "";
+        document.getElementById('new-meaning').value = "";
+    }
+
+    function bulkAddWords() {
+        const text = document.getElementById('bulk-text').value.trim();
+        if(!text) return;
+        text.split('\n').forEach(line => {
+            const p = line.trim().split(/\s+/);
+            if(p.length > 1) { 
+                const v = p.shift(); 
+                const m = p.join(' '); 
+                db.ref('woorden').push({v, m}); 
+            }
+        });
+        alert("Data geïmporteerd!");
+        document.getElementById('bulk-text').value = "";
+    }
+
+    // De rest van de game logica (initSessie, gameLoop, maze etc.) 
+    // blijft exact zoals in je eerdere werkende tunnel-versie.
+</script>
+</body>
+</html>

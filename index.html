@@ -3,197 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Tunnel Edition</title>
+    <title>BTV Police Training - Random Respawn Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --success: #2ecc71; --bg: #000; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--bg); 
-            color: #eee; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            touch-action: none; 
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-        .hud { 
-            width: 100%; 
-            max-width: 400px; 
-            padding: 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            font-weight: bold; 
-            color: var(--gold); 
-            background: #111; 
-            border-bottom: 4px solid var(--cobalt); 
-            box-sizing: border-box; 
-        }
-        #timer-display { 
-            color: #fff; 
-            font-size: 1rem; 
-            font-weight: bold; 
-            padding: 10px; 
-            text-align: center; 
-            width: 100%; 
-            background: #222; 
-            min-height: 1.2rem; 
-        }
-        #game-container { 
-            position: relative; 
-            border: 6px solid #111; 
-            background: #000; 
-        }
-        canvas { 
-            display: block; 
-            background: #000; 
-            touch-action: none;
-        }
-        #quiz-box { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 90%; 
-            background: #fff; 
-            border-radius: 8px; 
-            padding: 20px; 
-            text-align: center; 
-            display: none; 
-            z-index: 100; 
-            color: #000; 
-            box-sizing: border-box;
-            border: 5px solid var(--cobalt); 
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
-        }
-        .optie { 
-            display: block; 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            background: #eee; 
-            border: 2px solid #ccc; 
-            cursor: pointer; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            color: #000; 
-            font-size: 0.9rem; 
-        }
-        .correct { background: var(--success) !important; color: #fff; border-color: #1e8449; }
-        .fout { background: var(--danger) !important; color: #fff; border-color: #922b21; }
-        .panel { 
-            width: 95%; 
-            max-width: 380px; 
-            margin-top: 10px; 
-            background: #111; 
-            padding: 10px; 
-            border: 1px solid #333; 
-        }
-        .btn { 
-            background: var(--cobalt); 
-            color: white; 
-            padding: 12px; 
-            width: 100%; 
-            border: none; 
-            font-weight: bold; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            text-transform: uppercase; 
-        }
-        .btn-danger { background: var(--danger); margin-top: 5px; }
-        input, textarea {
-            padding: 12px;
-            background: #000;
-            color: #eee;
-            border: 1px solid #333;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .score-row { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 4px; 
-            font-family: monospace; 
-            font-size: 0.9rem; 
-            border-bottom: 1px solid #222; 
-        }
-        .admin-title {
-            color: var(--gold);
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        .hud { width: 100%; max-width: 400px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; }
+        #game-container { position: relative; border: 4px solid #222; background: #000; margin-top: 10px; display: none; }
+        canvas { display: block; background: #000; }
+        #quiz-box { width: 90%; max-width: 400px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; color: #000; border: 5px solid var(--cobalt); margin-top: 50px; }
+        .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f0f0f0; border: 2px solid #ccc; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .correct { background: var(--success) !important; color: #fff; }
+        .fout { background: var(--danger) !important; color: #fff; }
+        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
+        .admin-panel { width: 95%; max-width: 380px; margin: 20px 0; background: #111; padding: 15px; border: 1px solid #333; border-radius: 8px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div id="login" style="margin-top: 30px; text-align: center;">
-    <h1 style="color: var(--gold); letter-spacing: 2px;">BTV PAC-MAN</h1>
-    
-    <input type="text" id="vnaam" placeholder="AGENT NAAM..." style="width:250px; text-align:center; margin-bottom: 15px;"><br>
-    
-    <div class="panel" style="margin: 0 auto 15px auto;">
-        <div class="admin-title">WOORDENSCHAT TOEVOEGEN</div>
-        <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-            <input type="text" id="new-word" placeholder="woord" style="flex: 1;">
-            <input type="text" id="new-meaning" placeholder="betekenis" style="flex: 1;">
-        </div>
-        <button class="btn" style="font-size: 0.7rem; padding: 8px;" onclick="addSingleWord()">VOEG WOORD TOE</button>
-        <hr style="border: 0; border-top: 1px solid #222; margin: 10px 0;">
-        <textarea id="bulk-text" style="width:100%; height:50px; color:#0f0;" placeholder="woord betekenis (per regel)"></textarea>
-        <button class="btn" style="font-size:0.7rem; background:#222;" onclick="bulkAddWords()">IMPORT DATA LIJST</button>
-    </div>
-
-    <button class="btn" style="width:250px;" onclick="initSessie()">START TRAINING</button>
+<div id="quiz-box">
+    <h2 id="quiz-status" style="margin-top:0; color:var(--cobalt);">KWALIFICATIE: 0/5</h2>
+    <div id="vraag" style="font-size:1.2rem; font-weight:800; margin-bottom:15px; text-transform: uppercase;">Laden...</div>
+    <div id="optie-container"></div>
+    <button id="btn-retry" class="btn" style="display:none; background:var(--danger);" onclick="resetQuiz()">FOUT! OPNIEUW BEGINNEN</button>
 </div>
 
-<div id="main-game" style="display:none;">
-    <div class="hud"><span>SCORE: <span id="scr-val">0</span></span><span>HP: <span id="lvn-val">5</span></span></div>
-    <div id="timer-display">SYSTEEM GEREED</div>
+<div id="main-game" style="display:none; text-align:center;">
+    <div class="hud">
+        <span>SCORE: <span id="scr-val">0</span></span>
+        <span>LEVEL: <span id="lvl-val">1</span></span>
+        <span>TIJD: <span id="timer-val">180</span>s</span>
+    </div>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
-        <div id="quiz-box">
-            <div id="vraag" style="font-size:1.1rem; font-weight:800; margin-bottom:15px; text-transform: uppercase;"></div>
-            <div id="optie-container"></div>
-            <div class="progress-text" id="prog-val" style="font-size: 0.8rem; color: #666; margin-top: 5px; font-weight: bold;">Voortgang: 0 / 5</div>
-            <button id="btn-volgende" class="btn" style="display:none; background:var(--danger); margin-top:10px;" onclick="nextQ()">FOUT: RESET NAAR 0</button>
-            <button id="restart-btn" style="display:none;" class="btn" onclick="location.reload()">HERSTART TRAINING</button>
-        </div>
     </div>
-    
-    <div class="panel">
-        <h3>TOP SCORES</h3>
-        <div id="score-list">Laden...</div>
-        <div class="admin-controls" style="margin-top: 10px; padding: 10px; background: #222; border-radius: 5px;">
-            <div class="admin-title">ADMIN CONTROLS</div>
-            <button class="btn btn-danger" onclick="resetAllScores()" id="reset-btn">🔥 ALLE SCORES RESETTEN</button>
-            <div id="reset-confirm" style="display:none; margin-top:10px;">
-                <p style="color: #fff; font-size:0.8rem;">Zeker weten?</p>
-                <button class="btn btn-danger" onclick="confirmReset()" style="width:48%; display:inline-block;">JA</button>
-                <button class="btn" onclick="cancelReset()" style="width:48%; display:inline-block; background:#666;">NEE</button>
-            </div>
-        </div>
-    </div>
+</div>
+
+<div class="admin-panel">
+    <h4 style="margin:0; color:var(--gold);">ADMIN: WOORDENLIJST</h4>
+    <textarea id="bulk-text" style="width:100%; height:40px; background:#000; color:#0f0; border:1px solid #444; margin-top:5px;" placeholder="woord betekenis"></textarea>
+    <button class="btn" style="font-size:0.7rem; padding:5px; margin-top:5px;" onclick="bulkAdd()">VOEG TOE</button>
 </div>
 
 <script>
-    const firebaseConfig = { 
-        apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", 
-        databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", 
-        projectId: "aangiftebotje" 
-    };
+    const firebaseConfig = { apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", projectId: "aangiftebotje" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let dynamicWords = [], vnaam, sRef, score = 0, levens = 5, frame = 0, inGame = false, quizCount = 0, quizTarget = 5;
-    let canvas, ctx, tileSize, pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0}, rotation: 0, sirenActive: true, sirenPhase: 0 };
-    let dots = [], walls = [], ghosts = [], fruit = { x: -1, y: -1, active: false }, powerTimer = 0, levelStartTime = 0;
-    let ghostChaseStart = false, chaseStartTime = 0, gameStartTime = 0;
+    let dynamicWords = [], score = 0, frame = 0, inGame = false, quizCount = 0;
+    let canvas, ctx, tileSize = 20, lightOn = true;
+    let pacman = { x: 9, y: 5, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
+    let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.05;
+    let timeLeft = 180, currentLevel = 1, timerInterval;
 
     const mazeLayout = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -201,180 +63,151 @@
         [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1],
-        [0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0],
+        [2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,2], 
         [1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1],
-        [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
-        [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
         [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    function addSingleWord() {
-        const v = document.getElementById('new-word').value.trim();
-        const m = document.getElementById('new-meaning').value.trim();
-        if(!v || !m) return alert("Vul beide velden in");
-        db.ref('woorden').push({v, m});
-        alert("Toegevoegd!");
-        document.getElementById('new-word').value = "";
-        document.getElementById('new-meaning').value = "";
-    }
-
-    function bulkAddWords() {
-        const text = document.getElementById('bulk-text').value.trim();
-        if(!text) return;
-        text.split('\n').forEach(line => {
-            const p = line.trim().split(/\s+/);
-            if(p.length > 1) { 
-                const v = p.shift(); 
-                const m = p.join(' '); 
-                db.ref('woorden').push({v, m}); 
-            }
-        });
-        alert("Data geïmporteerd!");
-        document.getElementById('bulk-text').value = "";
-    }
-
-    function initSessie() {
-        vnaam = document.getElementById('vnaam').value.trim();
-        if(!vnaam) return alert("Voer een naam in.");
-        db.ref('woorden').once('value', snap => {
-            if(!snap.exists()) return alert("Database leeg!");
-            dynamicWords = Object.values(snap.val()).filter(w => w.v && w.m);
-            sRef = db.ref('ranking').push();
-            sRef.set({ naam: vnaam, score: 0, timestamp: Date.now() });
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('main-game').style.display = 'block';
-            updateScoreboard(); 
-            setupCanvas(); 
-            startQuiz(5);
-        });
-    }
-
-    function updateScoreboard() {
-        db.ref('ranking').orderByChild('score').limitToLast(10).on('value', snap => {
-            const list = document.getElementById('score-list');
-            list.innerHTML = "";
-            let items = [];
-            snap.forEach(c => items.push(c.val()));
-            items.reverse().forEach((d, i) => {
-                const r = document.createElement('div');
-                r.className = 'score-row';
-                r.innerHTML = `<span>${i+1}. ${d.naam}</span><span>${d.score}</span>`;
-                list.appendChild(r);
-            });
-        });
-    }
-
-    function startQuiz(num) {
-        inGame = false; quizCount = 0; quizTarget = num;
-        document.getElementById('quiz-box').style.display = 'block';
-        nextQ();
-    }
-
-    function nextQ() {
-        if(quizCount >= quizTarget) { 
-            document.getElementById('quiz-box').style.display = 'none'; 
-            levelStartTime = Date.now(); inGame = true; initLevel(); requestAnimationFrame(gameLoop); 
-            return; 
+    // --- RANDOM LOCATIE FUNCTIE ---
+    function getRandomLocation() {
+        let valid = false;
+        let rx, ry;
+        while(!valid) {
+            rx = Math.floor(Math.random() * 19);
+            ry = Math.floor(Math.random() * 9);
+            // Check of het geen muur is (mazeLayout 1 = muur)
+            if(mazeLayout[ry][rx] !== 1) valid = true;
         }
-        let canAnswer = true;
-        document.getElementById('btn-volgende').style.display = 'none';
-        document.getElementById('prog-val').innerText = `Voortgang: ${quizCount} / ${quizTarget}`;
+        return {x: rx, y: ry};
+    }
+
+    function loadWords() {
+        db.ref('woorden').once('value', snap => {
+            if(snap.exists()) { dynamicWords = Object.values(snap.val()); showQuestion(); }
+        });
+    }
+
+    function showQuestion() {
+        if(quizCount >= 5) { startArrestMode(); return; }
+        document.getElementById('quiz-status').innerText = `KWALIFICATIE: ${quizCount}/5`;
+        document.getElementById('btn-retry').style.display = 'none';
         const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
-        let fPool = dynamicWords.map(w => w.m).filter(m => m !== q.m).sort(() => 0.5 - Math.random());
-        let opties = [q.m, fPool[0] || "Fout A", fPool[1] || "Fout B"].sort(() => 0.5 - Math.random());
+        let others = dynamicWords.filter(w => w.m !== q.m).map(w => w.m).sort(() => 0.5 - Math.random());
+        let opties = [q.m, others[0] || "Fout 1", others[1] || "Fout 2"].sort(() => 0.5 - Math.random());
         document.getElementById('vraag').innerText = q.v;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
         opties.forEach(o => {
             const b = document.createElement('button'); b.className = 'optie'; b.innerText = o;
             b.onclick = () => {
-                if(!canAnswer) return; canAnswer = false;
-                if(o === q.m) { b.classList.add('correct'); setTimeout(() => { quizCount++; nextQ(); }, 600); }
-                else { b.classList.add('fout'); quizCount = 0; document.getElementById('btn-volgende').style.display = 'block'; }
+                if(o === q.m) { b.classList.add('correct'); quizCount++; setTimeout(showQuestion, 600); }
+                else { b.classList.add('fout'); document.getElementById('btn-retry').style.display = 'block'; }
             };
             cont.appendChild(b);
         });
     }
 
+    function resetQuiz() { quizCount = 0; showQuestion(); }
+
+    function startArrestMode() {
+        document.getElementById('quiz-box').style.display = 'none';
+        document.getElementById('main-game').style.display = 'block';
+        document.getElementById('game-container').style.display = 'block';
+        setupCanvas();
+        initLevel(1);
+        requestAnimationFrame(gameLoop);
+    }
+
+    function initLevel(level) {
+        currentLevel = level;
+        timeLeft = level === 1 ? 180 : (level === 2 ? 120 : 60);
+        ghostBaseSpeed = 0.04 + (level * 0.015);
+        dots = []; walls = [];
+        for(let y=0; y<mazeLayout.length; y++) for(let x=0; x<mazeLayout[y].length; x++) {
+            if(mazeLayout[y][x] === 1) walls.push({x, y});
+            else if(mazeLayout[y][x] === 0) dots.push({x, y, eaten: false});
+        }
+        pacman.x = 9; pacman.y = 5; pacman.dir = {x:0, y:0};
+        
+        // Spookjes starten op random plekken
+        let loc1 = getRandomLocation();
+        let loc2 = getRandomLocation();
+        ghosts = [
+            {x: loc1.x, y: loc1.y, color: 'red'}, 
+            {x: loc2.x, y: loc2.y, color: 'pink'}
+        ];
+        
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => { if(inGame) { timeLeft--; document.getElementById('timer-val').innerText = timeLeft; if(timeLeft <= 0) location.reload(); }}, 1000);
+        inGame = true;
+    }
+
     function setupCanvas() {
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
-        const s = Math.min(window.innerWidth * 0.95, 400); 
-        tileSize = Math.floor(s/19);
-        canvas.width = tileSize*19; canvas.height = tileSize*11;
+        canvas.width = 19 * tileSize; canvas.height = 9 * tileSize;
         window.addEventListener('keydown', e => {
-            if(e.key.includes("Up")) pacman.nextDir = {x:0, y:-1}; 
+            if(e.key.includes("Up")) pacman.nextDir = {x:0, y:-1};
             if(e.key.includes("Down")) pacman.nextDir = {x:0, y:1};
-            if(e.key.includes("Left")) pacman.nextDir = {x:-1, y:0}; 
+            if(e.key.includes("Left")) pacman.nextDir = {x:-1, y:0};
             if(e.key.includes("Right")) pacman.nextDir = {x:1, y:0};
         });
     }
 
-    function initLevel() {
-        dots = []; walls = [];
-        for(let y=0; y<11; y++) for(let x=0; x<19; x++) {
-            if(mazeLayout[y][x] === 1) walls.push({x, y});
-            else if(mazeLayout[y][x] === 0) dots.push({x, y, eaten: false});
-        }
-        pacman.x = 9; pacman.y = 9; pacman.dir = {x:0, y:0}; pacman.nextDir = {x:0, y:0};
-        ghosts = [{x:9, y:5, color:'red', speed: 0.04, dir: {x:0, y:0}}, {x:8, y:5, color:'pink', speed: 0.035, dir: {x:0, y:0}}];
-        ghostChaseStart = false; gameStartTime = Date.now();
-    }
-
-    function canMove(x, y) {
-        let rx = Math.round(x); let ry = Math.round(y);
-        if (rx < 0 || rx > 18) return true;
-        if (ry < 0 || ry > 10) return false;
-        return mazeLayout[ry][rx] !== 1;
-    }
-
-    function drawPacMan(x, y, rotation, mouth) {
-        const cx = x * tileSize + tileSize / 2; const cy = y * tileSize + tileSize / 2;
-        ctx.save(); ctx.translate(cx, cy); ctx.rotate(rotation);
-        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(0, 0, tileSize/2-2, (0.2 + mouth) * Math.PI, (1.8 - mouth) * Math.PI); ctx.lineTo(0, 0); ctx.fill();
-        ctx.restore();
-        if (pacman.sirenActive) {
-            pacman.sirenPhase = (pacman.sirenPhase + 0.2) % (Math.PI * 2);
-            ctx.fillStyle = Math.sin(pacman.sirenPhase*3) > 0 ? '#0044ff' : '#ff0000';
-            ctx.beginPath(); ctx.arc(cx, cy-tileSize/2, 4, 0, 7); ctx.fill();
-        }
-    }
+    function canM(x, y) { return (x < 0 || x > 18) || !walls.some(w => w.x === Math.round(x) && w.y === Math.round(y)); }
 
     function gameLoop() {
         if(!inGame) return;
-        frame++; ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
-        const elapsed = Date.now() - gameStartTime;
-        if (!ghostChaseStart && elapsed > 20000) ghostChaseStart = true;
-        
-        ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+2, w.y*tileSize+2, tileSize-4, tileSize-4));
-        ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten){ ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
-
-        if(pacman.x < -0.5) pacman.x = 18.5; if(pacman.x > 18.5) pacman.x = -0.5;
+        frame++; if(frame % 15 === 0) lightOn = !lightOn;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+1, w.y*tileSize+1, tileSize-2, tileSize-2));
+        ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten) { ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
 
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
-            let d = dots.find(dot => dot.x === pacman.x && dot.y === pacman.y && !dot.eaten);
-            if(d){ d.eaten = true; score += 10; document.getElementById('scr-val').innerText = score; sRef.update({score}); }
-            if(canMove(pacman.x+pacman.nextDir.x, pacman.y+pacman.nextDir.y)) pacman.dir = pacman.nextDir;
-            if(!canMove(pacman.x+pacman.dir.x, pacman.y+pacman.dir.y)) pacman.dir = {x:0, y:0};
-            if(pacman.dir.x === 1) pacman.rotation = 0; else if(pacman.dir.x === -1) pacman.rotation = Math.PI;
-            else if(pacman.dir.y === 1) pacman.rotation = Math.PI/2; else if(pacman.dir.y === -1) pacman.rotation = -Math.PI/2;
+            if(canM(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
+            if(!canM(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
-        pacman.x = Math.round((pacman.x + pacman.dir.x*0.1)*10)/10; pacman.y = Math.round((pacman.y + pacman.dir.y*0.1)*10)/10;
-        drawPacMan(pacman.x, pacman.y, pacman.rotation, Math.abs(Math.sin(frame*0.2)) * 0.2);
+        pacman.x = Math.round((pacman.x + pacman.dir.x * 0.1) * 10) / 10;
+        pacman.y = Math.round((pacman.y + pacman.dir.y * 0.1) * 10) / 10;
+        if(pacman.x < 0) pacman.x = 18; if(pacman.x > 18) pacman.x = 0;
+
+        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
+        if(lightOn) { ctx.fillStyle = '#00f'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2 - 5, 4, 0, 7); ctx.fill(); }
 
         ghosts.forEach(g => {
-            if(frame % 30 === 0) g.dir = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}][Math.floor(Math.random()*4)];
-            if(canMove(g.x+g.dir.x*0.1, g.y+g.dir.y*0.1)) { g.x += g.dir.x*g.speed; g.y += g.dir.y*g.speed; }
-            ctx.fillStyle = g.color; ctx.globalAlpha = ghostChaseStart ? 1 : 0.3;
-            ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, tileSize/2-2, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
-            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7 && ghostChaseStart) { levens--; if(levens<=0) location.reload(); else startQuiz(5); }
+            let mX = (pacman.x > g.x ? -ghostBaseSpeed : ghostBaseSpeed);
+            let mY = (pacman.y > g.y ? -ghostBaseSpeed : ghostBaseSpeed);
+            if(canM(g.x + mX, g.y)) g.x += mX; else if(canM(g.x, g.y + mY)) g.y += mY;
+
+            let d = dots.find(dot => Math.round(dot.x) === Math.round(g.x) && Math.round(dot.y) === Math.round(g.y) && !dot.eaten);
+            if(d) { d.eaten = true; score -= 10; }
+
+            ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
+
+            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
+                score += 100;
+                // --- RANDOM RESPAWN LOGICA ---
+                let newPos = getRandomLocation();
+                g.x = newPos.x;
+                g.y = newPos.y;
+
+                if(score >= currentLevel * 500) {
+                    if(currentLevel < 3) { alert("LEVEL VOLTOOID!"); initLevel(currentLevel+1); }
+                    else { alert("STAD VEILIG! EINDCORE: " + score); location.reload(); }
+                }
+            }
         });
-        document.getElementById('timer-display').innerText = ghostChaseStart ? "👻 CHASE MODE" : `🚨 WAARSCHUWING (${Math.max(0, Math.floor((20000-elapsed)/1000))}s)`;
         requestAnimationFrame(gameLoop);
     }
 
-    function resetAllScores() { document.getElementById('reset-confirm').style.display = 'block'; }
-    function cancelReset() { document.getElementById('reset-confirm').style.display = 'none'; }
-    function confirmReset() { db.ref('ranking').remove().then(() => location.reload()); }
+    function bulkAdd() {
+        const t = document.getElementById('bulk-text').value.trim();
+        t.split('\n').forEach(l => {
+            const d = l.trim().split(/\s+/);
+            if(d.length > 1) { const v = d.shift(); const m = d.join(' '); db.ref('woorden').push({v, m}); }
+        });
+        alert("Data toegevoegd!"); location.reload();
+    }
+    loadWords();
 </script>
 </body>
 </html>

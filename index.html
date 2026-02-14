@@ -3,38 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTV Police - Leaderboard Edition</title>
+    <title>BTV Police - Smooth AI Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --success: #2ecc71; --bg: #000; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        .hud { width: 100%; max-width: 380px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; overflow: hidden; touch-action: none; }
+        .hud { width: 380px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); }
         #game-container { position: relative; border: 4px solid #222; background: #000; margin-top: 10px; display: none; }
         canvas { display: block; }
-        #quiz-box, #name-box { width: 90%; max-width: 380px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; color: #000; border: 5px solid var(--cobalt); margin-top: 50px; }
-        .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f0f0f0; border: 2px solid #ccc; cursor: pointer; border-radius: 8px; font-weight: bold; color: #000; }
+        #quiz-box, #name-box { width: 340px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; color: #000; border: 5px solid var(--cobalt); margin-top: 50px; }
+        .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f0f0f0; border: 2px solid #ccc; cursor: pointer; border-radius: 8px; font-weight: bold; }
         .correct { background: var(--success) !important; color: #fff; }
         .fout { background: var(--danger) !important; color: #fff; }
-        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; text-transform: uppercase; }
-        #leaderboard { width: 90%; max-width: 380px; margin-top: 20px; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; }
-        .lb-entry { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #222; font-size: 0.9rem; }
-        .lb-name { color: var(--gold); }
+        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; }
+        #leaderboard { width: 380px; margin-top: 15px; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; }
+        .lb-entry { display: flex; justify-content: space-between; padding: 4px; font-size: 0.85rem; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
 
 <div id="quiz-box">
-    <h2 id="quiz-status" style="color:var(--cobalt);">POLITIE EXAMEN: 0/5</h2>
-    <div id="vraag" style="font-weight:800; margin-bottom:15px; text-transform: uppercase;">Laden...</div>
+    <h2 id="quiz-status" style="color:var(--cobalt); margin:0;">AGENT EXAMEN</h2>
+    <p id="progress-text">Voortgang: 0/5</p>
+    <div id="vraag" style="font-weight:800; margin-bottom:15px; min-height:40px;">Laden...</div>
     <div id="optie-container"></div>
     <button id="btn-retry" class="btn" style="display:none; background:var(--danger);" onclick="resetQuiz()">FOUT! OPNIEUW</button>
 </div>
 
 <div id="name-box" style="display:none;">
     <h2 style="color:var(--cobalt);">GESLAAGD!</h2>
-    <p>Voer je Agenten-naam in voor het klassement:</p>
-    <input type="text" id="agent-name" style="width:100%; padding:10px; box-sizing:border-box; margin-bottom:10px;" placeholder="Naam...">
+    <input type="text" id="agent-name" style="width:100%; padding:10px; margin-bottom:10px;" placeholder="Je naam...">
     <button class="btn" onclick="startArrestMode()">START SURVEILLANCE</button>
 </div>
 
@@ -42,14 +41,14 @@
     <div class="hud">
         <span>SCORE: <span id="scr-val">0</span></span>
         <span>LVL: <span id="lvl-val">1</span></span>
-        <span>TIJD: <span id="timer-val">180</span>s</span>
+        <span>TIJD: <span id="timer-val">180</span></span>
     </div>
     <div id="game-container"><canvas id="gameCanvas"></canvas></div>
 </div>
 
 <div id="leaderboard">
-    <h4 style="margin:0 0 10px 0; color:var(--cobalt); text-align:center;">TOP 5 AGENTEN</h4>
-    <div id="lb-list">Laden...</div>
+    <h4 style="margin:0 0 5px 0; color:var(--cobalt); text-align:center;">TOP AGENTEN</h4>
+    <div id="lb-list">...</div>
 </div>
 
 <script>
@@ -60,7 +59,7 @@
     let dynamicWords = [], score = 0, frame = 0, inGame = false, quizCount = 0, lightOn = true, agentName = "";
     let canvas, ctx, tileSize = 20;
     let pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
-    let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.05;
+    let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.06;
     let timeLeft = 180, currentLevel = 1, timerInterval;
 
     const maze = [
@@ -69,7 +68,7 @@
         [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1],
-        [2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,2],
+        [0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0], // RIJ 5: DE TUNNEL
         [1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
         [1,0,1,1,0,1,1,1,0,0,0,1,1,1,0,1,1,0,1],
@@ -84,7 +83,7 @@
 
     function showQuestion() {
         if(quizCount >= 5) { document.getElementById('quiz-box').style.display='none'; document.getElementById('name-box').style.display='block'; return; }
-        document.getElementById('quiz-status').innerText = `POLITIE EXAMEN: ${quizCount}/5`;
+        document.getElementById('progress-text').innerText = `Voortgang: ${quizCount}/5`;
         document.getElementById('btn-retry').style.display = 'none';
         const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
         let others = dynamicWords.filter(w => w.m !== q.m).map(w => w.m).sort(() => 0.5 - Math.random());
@@ -102,62 +101,42 @@
     }
 
     function startArrestMode() {
-        agentName = document.getElementById('agent-name').value || "Anonieme Agent";
+        agentName = document.getElementById('agent-name').value || "Agent";
         document.getElementById('name-box').style.display = 'none';
         document.getElementById('main-game').style.display = 'block';
         document.getElementById('game-container').style.display = 'block';
         setupCanvas(); initLevel(1); requestAnimationFrame(gameLoop);
     }
 
-    function saveScore() {
-        db.ref('leaderboard').push({ name: agentName, score: score });
-        updateLeaderboard();
-    }
-
-    function updateLeaderboard() {
-        db.ref('leaderboard').orderByChild('score').limitToLast(5).once('value', snap => {
-            let html = ""; let arr = [];
-            snap.forEach(s => arr.push(s.val()));
-            arr.reverse().forEach((entry, i) => {
-                html += `<div class="lb-entry"><span>${i+1}. <span class="lb-name">${entry.name}</span></span><span>${entry.score}</span></div>`;
-            });
-            document.getElementById('lb-list').innerHTML = html;
-        });
-    }
-
-    // --- GAME ENGINE ---
-    function getRandomLoc() {
-        let opts = []; for(let y=0;y<maze.length;y++) for(let x=0;x<maze[y].length;x++) if(maze[y][x]===0) opts.push({x,y});
-        return opts[Math.floor(Math.random()*opts.length)];
-    }
-
     function initLevel(level) {
         currentLevel = level;
-        timeLeft = level === 1 ? 180 : (level === 2 ? 120 : 60);
-        ghostBaseSpeed = 0.04 + (level * 0.015);
+        timeLeft = 180 - (level-1)*30;
         dots = []; walls = [];
         for(let y=0; y<maze.length; y++) for(let x=0; x<maze[y].length; x++) {
             if(maze[y][x] === 1) walls.push({x, y});
             else if(maze[y][x] === 0 || maze[y][x] === 2) dots.push({x, y, eaten: false});
         }
         pacman.x = 9; pacman.y = 9; pacman.dir = {x:0, y:0};
-        let l1 = getRandomLoc(); let l2 = getRandomLoc();
-        ghosts = [{x:l1.x, y:l1.y, color:'red'}, {x:l2.x, y:l2.y, color:'pink'}];
+        ghosts = [
+            {x:1, y:1, color:'red', vx:0, vy:0}, 
+            {x:17, y:1, color:'pink', vx:0, vy:0}
+        ];
         if(timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => { if(inGame) { timeLeft--; document.getElementById('timer-val').innerText = timeLeft; if(timeLeft <= 0) gameOver(); }}, 1000);
         inGame = true;
     }
 
-    function canM(x, y) {
+    function canMove(x, y) {
         let rx = Math.round(x); let ry = Math.round(y);
-        if(rx < 0 || rx > 18) return true;
-        return maze[ry] && maze[ry][rx] !== 1;
+        if(ry === 5 && (rx < 0 || rx > 18)) return true; // Tunnel vrijheid
+        if(!maze[ry] || maze[ry][rx] === 1) return false;
+        return true;
     }
 
     function gameOver() {
         inGame = false; clearInterval(timerInterval);
-        saveScore();
-        alert(`TIJD OP! Agent ${agentName}, je score is ${score}.`);
+        db.ref('leaderboard').push({ name: agentName, score: score });
+        alert(`EINDE DIENST! Score: ${score}`);
         location.reload();
     }
 
@@ -172,37 +151,73 @@
         });
     }
 
+    function updateLeaderboard() {
+        db.ref('leaderboard').orderByChild('score').limitToLast(5).once('value', snap => {
+            let html = ""; let arr = []; snap.forEach(s => arr.push(s.val()));
+            arr.reverse().forEach((e, i) => html += `<div class="lb-entry"><span>${i+1}. ${e.name}</span><span>${e.score}</span></div>`);
+            document.getElementById('lb-list').innerHTML = html;
+        });
+    }
+
     function gameLoop() {
         if(!inGame) return;
         frame++; if(frame % 15 === 0) lightOn = !lightOn;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+1, w.y*tileSize+1, tileSize-2, tileSize-2));
         ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten) { ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
 
-        if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
-            if(canM(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
-            if(!canM(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
+        // Pacman Move
+        if(Math.abs(pacman.x - Math.round(pacman.x)) < 0.1 && Math.abs(pacman.y - Math.round(pacman.y)) < 0.1) {
+            if(canMove(Math.round(pacman.x + pacman.nextDir.x), Math.round(pacman.y + pacman.nextDir.y))) pacman.dir = pacman.nextDir;
+            if(!canMove(Math.round(pacman.x + pacman.dir.x), Math.round(pacman.y + pacman.dir.y))) pacman.dir = {x:0, y:0};
         }
-        pacman.x += pacman.dir.x * 0.1; pacman.y += pacman.dir.y * 0.1;
-        pacman.x = Math.round(pacman.x * 10) / 10; pacman.y = Math.round(pacman.y * 10) / 10;
-        if(pacman.x < -0.5) pacman.x = 18.5; if(pacman.x > 18.5) pacman.x = -0.5;
+        pacman.x += pacman.dir.x * 0.12; pacman.y += pacman.dir.y * 0.12;
+        if(pacman.x < -0.6) pacman.x = 18.6; if(pacman.x > 18.6) pacman.x = -0.6;
 
+        // Draw Pacman
         ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
         if(lightOn) { ctx.fillStyle = '#00f'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2 - 5, 4, 0, 7); ctx.fill(); }
 
+        // Ghost AI
         ghosts.forEach(g => {
-            let mX = (pacman.x > g.x ? -ghostBaseSpeed : ghostBaseSpeed);
-            let mY = (pacman.y > g.y ? -ghostBaseSpeed : ghostBaseSpeed);
-            if(canM(g.x + mX, g.y)) g.x += mX; else if(canM(g.x, g.y + mY)) g.y += mY;
-            if(g.x < -0.5) g.x = 18.5; if(g.x > 18.5) g.x = -0.5;
+            // Tunnel check: Altijd rechtdoor in de tunnel
+            if(Math.round(g.y) === 5 && (g.x < 1 || g.x > 17)) {
+                // Doe niets, behoud huidige snelheid (vx)
+            } else if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
+                // Kies richting gebaseerd op Pacman
+                let dx = pacman.x > g.x ? 1 : -1;
+                let dy = pacman.y > g.y ? 1 : -1;
+                
+                // Slimmere keuze: probeer eerst de as die het verst weg is, tenzij er een muur is
+                if(Math.abs(pacman.x - g.x) > Math.abs(pacman.y - g.y)) {
+                    if(canMove(Math.round(g.x + dx), Math.round(g.y))) { g.vx = dx; g.vy = 0; }
+                    else if(canMove(Math.round(g.x), Math.round(g.y + dy))) { g.vx = 0; g.vy = dy; }
+                    else { g.vx = -dx; g.vy = 0; } // Reverse als alles muur is
+                } else {
+                    if(canMove(Math.round(g.x), Math.round(g.y + dy))) { g.vx = 0; g.vy = dy; }
+                    else if(canMove(Math.round(g.x + dx), Math.round(g.y))) { g.vx = dx; g.vy = 0; }
+                    else { g.vy = -dy; g.vx = 0; }
+                }
+            }
+            
+            g.x += g.vx * (ghostBaseSpeed + currentLevel*0.01);
+            g.y += g.vy * (ghostBaseSpeed + currentLevel*0.01);
+            
+            // Tunnel teleport
+            if(g.x < -0.6) g.x = 18.6; if(g.x > 18.6) g.x = -0.6;
 
+            // Eat dots
             let d = dots.find(dot => Math.round(dot.x) === Math.round(g.x) && Math.round(dot.y) === Math.round(g.y) && !dot.eaten);
             if(d) { d.eaten = true; score -= 10; }
 
             ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
-            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
-                score += 100; let np = getRandomLoc(); g.x = np.x; g.y = np.y;
-                if(score >= currentLevel * 500 && currentLevel < 3) initLevel(currentLevel+1);
+            
+            if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
+                score += 100; 
+                let np = {x:1, y:1}; // Reset naar start bij arrestatie
+                g.x = np.x; g.y = np.y;
+                if(score >= currentLevel * 600) initLevel(currentLevel+1);
             }
         });
         document.getElementById('scr-val').innerText = score;

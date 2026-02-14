@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BTV Police Training - Open Road Edition</title>
+    <title>BTV Police Training - Tunnel Master</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -46,22 +46,21 @@
 
     let dynamicWords = [], score = 0, frame = 0, inGame = false, quizCount = 0, lightOn = true;
     let canvas, ctx, tileSize = 20;
-    let pacman = { x: 9, y: 7, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
+    let pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
     let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.05;
     let timeLeft = 180, currentLevel = 1, timerInterval;
 
-    // AANGEPAST MAZE: Onderste weg (rij 9) is nu open (0) met twee toegangen (rij 8)
     const maze = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
         [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1],
-        [2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,2], // Tunnel rij
+        [2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,2], // RIJ 5: TUNNEL
         [1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
-        [1,0,1,1,0,1,1,1,0,0,0,1,1,1,0,1,1,0,1], // <--- Extra toegangen in het midden
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // <--- DE ONDERSTE WEG IS NU VRIJ
+        [1,0,1,1,0,1,1,1,0,0,0,1,1,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // RIJ 9: OPEN WEG
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
@@ -110,7 +109,7 @@
     function initLevel(level) {
         currentLevel = level;
         timeLeft = level === 1 ? 180 : (level === 2 ? 120 : 60);
-        ghostBaseSpeed = 0.04 + (level * 0.012);
+        ghostBaseSpeed = 0.04 + (level * 0.015);
         dots = []; walls = [];
         for(let y=0; y<maze.length; y++) for(let x=0; x<maze[y].length; x++) {
             if(maze[y][x] === 1) walls.push({x, y});
@@ -135,53 +134,63 @@
         });
     }
 
-    function canM(x, y) { return (x < 0 || x > 18) || !walls.some(w => w.x === Math.round(x) && w.y === Math.round(y)); }
+    function canM(x, y) {
+        let rx = Math.round(x);
+        let ry = Math.round(y);
+        // Tunnel uitzondering: buiten het canvas mag je altijd bewegen
+        if(rx < 0 || rx > 18) return true;
+        if(ry < 0 || ry > 10) return false;
+        return maze[ry][rx] !== 1;
+    }
 
     function gameLoop() {
         if(!inGame) return;
         frame++; if(frame % 15 === 0) lightOn = !lightOn;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Teken muren
         ctx.fillStyle = '#0022aa';
         walls.forEach(w => ctx.fillRect(w.x*tileSize+1, w.y*tileSize+1, tileSize-2, tileSize-2));
         
-        // Teken bolletjes (het bewijsmateriaal)
         ctx.fillStyle = '#fff';
         dots.forEach(d => { if(!d.eaten) { ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
 
-        // Politie Pacman Beweging
+        // Pacman Teleport Tunnel
         if(Number.isInteger(pacman.x) && Number.isInteger(pacman.y)) {
             if(canM(pacman.x + pacman.nextDir.x, pacman.y + pacman.nextDir.y)) pacman.dir = pacman.nextDir;
             if(!canM(pacman.x + pacman.dir.x, pacman.y + pacman.dir.y)) pacman.dir = {x:0, y:0};
         }
-        pacman.x = Math.round((pacman.x + pacman.dir.x * 0.1) * 10) / 10;
-        pacman.y = Math.round((pacman.y + pacman.dir.y * 0.1) * 10) / 10;
-        if(pacman.x < 0) pacman.x = 18; if(pacman.x > 18) pacman.x = 0;
+        pacman.x += pacman.dir.x * 0.1;
+        pacman.y += pacman.dir.y * 0.1;
+        pacman.x = Math.round(pacman.x * 10) / 10;
+        pacman.y = Math.round(pacman.y * 10) / 10;
+        if(pacman.x < -0.5) pacman.x = 18.5; if(pacman.x > 18.5) pacman.x = -0.5;
 
-        // Teken Pacman + Blauw Zwaailicht
+        // Teken Pacman + Zwaailicht
         ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
         if(lightOn) { ctx.fillStyle = '#00f'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2 - 5, 4, 0, 7); ctx.fill(); }
 
-        // Boeven AI (Vluchten en stelen)
+        // Boeven met Teleport Tunnel
         ghosts.forEach(g => {
             let mX = (pacman.x > g.x ? -ghostBaseSpeed : ghostBaseSpeed);
             let mY = (pacman.y > g.y ? -ghostBaseSpeed : ghostBaseSpeed);
-            if(canM(g.x + mX, g.y)) g.x += mX; else if(canM(g.x, g.y + mY)) g.y += mY;
+            
+            if(canM(g.x + mX, g.y)) g.x += mX; 
+            else if(canM(g.x, g.y + mY)) g.y += mY;
 
+            // Tunnel voor boeven
+            if(g.x < -0.5) g.x = 18.5; if(g.x > 18.5) g.x = -0.5;
+
+            // Strafpunten voor bolletjes eten
             let d = dots.find(dot => Math.round(dot.x) === Math.round(g.x) && Math.round(dot.y) === Math.round(g.y) && !dot.eaten);
             if(d) { d.eaten = true; score -= 10; }
 
             ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
             
-            // Arrestatie Check
             if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.7) {
-                score += 100; 
-                let np = getRandomLoc(); 
-                g.x = np.x; g.y = np.y;
+                score += 100; let np = getRandomLoc(); g.x = np.x; g.y = np.y;
                 if(score >= currentLevel * 500) {
-                    if(currentLevel < 3) { alert("DOOR NAAR VOLGENDE RONDE!"); initLevel(currentLevel+1); }
-                    else { alert("PROMOTIE! ALLE BOEVEN GEPAKT!"); location.reload(); }
+                    if(currentLevel < 3) { alert("VOLGENDE RONDE!"); initLevel(currentLevel+1); }
+                    else { alert("MAX SCORE!"); location.reload(); }
                 }
             }
         });

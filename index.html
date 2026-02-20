@@ -19,9 +19,18 @@
         .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; }
         #leaderboard { width: 380px; margin-top: 15px; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; }
         .lb-entry { display: flex; justify-content: space-between; padding: 4px; font-size: 0.85rem; border-bottom: 1px solid #222; }
+        
+        /* NIEUW: Snelheid Dashboard */
+        .speed-control { background: #222; padding: 10px; border-radius: 8px; margin-top: 10px; width: 360px; text-align: center; font-size: 0.8rem; border: 1px solid var(--cobalt); }
+        input[type=range] { width: 80%; cursor: pointer; }
     </style>
 </head>
 <body>
+
+<div class="speed-control" id="admin-speed" style="display:none;">
+    <label>Snelheid Verdachten: <span id="speed-val">0.06</span></label><br>
+    <input type="range" min="0.01" max="0.20" step="0.01" value="0.06" oninput="updateGhostSpeed(this.value)">
+</div>
 
 <div id="quiz-box">
     <h2 id="quiz-status" style="color:var(--cobalt); margin:0;">AGENT EXAMEN</h2>
@@ -59,8 +68,14 @@
     let dynamicWords = [], score = 0, frame = 0, inGame = false, quizCount = 0, lightOn = true, agentName = "";
     let canvas, ctx, tileSize = 20;
     let pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
-    let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.06;
+    let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.06; 
     let timeLeft = 180, currentLevel = 1, timerInterval;
+
+    // Functie om de snelheid live aan te passen
+    function updateGhostSpeed(val) {
+        ghostBaseSpeed = parseFloat(val);
+        document.getElementById('speed-val').innerText = val;
+    }
 
     const maze = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -68,7 +83,7 @@
         [1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,0,1],
         [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
         [1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1],
-        [0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0], // RIJ 5: DE TUNNEL
+        [0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0], 
         [1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1],
         [1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
         [1,0,1,1,0,1,1,1,0,0,0,1,1,1,0,1,1,0,1],
@@ -105,6 +120,7 @@
         document.getElementById('name-box').style.display = 'none';
         document.getElementById('main-game').style.display = 'block';
         document.getElementById('game-container').style.display = 'block';
+        document.getElementById('admin-speed').style.display = 'block'; // Toon slider in game
         setupCanvas(); initLevel(1); requestAnimationFrame(gameLoop);
     }
 
@@ -128,7 +144,7 @@
 
     function canMove(x, y) {
         let rx = Math.round(x); let ry = Math.round(y);
-        if(ry === 5 && (rx < 0 || rx > 18)) return true; // Tunnel vrijheid
+        if(ry === 5 && (rx < 0 || rx > 18)) return true;
         if(!maze[ry] || maze[ry][rx] === 1) return false;
         return true;
     }
@@ -167,7 +183,6 @@
         ctx.fillStyle = '#0022aa'; walls.forEach(w => ctx.fillRect(w.x*tileSize+1, w.y*tileSize+1, tileSize-2, tileSize-2));
         ctx.fillStyle = '#fff'; dots.forEach(d => { if(!d.eaten) { ctx.beginPath(); ctx.arc(d.x*tileSize+tileSize/2, d.y*tileSize+tileSize/2, 2, 0, 7); ctx.fill(); }});
 
-        // Pacman Move
         if(Math.abs(pacman.x - Math.round(pacman.x)) < 0.1 && Math.abs(pacman.y - Math.round(pacman.y)) < 0.1) {
             if(canMove(Math.round(pacman.x + pacman.nextDir.x), Math.round(pacman.y + pacman.nextDir.y))) pacman.dir = pacman.nextDir;
             if(!canMove(Math.round(pacman.x + pacman.dir.x), Math.round(pacman.y + pacman.dir.y))) pacman.dir = {x:0, y:0};
@@ -175,47 +190,33 @@
         pacman.x += pacman.dir.x * 0.12; pacman.y += pacman.dir.y * 0.12;
         if(pacman.x < -0.6) pacman.x = 18.6; if(pacman.x > 18.6) pacman.x = -0.6;
 
-        // Draw Pacman
         ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
         if(lightOn) { ctx.fillStyle = '#00f'; ctx.beginPath(); ctx.arc(pacman.x*tileSize+tileSize/2, pacman.y*tileSize+tileSize/2 - 5, 4, 0, 7); ctx.fill(); }
 
-        // Ghost AI
         ghosts.forEach(g => {
-            // Tunnel check: Altijd rechtdoor in de tunnel
             if(Math.round(g.y) === 5 && (g.x < 1 || g.x > 17)) {
-                // Doe niets, behoud huidige snelheid (vx)
             } else if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
-                // Kies richting gebaseerd op Pacman
                 let dx = pacman.x > g.x ? 1 : -1;
                 let dy = pacman.y > g.y ? 1 : -1;
-                
-                // Slimmere keuze: probeer eerst de as die het verst weg is, tenzij er een muur is
                 if(Math.abs(pacman.x - g.x) > Math.abs(pacman.y - g.y)) {
                     if(canMove(Math.round(g.x + dx), Math.round(g.y))) { g.vx = dx; g.vy = 0; }
                     else if(canMove(Math.round(g.x), Math.round(g.y + dy))) { g.vx = 0; g.vy = dy; }
-                    else { g.vx = -dx; g.vy = 0; } // Reverse als alles muur is
+                    else { g.vx = -dx; g.vy = 0; }
                 } else {
                     if(canMove(Math.round(g.x), Math.round(g.y + dy))) { g.vx = 0; g.vy = dy; }
                     else if(canMove(Math.round(g.x + dx), Math.round(g.y))) { g.vx = dx; g.vy = 0; }
                     else { g.vy = -dy; g.vx = 0; }
                 }
             }
-            
             g.x += g.vx * (ghostBaseSpeed + currentLevel*0.01);
             g.y += g.vy * (ghostBaseSpeed + currentLevel*0.01);
-            
-            // Tunnel teleport
             if(g.x < -0.6) g.x = 18.6; if(g.x > 18.6) g.x = -0.6;
-
-            // Eat dots
             let d = dots.find(dot => Math.round(dot.x) === Math.round(g.x) && Math.round(dot.y) === Math.round(g.y) && !dot.eaten);
             if(d) { d.eaten = true; score -= 10; }
-
             ctx.fillStyle = g.color; ctx.beginPath(); ctx.arc(g.x*tileSize+tileSize/2, g.y*tileSize+tileSize/2, 8, 0, 7); ctx.fill();
-            
             if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
                 score += 100; 
-                let np = {x:1, y:1}; // Reset naar start bij arrestatie
+                let np = {x:1, y:1};
                 g.x = np.x; g.y = np.y;
                 if(score >= currentLevel * 600) initLevel(currentLevel+1);
             }

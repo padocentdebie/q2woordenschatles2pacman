@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTV Police - Random Chaos Edition</title>
+    <title>BTV Police - Tactical Escape Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -213,8 +213,17 @@
         ghosts.forEach(g => {
             if(Math.round(g.y) === 5 && (g.x < 1 || g.x > 17)) {} 
             else if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
-                let dx = pacman.x > g.x ? 1 : -1;
-                let dy = pacman.y > g.y ? 1 : -1;
+                let dist = Math.hypot(pacman.x - g.x, pacman.y - g.y);
+                let dx, dy;
+
+                if (dist < 4) { // --- NIEUWE LOGICA: VLUCHTEN ---
+                    dx = pacman.x > g.x ? -1 : 1; // Precies andersom dan Pacman
+                    dy = pacman.y > g.y ? -1 : 1;
+                } else { // Normaal jagen
+                    dx = pacman.x > g.x ? 1 : -1;
+                    dy = pacman.y > g.y ? 1 : -1;
+                }
+
                 if(Math.abs(pacman.x - g.x) > Math.abs(pacman.y - g.y)) {
                     if(canMove(Math.round(g.x + dx), Math.round(g.y))) { g.vx = dx; g.vy = 0; }
                     else if(canMove(Math.round(g.x), Math.round(g.y + dy))) { g.vx = 0; g.vy = dy; }
@@ -234,11 +243,9 @@
             
             if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
                 score += 100; 
-                // --- NIEUW: Random Reset ---
                 let newPos = getRandomEmptyPos();
                 g.x = newPos.x;
                 g.y = newPos.y;
-
                 if(score >= currentLevel * 600) {
                      currentLevel++;
                      document.getElementById('lvl-val').innerText = currentLevel;

@@ -1,63 +1,3 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTV Police - Tactical Escape Edition</title>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <style>
-        :root { --cobalt: #0044ff; --gold: #f0db4f; --danger: #ff0000; --success: #2ecc71; --bg: #000; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #eee; margin: 0; display: flex; flex-direction: column; align-items: center; overflow: hidden; touch-action: none; }
-        .hud { width: 380px; padding: 10px; display: flex; justify-content: space-between; font-weight: bold; color: var(--gold); background: #111; border-bottom: 3px solid var(--cobalt); }
-        #game-container { position: relative; border: 4px solid #222; background: #000; margin-top: 10px; display: none; }
-        canvas { display: block; }
-        #quiz-box, #name-box { width: 340px; background: #fff; border-radius: 12px; padding: 20px; text-align: center; color: #000; border: 5px solid var(--cobalt); margin-top: 50px; }
-        .optie { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #f0f0f0; border: 2px solid #ccc; cursor: pointer; border-radius: 8px; font-weight: bold; }
-        .correct { background: var(--success) !important; color: #fff; }
-        .fout { background: var(--danger) !important; color: #fff; }
-        .btn { background: var(--cobalt); color: white; padding: 12px; width: 100%; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; }
-        #leaderboard { width: 380px; margin-top: 15px; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #333; }
-        .lb-entry { display: flex; justify-content: space-between; padding: 4px; font-size: 0.85rem; border-bottom: 1px solid #222; }
-        .speed-control { background: #222; padding: 10px; border-radius: 8px; margin-top: 10px; width: 360px; text-align: center; font-size: 0.8rem; border: 1px solid var(--cobalt); }
-        input[type=range] { width: 80%; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-<div class="speed-control" id="admin-speed" style="display:none;">
-    <label>Snelheid Verdachten: <span id="speed-val">0.06</span></label><br>
-    <input type="range" min="0.01" max="0.20" step="0.01" value="0.06" oninput="updateGhostSpeed(this.value)">
-</div>
-
-<div id="quiz-box">
-    <h2 id="quiz-status" style="color:var(--cobalt); margin:0;">AGENT EXAMEN</h2>
-    <p id="progress-text">Voortgang: 0/5</p>
-    <div id="vraag" style="font-weight:800; margin-bottom:15px; min-height:40px;">Laden...</div>
-    <div id="optie-container"></div>
-    <button id="btn-retry" class="btn" style="display:none; background:var(--danger);" onclick="resetQuiz()">FOUT! OPNIEUW</button>
-</div>
-
-<div id="name-box" style="display:none;">
-    <h2 style="color:var(--cobalt);">GESLAAGD!</h2>
-    <input type="text" id="agent-name" style="width:100%; padding:10px; margin-bottom:10px;" placeholder="Je naam...">
-    <button class="btn" onclick="startArrestMode()">START SURVEILLANCE</button>
-</div>
-
-<div id="main-game" style="display:none; text-align:center;">
-    <div class="hud">
-        <span>SCORE: <span id="scr-val">0</span></span>
-        <span>LEVEL: <span id="lvl-val">1</span></span>
-        <span>TIJD: <span id="timer-val">120</span></span>
-    </div>
-    <div id="game-container"><canvas id="gameCanvas"></canvas></div>
-</div>
-
-<div id="leaderboard">
-    <h4 style="margin:0 0 5px 0; color:var(--cobalt); text-align:center;">TOP AGENTEN</h4>
-    <div id="lb-list">...</div>
-</div>
-
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY", databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app", projectId: "aangiftebotje" };
     firebase.initializeApp(firebaseConfig);
@@ -68,6 +8,25 @@
     let pacman = { x: 9, y: 9, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
     let dots = [], walls = [], ghosts = [], ghostBaseSpeed = 0.06; 
     let timeLeft = 120, currentLevel = 1, timerInterval;
+
+    // --- NIEUW: BULK INVOER FUNCTIE ---
+    function importBulk() {
+        const input = document.getElementById('bulk-input').value;
+        const lines = input.split('\n');
+        lines.forEach(line => {
+            const parts = line.split('|');
+            if(parts.length === 2) {
+                const vraag = parts[0].trim();
+                const antwoord = parts[1].trim();
+                if(vraag && antwoord) {
+                    db.ref('woorden').push({ v: vraag, m: antwoord });
+                }
+            }
+        });
+        alert('Woorden toegevoegd aan Firebase!');
+        document.getElementById('bulk-input').value = '';
+        loadWords();
+    }
 
     function updateGhostSpeed(val) {
         ghostBaseSpeed = parseFloat(val);
@@ -89,17 +48,33 @@
     ];
 
     function loadWords() {
-        db.ref('woorden').once('value', snap => { if(snap.exists()){ dynamicWords = Object.values(snap.val()); showQuestion(); }});
+        db.ref('woorden').once('value', snap => { 
+            if(snap.exists()){ 
+                dynamicWords = Object.values(snap.val()); 
+                showQuestion(); 
+            }
+        });
         updateLeaderboard();
     }
 
     function showQuestion() {
-        if(quizCount >= 5) { document.getElementById('quiz-box').style.display='none'; document.getElementById('name-box').style.display='block'; return; }
+        if(quizCount >= 5) { 
+            document.getElementById('quiz-box').style.display='none'; 
+            document.getElementById('name-box').style.display='block'; 
+            return; 
+        }
         document.getElementById('progress-text').innerText = `Voortgang: ${quizCount}/5`;
         document.getElementById('btn-retry').style.display = 'none';
+        
+        if(dynamicWords.length < 3) {
+            document.getElementById('vraag').innerText = "Voeg eerst meer woorden toe aan de database!";
+            return;
+        }
+
         const q = dynamicWords[Math.floor(Math.random()*dynamicWords.length)];
         let others = dynamicWords.filter(w => w.m !== q.m).map(w => w.m).sort(() => 0.5 - Math.random());
         let opties = [q.m, others[0], others[1]].sort(() => 0.5 - Math.random());
+        
         document.getElementById('vraag').innerText = q.v;
         const cont = document.getElementById('optie-container'); cont.innerHTML = '';
         opties.forEach(o => {
@@ -177,7 +152,12 @@
     function setupCanvas() {
         canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
         canvas.width = 19 * tileSize; canvas.height = 11 * tileSize;
+        
+        // --- FIX: VOORKOM SCROLLEN MET e.preventDefault() ---
         window.addEventListener('keydown', e => {
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
+                e.preventDefault(); 
+            }
             if(e.key.includes("Up")) pacman.nextDir = {x:0, y:-1};
             if(e.key.includes("Down")) pacman.nextDir = {x:0, y:1};
             if(e.key.includes("Left")) pacman.nextDir = {x:-1, y:0};
@@ -215,14 +195,8 @@
             else if(Math.abs(g.x - Math.round(g.x)) < 0.1 && Math.abs(g.y - Math.round(g.y)) < 0.1) {
                 let dist = Math.hypot(pacman.x - g.x, pacman.y - g.y);
                 let dx, dy;
-
-                if (dist < 4) { // --- NIEUWE LOGICA: VLUCHTEN ---
-                    dx = pacman.x > g.x ? -1 : 1; // Precies andersom dan Pacman
-                    dy = pacman.y > g.y ? -1 : 1;
-                } else { // Normaal jagen
-                    dx = pacman.x > g.x ? 1 : -1;
-                    dy = pacman.y > g.y ? 1 : -1;
-                }
+                if (dist < 4) { dx = pacman.x > g.x ? -1 : 1; dy = pacman.y > g.y ? -1 : 1; } 
+                else { dx = pacman.x > g.x ? 1 : -1; dy = pacman.y > g.y ? 1 : -1; }
 
                 if(Math.abs(pacman.x - g.x) > Math.abs(pacman.y - g.y)) {
                     if(canMove(Math.round(g.x + dx), Math.round(g.y))) { g.vx = dx; g.vy = 0; }
@@ -244,8 +218,7 @@
             if(Math.hypot(pacman.x-g.x, pacman.y-g.y) < 0.8) {
                 score += 100; 
                 let newPos = getRandomEmptyPos();
-                g.x = newPos.x;
-                g.y = newPos.y;
+                g.x = newPos.x; g.y = newPos.y;
                 if(score >= currentLevel * 600) {
                      currentLevel++;
                      document.getElementById('lvl-val').innerText = currentLevel;
@@ -257,5 +230,3 @@
     }
     loadWords();
 </script>
-</body>
-</html>
